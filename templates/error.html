@@ -1,0 +1,16 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="content block error">
+        <div class="block-icon">❌</div>
+
+        {% if title %}
+            <div class="block-header">{{ title }}</div>
+        {% endif %}
+
+        <div class="block-description block-description-center">
+            {{ message | safe }}
+        </div>
+    </div>
+{% endblock %}
+

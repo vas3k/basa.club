@@ -1,0 +1,179 @@
+.profile {
+    padding: 30px;
+    max-width: 700px;
+    margin: 0 auto;
+}
+
+    .profile-header {
+        margin-top: 30px;
+    }
+
+    .profile-buttons {
+        display: flex;
+        gap: 20px;
+        justify-content: center;
+        padding-bottom: 40px;
+    }
+
+.profile-footer {
+    padding-top: 70px;
+    text-align: center;
+}
+
+.profile-badge {
+    max-width: 700px;
+    max-height: 700px;
+}
+
+.profile-card {
+    display: grid;
+    column-gap: 20px;
+    align-items: flex-start;
+    break-inside: avoid;
+    vertical-align: middle;
+    color: var(--opposite-text-color);
+    background-color: var(--opposite-bg-color);
+    color-adjust: exact;
+    grid-template-columns: 140px auto;
+    grid-template-rows: auto auto;
+    column-gap: 15px;
+    box-shadow: none;
+    margin-bottom: 0;
+    padding: 30px 20px 20px;
+    border-radius: 0;
+    max-width: 600px;
+    margin: 0 auto;
+    font-size: 120%;
+}
+
+    .profile-card-photo {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+    }
+
+    .profile-card-age {
+        font-size: 90%;
+        max-width: 60%;
+        display: inline-block;
+        text-align: center;
+        font-weight: 500;
+        line-height: 1.1em;
+        border-radius: 5px;
+        min-width: 25px;
+        padding: 6px 5px 6px;
+        color: var(--text-color);
+        background-color: color-mix(in srgb, var(--bg-color) 85%, transparent);
+        position: relative;
+        top: -17px;
+    }
+
+    .profile-card-info {
+        display: block;
+        text-align: left;
+        padding-top: 20px;
+        overflow: hidden;
+        font-size: 85%;
+        padding-top: 0;
+    }
+
+        .profile-user-job {
+            display: block;
+            font-weight: 500;
+            padding-bottom: 10px;
+            font-size: 120%;
+        }
+
+        .profile-user-avatar {
+            display: block;
+            width: 100%;
+            max-width: 180px;
+            aspect-ratio: 1/1;
+            margin: 0 auto;
+            position: relative;
+        }
+
+            .profile-user-avatar img {
+                position: absolute;
+                top: 0;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: 100%;
+                object-fit: cover;
+            }
+
+        .profile-user-location {
+            font-size: 120%;
+            opacity: 0.8;
+            position: relative;
+            left: -5px;
+        }
+
+        .profile-user-bio {
+            display: block;
+            opacity: 0.7;
+            font-size: 90%;
+        }
+
+            .profile-user-bio img {
+                max-width: 200px;
+            }
+
+            .profile-user-bio a {
+                color: var(--opposite-text-color);
+            }
+
+        .profile-user-name {
+            display: block;
+            font-weight: 600;
+            padding-bottom: 10px;
+            text-decoration: none;
+            word-break: break-word;
+            font-size: 200%;
+            padding-bottom: 7px;
+            line-height: 1.1em;
+        }
+
+            .profile-user-fullname {
+                margin-right: 0;
+                color: var(--opposite-text-color);
+            }
+
+            .profile-user-nickname {
+                font-weight: 300;
+                opacity: 0.4;
+                font-size: 88%;
+                color: var(--opposite-text-color);
+                position: relative;
+                top: -0.1em;
+                font-size: 70%;
+                opacity: 1;
+                color: #777;
+            }
+
+    .user-badges {
+        grid-column-start: 1;
+        grid-column-end: 3;
+        font-size: 80%;
+        gap: 10px;
+        display: flex;
+        justify-content: center;
+        padding-top: 15px;
+        padding-bottom: 0;
+
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: center;
+
+        overflow: hidden;
+        max-height: 70px;
+    }
+
+    .user-badge-achievement {
+        width: 20px;
+        height: 20px;
+        padding: 3px;
+        border-radius: 5px;
+    }

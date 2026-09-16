@@ -1,0 +1,468 @@
+/* Buttons, switches and other reusable elements */
+.block {
+    padding: 30px;
+    margin-bottom: 30px;
+    box-sizing: border-box;
+    box-shadow: var(--block-shadow);
+    background-color: var(--block-bg-color);
+    border-radius: var(--block-border-radius);
+    transition: 0.1s ease-out;
+}
+
+.block-icon {
+    text-align: center;
+    font-size: 40px;
+}
+
+.block-clickable {
+    padding: 24px;
+    box-sizing: border-box;
+    box-shadow: var(--block-shadow);
+    transition: all 0.2s ease;
+    cursor: pointer;
+}
+
+.block-clickable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 8px 16px -2px rgba(9, 30, 66, .35), 0 0 0 1px rgba(9, 30, 66, .18);
+}
+
+.block-header {
+    display: block;
+    font-size: 180%;
+    font-weight: 600;
+    text-align: center;
+    padding-bottom: 20px;
+    margin: 0 auto;
+}
+
+.block-header-big {
+    font-size: 300%;
+}
+
+.block-header-with-button {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    text-align: left;
+    padding-bottom: 20px;
+    margin: 0;
+}
+
+@media only screen and (max-width : 600px) {
+    .block-header-with-button {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 15px;
+    }
+}
+
+.block-subheader {
+    display: block;
+    font-size: 130%;
+    font-weight: 600;
+    text-align: center;
+    margin: 0 auto;
+    padding-bottom: 20px;
+}
+
+@media only screen and (max-width : 570px) {
+    .block {
+        padding: 20px;
+    }
+}
+
+.block-description {
+    display: block;
+    margin: 0 auto;
+    max-width: 90%;
+    padding: 20px 0;
+    font-size: 110%;
+}
+
+.block-description>p:first-child {
+    margin-top: 0;
+}
+
+.block-description-center {
+    text-align: center;
+}
+
+.block-description li {
+    padding-bottom: 0.8em;
+}
+
+.block-description a {
+    font-weight: 600;
+}
+
+.avatar {
+    display: inline-block;
+    border-radius: 50%;
+    min-height: 20px;
+    min-width: 20px;
+    box-sizing: border-box;
+    background-color: #bdc3c7;
+    vertical-align: middle;
+    overflow: hidden;
+    background-position: 50% 50%;
+    background-size: cover;
+}
+
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    opacity: 0.8;
+}
+
+.button {
+    display: inline-flex;
+    align-items: center;
+    text-decoration: none !important;
+    padding: 15px 18px;
+    box-sizing: border-box;
+    border-radius: var(--button-border-radius);
+    background-color: var(--button-bg-color);
+    border: var(--button-border);
+    color: var(--button-color);
+    text-align: center;
+    cursor: pointer;
+    line-height: 1em;
+    font-weight: 600;
+    transition: 0.2s ease-out;
+}
+
+@media only screen and (max-width : 600px) {
+    .button {
+        font-size: 90%;
+        line-height: 1.2em;
+        padding: 10px;
+    }
+}
+
+.button-round {
+    border-radius: 50%;
+}
+
+.button:hover {
+    color: var(--button-hover-color);
+    background-color: var(--button-hover-bg-color);
+    border: var(--button-hover-border);
+}
+
+.button:disabled {
+    background-color: var(--button-disabled-bg-color);
+    border-color: var(--button-disabled-bg-color);
+}
+
+.button:disabled:hover {
+    color: var(--button-color);
+    background-color: var(--button-disabled-bg-color);
+    border-color: var(--button-disabled-bg-color);
+}
+
+.button-inverted {
+    background-color: var(--button-color);
+    color: var(--button-bg-color);
+}
+
+.button-inverted:hover {
+    background-color: var(--button-bg-color);
+    color: var(--button-color);
+    border: solid 2px var(--button-color);
+}
+
+.button-big {
+    padding: 15px 30px;
+    font-size: 160%;
+    font-weight: bold;
+    margin: 50px auto 0;
+}
+
+.button-small {
+    padding: 8px 12px;
+    font-size: 90%;
+    font-weight: 600;
+}
+
+.button-red {
+    background-color: #ff1917;
+    border-color: #ff1917;
+}
+
+.button-blue {
+    background-color: #0088cc;
+    border-color: #0088cc;
+}
+
+.border {
+    border-radius: var(--button-border-radius);
+    border: var(--button-border);
+    color: var(--button-color);
+    padding: 5px 10px;
+}
+
+.markdown-text {
+    line-height: 1.5em;
+}
+
+.markdown-text h1,
+.markdown-text h2,
+.markdown-text h3 {
+    margin-top: 60px;
+    margin-bottom: 25px;
+}
+
+.markdown-text ul,
+.markdown-text ol {
+    padding-left: 1em;
+}
+
+.link-favicon {
+    display: none;
+    height: 1.1em;
+    width: 1.1em;
+    background-position: center center;
+    background-size: cover;
+    vertical-align: middle;
+    padding-right: 0.2em;
+}
+
+.link-favicon i {
+    font-size: 140%;
+}
+
+.markdown-text .link-favicon {
+    display: inline-block;
+}
+
+@keyframes fadeInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+img.emoji {
+    height: 1.2em;
+    width: 1.2em;
+    margin: 0 .05em 0 .1em;
+    vertical-align: -0.25em;
+}
+
+.animate-on-load>* {
+    animation: fadeInUp 0.5s ease backwards;
+}
+
+.animate-on-load>*:nth-child(1) {
+    animation-delay: 0.1s;
+}
+
+.animate-on-load>*:nth-child(2) {
+    animation-delay: 0.15s;
+}
+
+.animate-on-load>*:nth-child(3) {
+    animation-delay: 0.2s;
+}
+
+.animate-on-load>*:nth-child(4) {
+    animation-delay: 0.25s;
+}
+
+.animate-on-load>*:nth-child(5) {
+    animation-delay: 0.3s;
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    margin-bottom: 24px;
+}
+
+.form-group label {
+    font-weight: 600;
+    font-size: 110%;
+    color: var(--text-color);
+}
+
+.form-group textarea {
+    min-height: 120px;
+    resize: vertical;
+}
+
+.form-group-checkbox {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group-checkbox label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.form-group-checkbox input[type="checkbox"] {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.form-group-radio {
+    flex-direction: row;
+    align-items: center;
+    gap: 10px;
+}
+
+.form-group-radio label {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.form-group-radio input[type="radio"] {
+    width: 20px;
+    height: 20px;
+    box-sizing: border-box;
+    cursor: pointer;
+}
+
+.form-help {
+    font-size: 90%;
+    opacity: 0.7;
+    font-style: italic;
+    margin-top: -4px;
+}
+
+.form-error {
+    color: #ff1917;
+    font-size: 90%;
+    font-weight: 500;
+    margin-top: -4px;
+}
+
+.form-error ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.form-row {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 20px;
+}
+
+@media only screen and (max-width : 800px) {
+    .form-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.form-actions {
+    display: flex;
+    gap: 15px;
+    margin-top: 30px;
+    padding-top: 30px;
+    border-top: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+@media only screen and (max-width : 600px) {
+    .form-actions {
+        flex-direction: column;
+    }
+}
+
+/* Universal List/Table Styles */
+.list {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    margin-top: 20px;
+}
+
+.list-row {
+    display: flex;
+    align-items: center;
+    gap: 15px;
+    padding: 13px 15px;
+    box-sizing: border-box;
+    background-color: rgba(0, 0, 0, 0.03);
+    border-radius: var(--button-border-radius);
+    transition: all 0.2s ease;
+}
+
+.list-row-hover:hover {
+    background-color: rgba(0, 0, 0, 0.05);
+    transform: translateX(4px);
+}
+
+.list-cell {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    box-sizing: border-box;
+}
+
+.list-cell-actions {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    flex-wrap: wrap;
+    gap: 10px;
+    align-items: flex-end;
+    justify-content: flex-end;
+    min-width: 120px;
+    box-sizing: border-box;
+}
+
+.list-user {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-weight: 500;
+}
+
+.list-user .avatar {
+    width: 32px;
+    height: 32px;
+}
+
+.list-cell-date {
+    text-align: right;
+    opacity: 0.7;
+    font-size: 95%;
+    white-space: nowrap;
+}
+
+@media only screen and (max-width : 600px) {
+    .list-row {
+        flex-wrap: wrap;
+    }
+
+    .list-cell-actions {
+        width: 100%;
+        justify-content: flex-start;
+        margin-top: 10px;
+    }
+}

@@ -1,0 +1,19 @@
+{% extends "layout.html" %}
+
+{% block content %}
+    <div class="content block message">
+        <div class="block-icon">✅</div>
+
+        {% if title %}
+            <div class="block-header">{{ title }}</div>
+        {% endif %}
+
+        <div class="block-description block-description-center">
+            {{ message | safe }}
+        </div>
+
+        <div class="block-description block-description-center">
+            <a href="{% url "index" %}" class="button">На главную</a>
+        </div>
+    </div>
+{% endblock %}
