@@ -2,6 +2,14 @@
     --sans-font: "Ubuntu", Helvetica, Verdana, sans-serif;
     --serif-font: Georgia, Times, serif;
 
+    --max-page-width: 1600px;
+    --sidebar-width: 280px;
+    --index-gap: 40px;
+    --search-gap: 12px;
+    --page-padding: 20px;
+    --highlight-bg: rgba(0, 0, 0, 0.05);
+    --highlight-bg-active: rgba(0, 0, 0, 0.12);
+
     --block-border-radius: 15px;
     --button-border-radius: 15px;
     --input-border-radius: 10px;
@@ -12,6 +20,11 @@
     --button-hover-color: #333;
     --button-hover-bg-color: #FFF;
     --button-hover-border: solid 2px #333;
+    --button-disabled-bg-color: #DDD;
+
+    --input-font-size: 120%;
+    --input-shadow: 0 4px 8px -2px rgba(9, 30, 66, .25), 0 0 0 1px rgba(9, 30, 66, .08);
+    --input-shadow-focus: 0 4px 12px -2px rgba(9, 30, 66, .45), 0 0 0 1px rgba(9, 30, 66, .32);
 
     --badge-color: rgba(255, 196, 85, 0.91);
 }
@@ -27,19 +40,12 @@ html {
     --block-bg-color: #FFF;
     --opposite-block-bg-color: #282c35;
     --block-shadow: 10px 15px 40px rgba(83, 91, 110, 0.11);
+    --block-shadow-hover: 0 8px 16px -2px rgba(9, 30, 66, .35), 0 0 0 1px rgba(9, 30, 66, .18);
     --block-border: none;
 
     --link-color: #333;
     --link-hover-color: #000;
     --visited-link-color: #333;
-
-    --button-color: #FFF;
-    --button-bg-color: #333;
-    --button-disabled-bg-color: #DDD;
-    --button-border: solid 2px #333;
-    --button-hover-color: #333;
-    --button-hover-bg-color: #FFF;
-    --button-hover-border: solid 2px #333;
 
     --select-color: #333;
     --select-bg-color: #FFF;
@@ -47,10 +53,6 @@ html {
     --input-color: #000;
     --input-bg-color: #fff;
     --input-border-color: #ddd;
-    --input-toolbar-bg: #fff;
-    --input-toolbar-button-color: #000;
-    --input-link: #7f8c8d;
-    --input-selection-color: #d7d4f0;
 }
 
 body {
@@ -78,6 +80,7 @@ body {
 
 a {
     color: var(--link-color);
+    text-decoration: none;
     transition: color linear .1s;
 }
 
@@ -85,6 +88,10 @@ a:hover {
     color: var(--link-hover-color);
 }
 
+button {
+    font-family: inherit;
+    font-size: inherit;
+}
 
 figure {
     margin: 0;
@@ -92,11 +99,6 @@ figure {
 
 img {
     max-width: 100%;
-}
-
-select {
-    color: var(--select-color);
-    background-color: var(--select-bg-color);
 }
 
 h1,
@@ -111,10 +113,6 @@ li {
     margin-bottom: 0.8em;
 }
 
-a {
-    text-decoration: none;
-}
-
 input[type=text],
 input[type=number],
 input[type=file],
@@ -127,53 +125,40 @@ input[type=password],
 input[type=search],
 textarea,
 select,
-.CodeMirror,
 .input-select {
     width: 100%;
     -webkit-appearance: none;
     appearance: none;
     border: none;
-    box-shadow: 0 4px 8px -2px rgba(9, 30, 66, .25), 0 0 0 1px rgba(9, 30, 66, .08);
+    box-shadow: var(--input-shadow);
     outline: none;
     padding: 8px 15px;
     resize: vertical;
     box-sizing: border-box;
     line-height: 1.4em;
     font-family: var(--sans-font);
+    font-size: var(--input-font-size);
     background: var(--input-bg-color);
-    border-color: var(--input-border-color);
     color: var(--input-color);
     border-radius: var(--input-border-radius);
 }
 
-select {
+select,
+.input-select {
+    color: var(--select-color);
+    background-color: var(--select-bg-color);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath fill='%23333' d='M1.4.6 6 5.2 10.6.6 12 2 6 8 0 2z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 14px center;
+    background-size: 12px;
+    padding-right: 38px;
     cursor: pointer;
 }
 
 input:focus,
 textarea:focus,
-.CodeMirror-focused {
-    box-shadow: 0 4px 12px -2px rgba(9, 30, 66, .45), 0 0 0 1px rgba(9, 30, 66, .32);
-}
-
-.editor-toolbar {
-    border: none;
-    box-shadow: 0 4px 8px -2px rgba(9, 30, 66, .25), 0 0 0 1px rgba(9, 30, 66, .08);
-    background: var(--input-toolbar-bg);
-}
-
-.editor-toolbar button {
-    color: var(--input-toolbar-button-color);
-}
-
-.editor-toolbar button:hover {
-    background: var(--input-bg-color);
-}
-
-input:hover,
-textarea:hover {
-    transform: scale(1.01);
-    transition: all linear .2s;
+select:focus {
+    box-shadow: var(--input-shadow-focus);
 }
 
 pre>code {

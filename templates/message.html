@@ -1,19 +1,25 @@
 {% extends "layout.html" %}
 
-{% block content %}
-    <div class="content block message">
-        <div class="block-icon">✅</div>
+{% block subheader %}{% endblock %}
 
-        {% if title %}
-            <div class="block-header">{{ title }}</div>
-        {% endif %}
+{% block main %}
+    <section class="main">
+        <div class="content">
+            <div class="block message">
+                <div class="block-icon">✅</div>
 
-        <div class="block-description block-description-center">
-            {{ message | safe }}
+                {% if title %}
+                    <div class="block-header">{{ title }}</div>
+                {% endif %}
+
+                <div class="block-description block-description-center">
+                    {{ message | safe }}
+                </div>
+
+                <div class="block-description block-description-center">
+                    <a href="{% url "index" %}" class="button">На главную</a>
+                </div>
+            </div>
         </div>
-
-        <div class="block-description block-description-center">
-            <a href="{% url "index" %}" class="button">На главную</a>
-        </div>
-    </div>
+    </section>
 {% endblock %}

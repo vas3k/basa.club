@@ -5,15 +5,18 @@
     Мой профиль — {{ block.super }}
 {% endblock %}
 
-{% block content %}
-<div class="content">
-    <div class="block profile">
-        <div class="block-header profile-header">Я — {{ user.full_name }}</div>
-    </div>
+{% block subheader %}{% endblock %}
 
-    <div class="profile-footer">
-        <a href="{% url "logout" %}" class="button button-red">Выйти</a>
-    </div>
-</div>
+{% block main %}
+    <section class="main">
+        <div class="content">
+            <div class="block profile">
+                <div class="block-header profile-header">Я — {{ user.full_name }}</div>
+            </div>
+
+            <div class="profile-footer">
+                <a href="{% url "logout" %}" class="button button-red">Выйти</a>
+            </div>
+        </div>
+    </section>
 {% endblock %}
-

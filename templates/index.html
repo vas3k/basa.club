@@ -1,4 +1,35 @@
 {% extends "layout.html" %}
 
 {% block content %}
+    {% if current_category %}
+        <section class="content-subcategories">
+            <a href="{% listing_url category=current_category.id %}" class="content-subcategory {% if not current_subcategory %}content-subcategory-active{% endif %}">
+                <span class="content-subcategory-icon">
+                    <i class="fas fa-th-large"></i>
+                </span>
+                <span class="content-subcategory-name">
+                    Все
+                    {% if current_category.items_count %}
+                        <span class="content-subcategory-count">{{ current_category.items_count }}</span>
+                    {% endif %}
+                </span>
+            </a>
+            {% for subcategory in current_category.children.all %}
+                <a href="{% listing_url category=current_category.id subcategory=subcategory.id %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
+                    <span class="content-subcategory-icon">
+                        {{ subcategory.icon|safe }}
+                    </span>
+                    <span class="content-subcategory-name">
+                        {{ subcategory.name }}
+                        {% if subcategory.items_count %}
+                            <span class="content-subcategory-count">{{ subcategory.items_count }}</span>
+                        {% endif %}
+                    </span>
+                </a>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <section class="content-items">
+    </section>
 {% endblock %}

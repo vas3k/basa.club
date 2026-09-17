@@ -1,0 +1,24 @@
+from geo.models import GeoCountry
+
+
+def geo(request):
+    countries = list(GeoCountry.objects.prefetch_related("cities"))
+
+    current_country = None
+    current_city = None
+    cities = []
+    for country in countries:
+        if country.id == request.country_id:
+            current_country = country
+            cities = list(country.cities.all())
+            for city in cities:
+                if city.id == request.city_id:
+                    current_city = city
+            break
+
+    return {
+        "countries": countries,
+        "cities": cities,
+        "current_country": current_country,
+        "current_city": current_city,
+    }

@@ -1,19 +1,17 @@
-:root {
-    --max-content-width: 1200px;
-    --normal-content-width: 1000px;
-    --sidebar-width: 240px;
-    --index-gap: 32px;
+.header,
+.subheader,
+.main {
+    width: 100%;
+    max-width: var(--max-page-width);
+    margin: 0 auto;
+    padding-left: var(--page-padding);
+    padding-right: var(--page-padding);
+    box-sizing: border-box;
 }
 
 .header {
-    width: 100%;
-    max-width: var(--max-content-width);
-    margin: 0 auto;
-    display: flex;
-    flex-direction: column;
-    gap: 18px;
-    padding: 40px 20px 28px;
-    box-sizing: border-box;
+    padding-top: 32px;
+    padding-bottom: var(--index-gap);
 }
 
     .header a {
@@ -30,9 +28,17 @@
     }
 
     .header-logo {
+        display: flex;
+        align-items: center;
+        gap: 12px;
         font-size: 28px;
         font-weight: bold;
         letter-spacing: -0.02em;
+        min-width: 0;
+    }
+
+    .header-menu-button {
+        display: none;
     }
 
     .header-actions {
@@ -44,77 +50,6 @@
         gap: 12px;
     }
 
-    .header-search {
-        display: flex;
-        flex-direction: row;
-        align-items: center;
-        gap: var(--index-gap);
-        width: 100%;
-    }
-
-    .header-geo {
-        display: inline-flex;
-        align-items: center;
-        gap: 6px;
-        margin: 0;
-        width: var(--sidebar-width);
-        flex-shrink: 0;
-        box-sizing: border-box;
-        cursor: pointer;
-    }
-
-    .header-geo-label {
-        font-size: 120%;
-        line-height: 1;
-        flex-shrink: 0;
-    }
-
-    .header-geo-select {
-        width: 100%;
-        min-width: 0;
-        padding: 14px 16px;
-        font-size: 110%;
-        font-weight: 600;
-        box-shadow: 0 4px 8px -2px rgba(9, 30, 66, .25), 0 0 0 1px rgba(9, 30, 66, .08);
-    }
-
-    .header-geo-select:hover {
-        transform: none;
-    }
-
-    .header-search-field {
-        display: flex;
-        flex: 1;
-        align-items: center;
-        gap: 10px;
-        min-width: 0;
-    }
-
-    .header-search-input {
-        flex: 1;
-        min-width: 0;
-        padding: 16px 22px;
-        font-size: 120%;
-        font-weight: 500;
-        border-radius: 14px;
-        box-shadow: 0 4px 8px -2px rgba(9, 30, 66, .25), 0 0 0 1px rgba(9, 30, 66, .08);
-    }
-
-    .header-search-input:hover {
-        transform: none;
-    }
-
-    .header-search-input:focus {
-        box-shadow: 0 4px 12px -2px rgba(9, 30, 66, .45), 0 0 0 1px rgba(9, 30, 66, .32);
-    }
-
-    .header-search-button {
-        flex-shrink: 0;
-        padding: 16px 22px;
-        font-size: 110%;
-        white-space: nowrap;
-    }
-
     .header-create {
         white-space: nowrap;
     }
@@ -124,6 +59,7 @@
         flex-direction: row;
         flex-wrap: nowrap;
         gap: 10px;
+        align-items: center;
     }
 
         .header-user-button {
@@ -139,39 +75,35 @@
             height: 40px;
         }
 
-.content {
-    margin: 0 auto;
-    max-width: var(--normal-content-width);
-    padding-left: 20px;
-    padding-right: 20px;
+        .header-login-short {
+            display: none;
+        }
+
+.subheader {
+    padding-bottom: var(--index-gap);
 }
 
-    .content-header {
-        font-size: 230%;
-        text-align: center;
-        padding-top: 20px;
-        padding-bottom: 30px;
-        margin: 0 auto;
-    }
+.main {
+    display: flex;
+    flex-direction: row;
+    align-items: flex-start;
+    gap: var(--index-gap);
+}
 
-    .content-description {
-        font-size: 130%;
-        text-align: center;
-        max-width: 90%;
-        padding-bottom: 30px;
-        margin: 0 auto;
-    }
+.content {
+    flex: 1;
+    min-width: 0;
+}
 
-    .content-description-left {
-        text-align: left;
-    }
+.main:not(:has(.sidebar)) .content > .block {
+    max-width: 640px;
+    margin-left: auto;
+    margin-right: auto;
+}
 
-    @media only screen and (max-width : 570px) {
-        .content {
-            padding-left: 10px;
-            padding-right: 10px;
-        }
-    }
+.sidebar-overlay {
+    display: none;
+}
 
 .footer {
     text-align: center;
@@ -182,6 +114,9 @@
     font-size: 90%;
 }
 
-.error {
+.error,
+.message {
     max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
 }

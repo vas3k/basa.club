@@ -1,0 +1,7 @@
+/* Item cards, grids and detail pages */
+
+.content-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--index-gap);
+}

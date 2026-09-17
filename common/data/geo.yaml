@@ -1,0 +1,699 @@
+- id: de
+  name: Германия
+  icon: 🇩🇪
+  cities:
+    - id: berlin
+      name: Берлин
+      icon: 🥙
+    - id: munich
+      name: Мюнхен
+      icon: 🚘
+    - id: hamburg
+      name: Гамбург
+      icon: ⚓️
+
+- id: rs
+  name: Сербия
+  icon: 🇷🇸
+  cities:
+    - id: belgrade
+      name: Белград
+      icon: 🏛️
+    - id: novi-sad
+      name: Нови-Сад
+      icon: 🎭
+    - id: nis
+      name: Ниш
+      icon: 🏰
+
+- id: me
+  name: Черногория
+  icon: 🇲🇪
+  cities:
+    - id: podgorica
+      name: Подгорица
+      icon: 🏙
+    - id: budva
+      name: Будва
+      icon: 🏖️
+    - id: kotor
+      name: Котор
+      icon: ⛵
+
+- id: ge
+  name: Грузия
+  icon: 🇬🇪
+  cities:
+    - id: tbilisi
+      name: Тбилиси
+      icon: 🍷
+    - id: batumi
+      name: Батуми
+      icon: 🌊
+    - id: kutaisi
+      name: Кутаиси
+      icon: 🏛
+
+- id: am
+  name: Армения
+  icon: 🇦🇲
+  cities:
+    - id: yerevan
+      name: Ереван
+      icon: 🏔️
+    - id: gyumri
+      name: Гюмри
+      icon: 🎨
+    - id: vanadzor
+      name: Ванадзор
+      icon: 🌲
+
+- id: tr
+  name: Турция
+  icon: 🇹🇷
+  cities:
+    - id: istanbul
+      name: Стамбул
+      icon: 🕌
+    - id: ankara
+      name: Анкара
+      icon: 🏛
+    - id: antalya
+      name: Анталья
+      icon: 🏖️
+
+- id: th
+  name: Таиланд
+  icon: 🇹🇭
+  cities:
+    - id: bangkok
+      name: Бангкок
+      icon: 🛺
+    - id: chiang-mai
+      name: Чиангмай
+      icon: 🐘
+    - id: phuket
+      name: Пхукет
+      icon: 🏝️
+
+- id: id
+  name: Индонезия
+  icon: 🇮🇩
+  cities:
+    - id: bali
+      name: Бали
+      icon: 🏄
+    - id: jakarta
+      name: Джакарта
+      icon: 🏙
+    - id: yogyakarta
+      name: Джокьякарта
+      icon: 🛕
+
+- id: ae
+  name: ОАЭ
+  icon: 🇦🇪
+  cities:
+    - id: dubai
+      name: Дубай
+      icon: 🏙️
+    - id: abu-dhabi
+      name: Абу-Даби
+      icon: 🕌
+    - id: sharjah
+      name: Шарджа
+      icon: 📚
+
+- id: pt
+  name: Португалия
+  icon: 🇵🇹
+  cities:
+    - id: lisbon
+      name: Лиссабон
+      icon: 🚋
+    - id: porto
+      name: Порту
+      icon: 🍷
+    - id: faro
+      name: Фару
+      icon: ☀️
+
+- id: es
+  name: Испания
+  icon: 🇪🇸
+  cities:
+    - id: barcelona
+      name: Барселона
+      icon: ⛪
+    - id: madrid
+      name: Мадрид
+      icon: ☀️
+    - id: valencia
+      name: Валенсия
+      icon: 🍊
+
+- id: cy
+  name: Кипр
+  icon: 🇨🇾
+  cities:
+    - id: limassol
+      name: Лимасол
+      icon: ⚓
+    - id: nicosia
+      name: Никосия
+      icon: 🏛
+    - id: paphos
+      name: Пафос
+      icon: 🏺
+
+- id: pl
+  name: Польша
+  icon: 🇵🇱
+  cities:
+    - id: warsaw
+      name: Варшава
+      icon: 🏙
+    - id: krakow
+      name: Краков
+      icon: 🏰
+    - id: wroclaw
+      name: Вроцлав
+      icon: 🦆
+
+- id: cz
+  name: Чехия
+  icon: 🇨🇿
+  cities:
+    - id: prague
+      name: Прага
+      icon: 🍺
+    - id: brno
+      name: Брно
+      icon: 🎓
+    - id: ostrava
+      name: Острава
+      icon: ⚙️
+
+- id: nl
+  name: Нидерланды
+  icon: 🇳🇱
+  cities:
+    - id: amsterdam
+      name: Амстердам
+      icon: 🚲
+    - id: rotterdam
+      name: Роттердам
+      icon: 🚢
+    - id: hague
+      name: Гаага
+      icon: 🏛
+
+- id: fr
+  name: Франция
+  icon: 🇫🇷
+  cities:
+    - id: paris
+      name: Париж
+      icon: 🗼
+    - id: lyon
+      name: Лион
+      icon: 🍽️
+    - id: nice
+      name: Ницца
+      icon: 🌊
+
+- id: it
+  name: Италия
+  icon: 🇮🇹
+  cities:
+    - id: rome
+      name: Рим
+      icon: 🍝
+    - id: milan
+      name: Милан
+      icon: 👗
+    - id: florence
+      name: Флоренция
+      icon: 🎨
+
+- id: gb
+  name: Великобритания
+  icon: 🇬🇧
+  cities:
+    - id: london
+      name: Лондон
+      icon: 🎡
+    - id: manchester
+      name: Манчестер
+      icon: ⚽
+    - id: edinburgh
+      name: Эдинбург
+      icon: 🏰
+
+- id: us
+  name: США
+  icon: 🇺🇸
+  cities:
+    - id: new-york
+      name: Нью-Йорк
+      icon: 🗽
+    - id: los-angeles
+      name: Лос-Анджелес
+      icon: 🎬
+    - id: austin
+      name: Остин
+      icon: 🎸
+
+- id: ca
+  name: Канада
+  icon: 🇨🇦
+  cities:
+    - id: toronto
+      name: Торонто
+      icon: 🍁
+    - id: vancouver
+      name: Ванкувер
+      icon: ⛰️
+    - id: montreal
+      name: Монреаль
+      icon: 🥯
+
+- id: il
+  name: Израиль
+  icon: 🇮🇱
+  cities:
+    - id: tel-aviv
+      name: Тель-Авив
+      icon: 🏖️
+    - id: jerusalem
+      name: Иерусалим
+      icon: 🕍
+    - id: haifa
+      name: Хайфа
+      icon: ⚓
+
+- id: kz
+  name: Казахстан
+  icon: 🇰🇿
+  cities:
+    - id: almaty
+      name: Алматы
+      icon: 🍎
+    - id: astana
+      name: Астана
+      icon: 🏙
+    - id: shymkent
+      name: Шымкент
+      icon: 🌾
+
+- id: uz
+  name: Узбекистан
+  icon: 🇺🇿
+  cities:
+    - id: tashkent
+      name: Ташкент
+      icon: 🏙
+    - id: samarkand
+      name: Самарканд
+      icon: 🕌
+    - id: bukhara
+      name: Бухара
+      icon: 🏺
+
+- id: kg
+  name: Кыргызстан
+  icon: 🇰🇬
+  cities:
+    - id: bishkek
+      name: Бишкек
+      icon: 🏔️
+    - id: osh
+      name: Ош
+      icon: 🥖
+    - id: karakol
+      name: Каракол
+      icon: 🎿
+
+- id: ru
+  name: Россия
+  icon: 🇷🇺
+  cities:
+    - id: moscow
+      name: Москва
+      icon: 🏙
+    - id: spb
+      name: Санкт-Петербург
+      icon: 🌉
+    - id: kazan
+      name: Казань
+      icon: 🕌
+
+- id: ua
+  name: Украина
+  icon: 🇺🇦
+  cities:
+    - id: kyiv
+      name: Киев
+      icon: 🌻
+    - id: lviv
+      name: Львов
+      icon: ☕
+    - id: odesa
+      name: Одесса
+      icon: ⚓
+
+- id: by
+  name: Беларусь
+  icon: 🇧🇾
+  cities:
+    - id: minsk
+      name: Минск
+      icon: 🏙
+    - id: brest
+      name: Брест
+      icon: 🏰
+    - id: grodno
+      name: Гродно
+      icon: 🌲
+
+- id: lt
+  name: Литва
+  icon: 🇱🇹
+  cities:
+    - id: vilnius
+      name: Вильнюс
+      icon: 🏛
+    - id: kaunas
+      name: Каунас
+      icon: 🎓
+    - id: klaipeda
+      name: Клайпеда
+      icon: ⚓
+
+- id: lv
+  name: Латвия
+  icon: 🇱🇻
+  cities:
+    - id: riga
+      name: Рига
+      icon: 🎄
+    - id: jurmala
+      name: Юрмала
+      icon: 🏖️
+    - id: daugavpils
+      name: Даугавпилс
+      icon: 🏰
+
+- id: ee
+  name: Эстония
+  icon: 🇪🇪
+  cities:
+    - id: tallinn
+      name: Таллин
+      icon: 🧱
+    - id: tartu
+      name: Тарту
+      icon: 🎓
+    - id: parnu
+      name: Пярну
+      icon: 🏖️
+
+- id: fi
+  name: Финляндия
+  icon: 🇫🇮
+  cities:
+    - id: helsinki
+      name: Хельсинки
+      icon: 🦢
+    - id: tampere
+      name: Тампере
+      icon: 🏭
+    - id: turku
+      name: Турку
+      icon: ⛵
+
+- id: se
+  name: Швеция
+  icon: 🇸🇪
+  cities:
+    - id: stockholm
+      name: Стокгольм
+      icon: 🛶
+    - id: gothenburg
+      name: Гётеборг
+      icon: 🚢
+    - id: malmo
+      name: Мальмё
+      icon: 🌉
+
+- id: no
+  name: Норвегия
+  icon: 🇳🇴
+  cities:
+    - id: oslo
+      name: Осло
+      icon: 🌲
+    - id: bergen
+      name: Берген
+      icon: 🌧️
+    - id: trondheim
+      name: Тронхейм
+      icon: ⛪
+
+- id: at
+  name: Австрия
+  icon: 🇦🇹
+  cities:
+    - id: vienna
+      name: Вена
+      icon: 🎼
+    - id: salzburg
+      name: Зальцбург
+      icon: 🏔️
+    - id: graz
+      name: Грац
+      icon: 🎓
+
+- id: ch
+  name: Швейцария
+  icon: 🇨🇭
+  cities:
+    - id: zurich
+      name: Цюрих
+      icon: 🏦
+    - id: geneva
+      name: Женева
+      icon: 🌊
+    - id: bern
+      name: Берн
+      icon: 🐻
+
+- id: be
+  name: Бельгия
+  icon: 🇧🇪
+  cities:
+    - id: brussels
+      name: Брюссель
+      icon: 🍟
+    - id: antwerp
+      name: Антверпен
+      icon: 💎
+    - id: ghent
+      name: Гент
+      icon: 🏰
+
+- id: hu
+  name: Венгрия
+  icon: 🇭🇺
+  cities:
+    - id: budapest
+      name: Будапешт
+      icon: ♨️
+    - id: debrecen
+      name: Дебрецен
+      icon: 🎓
+    - id: szeged
+      name: Сегед
+      icon: 🌶
+
+- id: ro
+  name: Румыния
+  icon: 🇷🇴
+  cities:
+    - id: bucharest
+      name: Бухарест
+      icon: 🏙
+    - id: cluj
+      name: Клуж
+      icon: 🎓
+    - id: timisoara
+      name: Тимишоара
+      icon: 🏭
+
+- id: bg
+  name: Болгария
+  icon: 🇧🇬
+  cities:
+    - id: sofia
+      name: София
+      icon: 🏛
+    - id: plovdiv
+      name: Пловдив
+      icon: 🏺
+    - id: varna
+      name: Варна
+      icon: 🏖️
+
+- id: hr
+  name: Хорватия
+  icon: 🇭🇷
+  cities:
+    - id: zagreb
+      name: Загреб
+      icon: 🏙
+    - id: split
+      name: Сплит
+      icon: ☀️
+    - id: dubrovnik
+      name: Дубровник
+      icon: 🏰
+
+- id: gr
+  name: Греция
+  icon: 🇬🇷
+  cities:
+    - id: athens
+      name: Афины
+      icon: 🏛
+    - id: thessaloniki
+      name: Салоники
+      icon: ☕
+    - id: heraklion
+      name: Ираклион
+      icon: 🌊
+
+- id: vn
+  name: Вьетнам
+  icon: 🇻🇳
+  cities:
+    - id: hcmc
+      name: Хошимин
+      icon: 🍜
+    - id: hanoi
+      name: Ханой
+      icon: 🛵
+    - id: danang
+      name: Дананг
+      icon: 🏖️
+
+- id: jp
+  name: Япония
+  icon: 🇯🇵
+  cities:
+    - id: tokyo
+      name: Токио
+      icon: 🗼
+    - id: osaka
+      name: Осака
+      icon: 🍜
+    - id: kyoto
+      name: Киото
+      icon: ⛩️
+
+- id: kr
+  name: Южная Корея
+  icon: 🇰🇷
+  cities:
+    - id: seoul
+      name: Сеул
+      icon: 🏙️
+    - id: busan
+      name: Пусан
+      icon: 🌊
+    - id: incheon
+      name: Инчхон
+      icon: ✈️
+
+- id: cn
+  name: Китай
+  icon: 🇨🇳
+  cities:
+    - id: beijing
+      name: Пекин
+      icon: 🏯
+    - id: shanghai
+      name: Шанхай
+      icon: 🏙️
+    - id: shenzhen
+      name: Шэньчжэнь
+      icon: 💻
+
+- id: in
+  name: Индия
+  icon: 🇮🇳
+  cities:
+    - id: bangalore
+      name: Бангалор
+      icon: 💻
+    - id: mumbai
+      name: Мумбаи
+      icon: 🎬
+    - id: delhi
+      name: Дели
+      icon: 🕌
+
+- id: br
+  name: Бразилия
+  icon: 🇧🇷
+  cities:
+    - id: sao-paulo
+      name: Сан-Паулу
+      icon: 🏙
+    - id: rio
+      name: Рио-де-Жанейро
+      icon: 🏖️
+    - id: floripa
+      name: Флорианополис
+      icon: 🏄
+
+- id: ar
+  name: Аргентина
+  icon: 🇦🇷
+  cities:
+    - id: buenos-aires
+      name: Буэнос-Айрес
+      icon: 💃
+    - id: cordoba
+      name: Кордова
+      icon: 🎓
+    - id: mendoza
+      name: Мендоса
+      icon: 🍷
+
+- id: mx
+  name: Мексика
+  icon: 🇲🇽
+  cities:
+    - id: cdmx
+      name: Мехико
+      icon: 🌮
+    - id: playa
+      name: Плайя-дель-Кармен
+      icon: 🏝️
+    - id: guadalajara
+      name: Гвадалахара
+      icon: 🎸
+
+- id: au
+  name: Австралия
+  icon: 🇦🇺
+  cities:
+    - id: sydney
+      name: Сидней
+      icon: 🎭
+    - id: melbourne
+      name: Мельбурн
+      icon: ☕
+    - id: brisbane
+      name: Брисбен
+      icon: ☀️

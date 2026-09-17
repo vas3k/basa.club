@@ -1,0 +1,12 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ item.title }} — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <article class="item">
+        <h1 class="item-title">{{ item.title }}</h1>
+        <div class="item-description">{{ item.description }}</div>
+    </article>
+{% endblock %}

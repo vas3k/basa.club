@@ -5,15 +5,18 @@
     Вход — {{ block.super }}
 {% endblock %}
 
-{% block content %}
-<div class="content">
-    <div class="block">
-        <div class="block-header profile-header">🤔 Нужно войти...</div>
+{% block subheader %}{% endblock %}
 
-        <div class="block-description profile-buttons">
-            <a href="{% url "login_club" %}" class="button">Войти через Вастрик ✖︎ Клуб</a>
+{% block main %}
+    <section class="main">
+        <div class="content">
+            <div class="block">
+                <div class="block-header profile-header">🤔 Нужно войти...</div>
+
+                <div class="block-description profile-buttons">
+                    <a href="{% url "login_club" %}" class="button">Войти через Вастрик ✖︎ Клуб</a>
+                </div>
+            </div>
         </div>
-    </div>
-</div>
+    </section>
 {% endblock %}
-

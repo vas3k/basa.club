@@ -1,4 +1,5 @@
-/* Buttons, switches and other reusable elements */
+/* Blocks */
+
 .block {
     padding: 30px;
     margin-bottom: 30px;
@@ -24,7 +25,7 @@
 
 .block-clickable:hover {
     transform: translateY(-2px);
-    box-shadow: 0 8px 16px -2px rgba(9, 30, 66, .35), 0 0 0 1px rgba(9, 30, 66, .18);
+    box-shadow: var(--block-shadow-hover);
 }
 
 .block-header {
@@ -96,35 +97,14 @@
     font-weight: 600;
 }
 
-.avatar {
-    display: inline-block;
-    border-radius: 50%;
-    min-height: 20px;
-    min-width: 20px;
-    box-sizing: border-box;
-    background-color: #bdc3c7;
-    vertical-align: middle;
-    overflow: hidden;
-    background-position: 50% 50%;
-    background-size: cover;
-}
 
-.avatar img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-}
-
-.icon {
-    width: 14px;
-    height: 14px;
-    vertical-align: middle;
-    opacity: 0.8;
-}
+/* Buttons */
 
 .button {
     display: inline-flex;
     align-items: center;
+    justify-content: center;
+    gap: 8px;
     text-decoration: none !important;
     padding: 15px 18px;
     box-sizing: border-box;
@@ -132,10 +112,13 @@
     background-color: var(--button-bg-color);
     border: var(--button-border);
     color: var(--button-color);
+    font-family: var(--sans-font);
+    font-size: 100%;
     text-align: center;
     cursor: pointer;
     line-height: 1em;
     font-weight: 600;
+    white-space: nowrap;
     transition: 0.2s ease-out;
 }
 
@@ -145,10 +128,6 @@
         line-height: 1.2em;
         padding: 10px;
     }
-}
-
-.button-round {
-    border-radius: 50%;
 }
 
 .button:hover {
@@ -192,6 +171,17 @@
     font-weight: 600;
 }
 
+.button-icon {
+    width: 42px;
+    height: 42px;
+    padding: 0;
+    flex-shrink: 0;
+}
+
+.button-round {
+    border-radius: 50%;
+}
+
 .button-red {
     background-color: #ff1917;
     border-color: #ff1917;
@@ -209,50 +199,33 @@
     padding: 5px 10px;
 }
 
-.markdown-text {
-    line-height: 1.5em;
-}
 
-.markdown-text h1,
-.markdown-text h2,
-.markdown-text h3 {
-    margin-top: 60px;
-    margin-bottom: 25px;
-}
+/* Avatars and icons */
 
-.markdown-text ul,
-.markdown-text ol {
-    padding-left: 1em;
-}
-
-.link-favicon {
-    display: none;
-    height: 1.1em;
-    width: 1.1em;
-    background-position: center center;
-    background-size: cover;
-    vertical-align: middle;
-    padding-right: 0.2em;
-}
-
-.link-favicon i {
-    font-size: 140%;
-}
-
-.markdown-text .link-favicon {
+.avatar {
     display: inline-block;
+    border-radius: 50%;
+    min-height: 20px;
+    min-width: 20px;
+    box-sizing: border-box;
+    background-color: #bdc3c7;
+    vertical-align: middle;
+    overflow: hidden;
+    background-position: 50% 50%;
+    background-size: cover;
 }
 
-@keyframes fadeInUp {
-    from {
-        opacity: 0;
-        transform: translateY(20px);
-    }
+.avatar img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
 
-    to {
-        opacity: 1;
-        transform: translateY(0);
-    }
+.icon {
+    width: 14px;
+    height: 14px;
+    vertical-align: middle;
+    opacity: 0.8;
 }
 
 img.emoji {
@@ -262,29 +235,8 @@ img.emoji {
     vertical-align: -0.25em;
 }
 
-.animate-on-load>* {
-    animation: fadeInUp 0.5s ease backwards;
-}
 
-.animate-on-load>*:nth-child(1) {
-    animation-delay: 0.1s;
-}
-
-.animate-on-load>*:nth-child(2) {
-    animation-delay: 0.15s;
-}
-
-.animate-on-load>*:nth-child(3) {
-    animation-delay: 0.2s;
-}
-
-.animate-on-load>*:nth-child(4) {
-    animation-delay: 0.25s;
-}
-
-.animate-on-load>*:nth-child(5) {
-    animation-delay: 0.3s;
-}
+/* Forms */
 
 .form-group {
     display: flex;
@@ -392,7 +344,9 @@ img.emoji {
     }
 }
 
-/* Universal List/Table Styles */
+
+/* Lists */
+
 .list {
     display: flex;
     flex-direction: column;
@@ -465,4 +419,41 @@ img.emoji {
         justify-content: flex-start;
         margin-top: 10px;
     }
+}
+
+
+/* Markdown */
+
+.markdown-text {
+    line-height: 1.5em;
+}
+
+.markdown-text h1,
+.markdown-text h2,
+.markdown-text h3 {
+    margin-top: 60px;
+    margin-bottom: 25px;
+}
+
+.markdown-text ul,
+.markdown-text ol {
+    padding-left: 1em;
+}
+
+.link-favicon {
+    display: none;
+    height: 1.1em;
+    width: 1.1em;
+    background-position: center center;
+    background-size: cover;
+    vertical-align: middle;
+    padding-right: 0.2em;
+}
+
+.link-favicon i {
+    font-size: 140%;
+}
+
+.markdown-text .link-favicon {
+    display: inline-block;
 }

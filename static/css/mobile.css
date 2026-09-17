@@ -1,107 +1,109 @@
 @media (max-width: 900px) {
-    .content.index {
-        grid-template-columns: 1fr;
-        gap: 28px;
+    .header-menu-button {
+        display: inline-flex;
     }
 
-    .index-sidebar {
-        position: static;
+    body:not(:has(.sidebar)) .header-menu-button {
+        display: none;
     }
 
-    .index-categories {
-        padding: 16px;
+    .header-login-full {
+        display: none;
     }
 
-    .index-categories-list {
-        display: grid;
-        grid-template-columns: repeat(2, 1fr);
-        gap: 4px;
+    .header-login-short {
+        display: inline;
     }
 
-    .index-pinned-grid {
-        grid-template-columns: repeat(2, 1fr);
+    .subheader-search {
+        flex-wrap: wrap;
+        gap: var(--search-gap);
     }
 
-    .index-items-grid {
-        grid-template-columns: repeat(2, 1fr);
+        .subheader-search .subheader-search-geo {
+            width: calc((100% - var(--search-gap)) / 2);
+            flex: 1 1 calc((100% - var(--search-gap)) / 2);
+        }
+
+        .subheader-search .subheader-search-query {
+            flex: 1 1 auto;
+            min-width: 140px;
+        }
+
+    .main {
+        display: block;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        inset: 0;
+        z-index: 40;
+        background: rgba(15, 23, 42, 0.35);
+    }
+
+    .sidebar {
+        display: none;
+        position: fixed;
+        top: 12px;
+        left: 12px;
+        bottom: 12px;
+        z-index: 50;
+        width: min(320px, calc(100vw - 24px));
+        flex-basis: auto;
+        overflow-y: auto;
+    }
+
+    body.sidebar-open {
+        overflow: hidden;
+    }
+
+    body.sidebar-open .sidebar-overlay {
+        display: block;
+    }
+
+    body.sidebar-open .sidebar {
+        display: flex;
     }
 }
 
 @media (max-width: 700px) {
     .header {
-        gap: 14px;
-        padding-top: 20px;
+        padding-top: 16px;
         padding-bottom: 20px;
     }
 
         .header-top {
-            justify-content: center;
-            gap: 12px;
+            flex-wrap: nowrap;
+            gap: 10px;
         }
 
         .header-logo {
-            font-size: 24px;
-            text-align: center;
-            width: 100%;
+            flex: 1 1 auto;
+            min-width: 0;
+            font-size: 22px;
         }
 
         .header-actions {
-            width: 100%;
-            justify-content: center;
+            margin-left: auto;
         }
 
-        .header-search {
-            flex-wrap: wrap;
-        }
-
-        .header-geo {
-            width: 100%;
-        }
-
-        .header-geo-select {
-            width: 100%;
-            padding: 12px 14px;
-        }
-
-        .header-search-field {
-            width: 100%;
-            flex-wrap: wrap;
-        }
-
-        .header-search-input {
-            width: 100%;
-            padding: 14px 16px;
-            font-size: 110%;
-        }
-
-        .header-search-button {
-            width: 100%;
-            justify-content: center;
-            padding: 14px 16px;
-        }
-
-    .index-categories-list {
-        grid-template-columns: 1fr;
+    .subheader {
+        padding-bottom: 20px;
     }
 
-    .index-pinned-grid,
-    .index-items-grid {
-        grid-template-columns: 1fr 1fr;
-        gap: 8px;
+    .content-subcategories {
+        gap: 16px;
+        margin-bottom: 16px;
     }
 
-    .index-section-header {
-        flex-direction: column;
-        align-items: flex-start;
-        gap: 6px;
-    }
+        .content-subcategory {
+            width: 72px;
+        }
 
-    .profile-card {
-        grid-template-columns: 1fr;
-        gap: 30px;
-    }
-
-        .profile-card > * {
-            grid-column: 1;
+        .content-subcategory-icon {
+            width: 58px;
+            height: 58px;
+            font-size: 22px;
         }
 }

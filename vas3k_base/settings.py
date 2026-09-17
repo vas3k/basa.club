@@ -37,6 +37,8 @@ INSTALLED_APPS = [
     "django.contrib.postgres",
     "authn.apps.AuthnConfig",
     "users.apps.UsersConfig",
+    "categories.apps.CategoriesConfig",
+    "geo.apps.GeoConfig",
     "items.apps.ItemsConfig",
 ]
 
@@ -48,6 +50,7 @@ MIDDLEWARE = [
     "django.contrib.auth.middleware.AuthenticationMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
+    "geo.middleware.GeoCookieMiddleware",
     "vas3k_base.middleware.ExceptionMiddleware",
 ]
 
@@ -66,6 +69,11 @@ TEMPLATES = [
                 "django.contrib.auth.context_processors.auth",
                 "django.contrib.messages.context_processors.messages",
                 "vas3k_base.context_processors.settings_processor",
+                "categories.context_processors.categories",
+                "geo.context_processors.geo",
+            ],
+            "builtins": [
+                "items.templatetags.listing",
             ],
         },
     },
