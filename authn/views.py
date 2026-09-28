@@ -1,29 +1,51 @@
 import logging
 from urllib.parse import urlparse
 
+import requests
 from authlib.integrations.base_client import OAuthError
-from django.contrib.auth import logout, login
+from django.conf import settings
+from django.contrib.auth import login, logout
+from django.contrib.auth.decorators import login_required
 from django.db.models import Q
-from django.shortcuts import render, redirect
+from django.shortcuts import redirect, render
 from django.urls import reverse
+from django.utils import timezone
+from django.views.decorators.http import require_http_methods
 from requests import HTTPError
 
-from authn.providers import club
+from authn.providers import club, telegram
 from authn.providers.club import oauth
 from users.models import User
+from vas3k_base.exceptions import RateLimitException
 
 log = logging.getLogger(__name__)
 
 
+def start_session(request, user, redirect_to):
+    login(request, user)
+    request.session.set_expiry(settings.SESSION_COOKIE_AGE)
+    user.last_activity_at = timezone.now()
+    user.save(update_fields=["last_activity_at"])
+    return redirect(redirect_to)
+
+
+def home_for(user):
+    if user.telegram_id:
+        return reverse("user_profile", kwargs={"slug": "me"})
+    return reverse("bot")
+
+
 def log_in(request):
     if request.user.is_authenticated:
-        return redirect("profile")
+        return redirect(home_for(request.user))
     return render(request, "users/login.html")
 
 
 def log_out(request):
     logout(request)
-    return redirect("index")
+    response = redirect("index")
+    response.delete_cookie("token", path="/")
+    return response
 
 
 def login_club(request):
@@ -58,47 +80,73 @@ def club_callback(request):
         })
 
     user_slug = userinfo["sub"]
-    club_profile = club.parse_membership(token)
-    if not club_profile or not club_profile.get("user"):
+    try:
+        club_profile = requests.get(
+            url=f"{oauth.club.api_base_url}/user/me.json",
+            headers={"Authorization": f"{token['token_type']} {token['access_token']}"},
+        ).json()
+    except Exception as ex:
+        log.exception(ex)
+        club_profile = None
+
+    member = club_profile.get("user") if isinstance(club_profile, dict) else None
+    if not isinstance(member, dict):
         return render(request, "error.html", {
             "message": f"Член Клуба с именем {user_slug} не найден. "
                        "<a href=\"https://vas3k.club\">Попробуйте</a> войти в свой "
                        "аккаунт и потом авторизоваться здесь снова."
         })
 
-    if club_profile["user"]["payment_status"] != "active":
+    if member.get("payment_status") != "active":
         return render(request, "error.html", {
             "message": "Ваша подписка на Клуб истекла. "
                        "<a href=\"https://vas3k.club\">Продлите</a> её здесь."
         })
 
-
     user = User.objects.filter(Q(email=userinfo["email"]) | Q(slug=userinfo["sub"])).first()
-    telegram_id = club_profile["user"]["telegram"].get("id") if club_profile["user"].get("telegram") else None
     if user:
-        user.full_name = club_profile["user"]["full_name"]
-        user.avatar = club_profile["user"]["avatar"]
         if not user.email or user.email != userinfo["email"]:
             user.email = userinfo["email"]
-        user.telegram_id = telegram_id
-        user.profile_cache = club_profile
+        club.apply_club_profile(user, club_profile)
         user.save()
     else:
         user = User.objects.create_user(
             username=userinfo["sub"],
             email=userinfo["email"],
-            full_name=club_profile["user"]["full_name"],
-            telegram_id=telegram_id,
-            avatar=club_profile["user"]["avatar"],
-            profile_cache=club_profile,
         )
-
-    login(request, user)
+        club.apply_club_profile(user, club_profile)
+        user.save()
 
     goto = request.GET.get("goto")
-    if goto and urlparse(goto).netloc == request.get_host():
+    if goto and urlparse(goto).netloc == request.get_host() and user.telegram_id:
         redirect_to = goto
     else:
-        redirect_to = reverse("profile")
+        redirect_to = home_for(user)
 
-    return redirect(redirect_to)
+    return start_session(request, user, redirect_to)
+
+
+def login_telegram(request):
+    try:
+        return redirect(telegram.bot_url(request))
+    except RateLimitException as ex:
+        return render(request, "error.html", {"title": ex.title, "message": ex.message})
+
+
+@login_required
+def bot_page(request):
+    if request.user.telegram_id:
+        return redirect("user_profile", slug="me")
+    try:
+        url = telegram.bot_url(request, user=request.user)
+    except RateLimitException as ex:
+        return render(request, "error.html", {"title": ex.title, "message": ex.message})
+    return render(request, "authn/bot.html", {"bot_url": url})
+
+
+@require_http_methods(["GET", "POST"])
+def telegram_continue(request):
+    user = telegram.finish(request)
+    if not isinstance(user, User):
+        return user
+    return start_session(request, user, home_for(user))

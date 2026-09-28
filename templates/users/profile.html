@@ -1,22 +1,86 @@
 {% extends "layout.html" %}
-{% load static %}
 
 {% block title %}
-    Мой профиль — {{ block.super }}
+    {% if is_owner %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}
 {% endblock %}
 
-{% block subheader %}{% endblock %}
-
-{% block main %}
-    <section class="main">
-        <div class="content">
-            <div class="block profile">
-                <div class="block-header profile-header">Я — {{ user.full_name }}</div>
+{% block content %}
+    <div class="profile">
+        <div class="profile-card">
+            <div class="profile-card-photo">
+                <div class="profile-user-avatar">
+                    <img src="{{ profile_user.default_avatar }}" alt="">
+                </div>
+                <div class="profile-card-age profile-rating {% if profile_user.rating > 0 %}profile-rating-positive{% elif profile_user.rating < 0 %}profile-rating-negative{% endif %}" title="Рейтинг">
+                    {% if profile_user.rating > 0 %}+{% endif %}{{ profile_user.rating }}
+                </div>
             </div>
 
-            <div class="profile-footer">
-                <a href="{% url "logout" %}" class="button button-red">Выйти</a>
+            <div class="profile-card-info">
+                <div class="profile-user-name">
+                    <span class="profile-user-fullname">{% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}</span>
+                    {% if profile_user.full_name %}
+                        <span class="profile-user-nickname">@{{ profile_user.slug }}</span>
+                    {% endif %}
+                </div>
+
+                {% if profile_user.position or profile_user.company %}
+                    <div class="profile-user-job">
+                        {% if profile_user.position %}{{ profile_user.position }}{% endif %}{% if profile_user.position and profile_user.company %}, {% endif %}{% if profile_user.company %}{{ profile_user.company }}{% endif %}
+                    </div>
+                {% endif %}
+
+                {% if profile_user.city or profile_user.country %}
+                    <div class="profile-user-location">
+                        {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
+                    </div>
+                {% endif %}
+
+                {% if profile_user.contact %}
+                    <div class="profile-user-location">{{ profile_user.contact }}</div>
+                {% endif %}
+
+                <div class="profile-user-location">{{ profile_user.upvotes }} голосов</div>
+
+                {% if profile_user.membership_expires_at %}
+                    <div class="profile-user-location">Подписка до {{ profile_user.membership_expires_at|date:"j E Y" }}</div>
+                {% endif %}
+
+                {% if profile_user.bio %}
+                    <div class="profile-user-bio">{{ profile_user.bio|linebreaksbr }}</div>
+                {% endif %}
             </div>
         </div>
+
+        {% if is_owner %}
+            <div class="profile-buttons">
+                <a href="{% url "user_profile_edit" profile_user.slug %}" class="button">Редактировать</a>
+                <a href="{% url "logout" %}" class="button button-red">Выйти</a>
+            </div>
+        {% endif %}
+    </div>
+
+    <div class="block-header block-header-with-button">Объявления</div>
+    <section class="content-items">
+        {% for item in active_items %}
+            {% include "items/item.html" with show_owner_actions=is_owner %}
+        {% empty %}
+            <div class="block">
+                {% if is_owner %}
+                    Активных объявлений пока нет.
+                {% else %}
+                    У этого человека пока нет объявлений.
+                {% endif %}
+            </div>
+        {% endfor %}
     </section>
+
+    {% if is_owner and inactive_items %}
+        <div class="block-header block-header-with-button">Не в общей ленте</div>
+        <section class="content-items">
+            {% for item in inactive_items %}
+                {% include "items/item.html" with show_owner_actions=is_owner %}
+            {% endfor %}
+        </section>
+    {% endif %}
 {% endblock %}

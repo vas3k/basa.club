@@ -1,0 +1,53 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Анкета — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="block-header">Расскажите о себе</div>
+        <div class="block-description">
+            Клуб не обязателен. Аккаунт появится в базе только после этой анкеты.
+        </div>
+
+        <form method="post" action="{% url "telegram_continue" %}?code={{ code }}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.email.id_for_label }}">{{ form.email.label }}</label>
+                {{ form.email }}
+                {% if form.email.errors %}<div class="form-error">{{ form.email.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-row">
+                <div class="form-group">
+                    <label for="{{ form.city.id_for_label }}">{{ form.city.label }}</label>
+                    {{ form.city }}
+                    {% if form.city.errors %}<div class="form-error">{{ form.city.errors }}</div>{% endif %}
+                </div>
+                <div class="form-group">
+                    <label for="{{ form.country.id_for_label }}">{{ form.country.label }}</label>
+                    {{ form.country }}
+                    {% if form.country.errors %}<div class="form-error">{{ form.country.errors }}</div>{% endif %}
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.contact.id_for_label }}">{{ form.contact.label }}</label>
+                {{ form.contact }}
+                {% if form.contact.errors %}<div class="form-error">{{ form.contact.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Сохранить и войти</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

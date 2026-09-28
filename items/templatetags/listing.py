@@ -18,3 +18,12 @@ def listing_url(context, country="", city="", category="", subcategory=""):
         if subcategory:
             path += f"{subcategory}/"
     return path
+
+
+@register.simple_tag
+def item_url(item):
+    if not item.subcategory_id:
+        return ""
+    country = item.country_id or "everywhere"
+    city = item.city_id or "everywhere"
+    return f"/{country}/{city}/{item.category_id}/{item.subcategory_id}/{item.id}/"

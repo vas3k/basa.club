@@ -52,12 +52,6 @@ class URLParsingException(ClubException):
     default_message = ""
 
 
-class InvalidCode(ClubException):
-    default_code = "invalid-code"
-    default_title = "Вы ввели неправильный код"
-    default_message = "Введите или запросите его еще раз. Через несколько неправильных попыток коды удаляются"
-
-
 class ApiInsufficientFunds(ClubException):
     default_code = "api-insufficient-funds"
     default_title = "Недостаточно средств"

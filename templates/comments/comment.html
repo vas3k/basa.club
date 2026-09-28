@@ -1,0 +1,35 @@
+<div class="block">
+    {% if comment_node.comment.author %}
+        <a class="list-user" href="{{ comment_node.comment.author.get_absolute_url }}">
+            <span class="avatar" style="background-image: url('{{ comment_node.comment.author.default_avatar }}');"></span>
+            <span>{% if comment_node.comment.author.full_name %}{{ comment_node.comment.author.full_name }}{% else %}{{ comment_node.comment.author.slug }}{% endif %}</span>
+            <span class="rating {% if comment_node.comment.author.rating > 0 %}rating-positive{% elif comment_node.comment.author.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}">{% if comment_node.comment.author.rating > 0 %}+{% endif %}{{ comment_node.comment.author.rating }}</span>
+        </a>
+    {% endif %}
+    <div class="block-description">{{ comment_node.comment.text|linebreaksbr }}</div>
+    <div class="profile-buttons">
+        <span class="border">{{ comment_node.comment.upvotes }}</span>
+        {% if request.user.is_authenticated %}
+            <form method="post" action="{% url "comment_upvote" comment_node.comment.id %}">
+                {% csrf_token %}
+                <button type="submit" class="button button-small" {% if comment_node.comment.id in voted_comments or request.user.id == comment_node.comment.author_id %}disabled{% endif %}>
+                    {% if comment_node.comment.id in voted_comments %}Голос есть{% else %}＋{% endif %}
+                </button>
+            </form>
+            <form method="post" action="{% url "item_comment" item.id %}">
+                {% csrf_token %}
+                <input type="hidden" name="{{ comment_form.reply_to.html_name }}" value="{{ comment_node.comment.id }}">
+                <input type="text" name="{{ comment_form.text.html_name }}" placeholder="Ответить" required>
+                <button type="submit" class="button button-small">Ответить</button>
+            </form>
+        {% endif %}
+    </div>
+
+    {% if comment_node.replies %}
+        <div class="comment-replies">
+            {% for child in comment_node.replies %}
+                {% include "comments/comment.html" with comment_node=child %}
+            {% endfor %}
+        </div>
+    {% endif %}
+</div>

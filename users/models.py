@@ -1,10 +1,12 @@
 from uuid import uuid4
 
 from django.conf import settings
+from django.db.models import F
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
+from django.urls import reverse
 from django.utils.text import slugify
 
 
@@ -59,15 +61,29 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     slug = models.CharField(max_length=32, unique=True)
     email = models.EmailField(unique=True)
-    full_name = models.CharField(max_length=128, null=True)
+    full_name = models.CharField(max_length=128, null=True, blank=True)
     avatar = models.URLField(null=True, blank=True)
+    bio = models.TextField(null=True, blank=True)
+    company = models.TextField(null=True, blank=True)
+    position = models.TextField(null=True, blank=True)
+    city = models.CharField(max_length=128, null=True, blank=True)
+    country = models.CharField(max_length=128, null=True, blank=True)
+    contact = models.CharField(max_length=256, null=True, blank=True)
+    hat = models.JSONField(null=True, blank=True)
+    rating = models.IntegerField(default=0)
+    upvotes = models.IntegerField(default=0)
+
+    membership_started_at = models.DateTimeField(null=True, blank=True)
+    membership_expires_at = models.DateTimeField(null=True, blank=True)
+    telegram_data = models.JSONField(null=True, blank=True)
+    last_activity_at = models.DateTimeField(null=True, blank=True)
 
     profile_cache = models.JSONField(default=dict, null=True, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
 
-    telegram_id = models.CharField(max_length=64, db_index=True, null=True, blank=True)
+    telegram_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
 
     roles = ArrayField(models.CharField(max_length=32, choices=ROLES), default=list, null=False)
 
@@ -83,8 +99,17 @@ class User(AbstractBaseUser, PermissionsMixin):
     class Meta:
         db_table = "users"
 
-    def get_avatar(self):
-        return self.avatar or settings.DEFAULT_AVATAR
+    def get_absolute_url(self):
+        return reverse("user_profile", args=[self.slug])
+
+    def default_avatar(self):
+        if self.avatar:
+            return self.avatar
+        return settings.DEFAULT_AVATAR
+
+    def increment_vote_count(self):
+        User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
+        self.upvotes += 1
 
     @property
     def is_admin(self):

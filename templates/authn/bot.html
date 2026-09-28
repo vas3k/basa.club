@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Привязать Telegram — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="block-header profile-header">Нужен Telegram</div>
+        <div class="block-description">
+            Без привязанного бота База не открывается. Это работает и для нового аккаунта, и для старого.
+        </div>
+        <div class="block-description">
+            Откройте бота, нажмите «Старт», потом кнопку «Привязать Telegram». После этого бот даст ссылку обратно на сайт.
+        </div>
+        <div class="profile-buttons">
+            <a href="{{ bot_url }}" class="button button-blue" target="_blank" rel="noopener">
+                <i class="fab fa-telegram"></i>
+                Открыть бота
+            </a>
+            <a href="{% url "logout" %}" class="button button-inverted">Выйти</a>
+        </div>
+    </div>
+{% endblock %}

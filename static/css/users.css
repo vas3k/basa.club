@@ -15,9 +15,60 @@
         padding-bottom: 40px;
     }
 
+.login-options {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+    padding: 10px 0 30px;
+}
+
+    .login-option {
+        width: 100%;
+        white-space: normal;
+    }
+
+    .login-option-icon {
+        font-size: 22px;
+        line-height: 1;
+    }
+
 .profile-footer {
     padding-top: 70px;
     text-align: center;
+}
+
+.profile-rating {
+    max-width: none;
+    font-variant-numeric: tabular-nums;
+}
+
+.profile-card-age.profile-rating-positive {
+    background-color: #1f8a4c;
+    color: #fff;
+}
+
+.profile-card-age.profile-rating-negative {
+    background-color: #ff1917;
+    color: #fff;
+}
+
+.rating {
+    flex-shrink: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    font-size: 85%;
+}
+
+.rating-positive {
+    color: #1f8a4c;
+}
+
+.rating-negative {
+    color: #ff1917;
+}
+
+.rating-zero {
+    opacity: 0.45;
 }
 
 .profile-badge {

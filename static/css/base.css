@@ -190,6 +190,25 @@
 .button-blue {
     background-color: #0088cc;
     border-color: #0088cc;
+    color: #fff;
+}
+
+.button-blue:hover {
+    background-color: #0077b3;
+    border-color: #0077b3;
+    color: #fff;
+}
+
+.button-black {
+    background-color: #111;
+    border-color: #111;
+    color: #fff;
+}
+
+.button-black:hover {
+    background-color: #000;
+    border-color: #000;
+    color: #fff;
 }
 
 .border {

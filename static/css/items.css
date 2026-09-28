@@ -1,7 +1,20 @@
-/* Item cards, grids and detail pages */
-
 .content-items {
     display: flex;
     flex-direction: column;
     gap: var(--index-gap);
+}
+
+.block-header-with-button .block-header {
+    padding-bottom: 0;
+    margin: 0;
+    text-align: left;
+}
+
+.item-inactive {
+    opacity: 0.72;
+}
+
+.comment-replies {
+    margin-top: 12px;
+    margin-left: 24px;
 }

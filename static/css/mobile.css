@@ -7,14 +7,6 @@
         display: none;
     }
 
-    .header-login-full {
-        display: none;
-    }
-
-    .header-login-short {
-        display: inline;
-    }
-
     .subheader-search {
         flex-wrap: wrap;
         gap: var(--search-gap);

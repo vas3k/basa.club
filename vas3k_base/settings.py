@@ -1,4 +1,5 @@
 import os
+from datetime import timedelta
 from pathlib import Path
 
 import sentry_sdk
@@ -40,6 +41,7 @@ INSTALLED_APPS = [
     "categories.apps.CategoriesConfig",
     "geo.apps.GeoConfig",
     "items.apps.ItemsConfig",
+    "comments.apps.CommentsConfig",
 ]
 
 MIDDLEWARE = [
@@ -48,6 +50,7 @@ MIDDLEWARE = [
     "django.middleware.common.CommonMiddleware",
     "django.middleware.csrf.CsrfViewMiddleware",
     "django.contrib.auth.middleware.AuthenticationMiddleware",
+    "authn.middleware.AuthSessionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "geo.middleware.GeoCookieMiddleware",
@@ -139,8 +142,12 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Вастрик Ивент�
 
 # Telegram
 
-TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN")
-TELEGRAM_BOT_URL = os.getenv("TELEGRAM_BOT_URL") or "https://t.me/vas3k_club_bot"
+TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN") or "000000000:MOCK_TOKEN_REPLACE_ME"
+TELEGRAM_BOT_USERNAME = os.getenv("TELEGRAM_BOT_USERNAME") or "vas3k_base_bot"
+TELEGRAM_BOT_URL = os.getenv("TELEGRAM_BOT_URL") or f"https://t.me/{TELEGRAM_BOT_USERNAME}"
+TELEGRAM_BOT_WEBHOOK_HOST = os.getenv("TELEGRAM_BOT_WEBHOOK_HOST") or "0.0.0.0"
+TELEGRAM_BOT_WEBHOOK_PORT = int(os.getenv("TELEGRAM_BOT_WEBHOOK_PORT") or 8814)
+TELEGRAM_BOT_WEBHOOK_URL = os.getenv("TELEGRAM_BOT_WEBHOOK_URL") or ""
 
 # Logging
 
@@ -164,9 +171,18 @@ LOGGING = {
 
 APP_TITLE = "Вастрик 💽 База"
 APP_HOST = os.environ.get("APP_HOST") or "http://127.0.0.1:8000"
+if not TELEGRAM_BOT_WEBHOOK_URL:
+    TELEGRAM_BOT_WEBHOOK_URL = f"{APP_HOST}/telegram/webhook/"
 DEFAULT_AVATAR = "https://i.vas3k.club/v.png"
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 LOGIN_URL = "/login/"
+SESSION_COOKIE_AGE = 60 * 60 * 24 * 365 * 2
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False
+SESSION_COOKIE_HTTPONLY = True
+SESSION_COOKIE_SAMESITE = "Lax"
+SESSION_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SECURE = not DEBUG
+CSRF_COOKIE_SAMESITE = "Lax"
 
 
 # Stripe
@@ -174,8 +190,8 @@ LOGIN_URL = "/login/"
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY") or ""
 STRIPE_PUBLIC_KEY = os.getenv("STRIPE_PUBLIC_KEY") or ""
 STRIPE_WEBHOOK_SECRET = os.getenv("STRIPE_WEBHOOK_SECRET") or ""
-STRIPE_SUCCESS_URL = f"{APP_HOST}/me/"
-STRIPE_CANCEL_URL = f"{APP_HOST}/me/"
+STRIPE_SUCCESS_URL = f"{APP_HOST}/user/me/"
+STRIPE_CANCEL_URL = f"{APP_HOST}/user/me/"
 
 # Auth
 
@@ -190,6 +206,12 @@ CLUB_OPENID_CONFIG = {
     "client_kwargs": {"scope": "openid contact"},
 }
 CLUB_SERVICE_TOKEN = os.getenv("CLUB_SERVICE_TOKEN") or ""
+AUTH_CODE_LENGTH = 16
+AUTH_CODE_EXPIRATION_TIMEDELTA = timedelta(minutes=10)
+AUTH_MAX_CODE_TIMEDELTA = timedelta(hours=3)
+AUTH_MAX_CODE_COUNT = 3
+AUTH_MAX_CODE_COUNT_PER_IP = 5
+AUTH_MAX_CODE_COUNT_TOTAL = 100
 
 # Sentry
 

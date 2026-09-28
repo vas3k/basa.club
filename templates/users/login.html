@@ -1,22 +1,22 @@
 {% extends "layout.html" %}
-{% load static %}
 
 {% block title %}
     Вход — {{ block.super }}
 {% endblock %}
 
-{% block subheader %}{% endblock %}
+{% block content %}
+    <div class="block">
+        <div class="block-header profile-header">Войти</div>
 
-{% block main %}
-    <section class="main">
-        <div class="content">
-            <div class="block">
-                <div class="block-header profile-header">🤔 Нужно войти...</div>
-
-                <div class="block-description profile-buttons">
-                    <a href="{% url "login_club" %}" class="button">Войти через Вастрик ✖︎ Клуб</a>
-                </div>
-            </div>
+        <div class="login-options">
+            <a href="{% url "login_club" %}" class="button button-black login-option">
+                <span class="login-option-icon">✖︎</span>
+                Войти через Вастрик Клуб
+            </a>
+            <a href="{% url "login_telegram" %}" class="button button-blue login-option">
+                <i class="fab fa-telegram login-option-icon"></i>
+                Войти через Телеграм
+            </a>
         </div>
-    </section>
+    </div>
 {% endblock %}

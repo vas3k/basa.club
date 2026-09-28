@@ -1,4 +1,4 @@
-{% extends "layout.html" %}
+{% extends "layout_with_sidebar.html" %}
 
 {% block content %}
     {% if current_category %}
@@ -31,5 +31,10 @@
     {% endif %}
 
     <section class="content-items">
+        {% for item in items %}
+            {% include "items/item.html" %}
+        {% empty %}
+            <div class="block">Тут пока ничего нет</div>
+        {% endfor %}
     </section>
 {% endblock %}

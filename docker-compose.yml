@@ -1,0 +1,61 @@
+services:
+  app:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    command: python manage.py migrate && python manage.py runserver 0.0.0.0:8000
+    container_name: base_app
+    environment:
+      - DEBUG=true
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_DB=vas3k_base
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres
+      - APP_HOST=http://127.0.0.1:8000
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-000000000:MOCK_TOKEN_REPLACE_ME}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-vas3k_base_bot}
+    restart: always
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+    ports:
+      - "8000:8000"
+
+  bot:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    command: python manage.py migrate && python bot/main.py
+    container_name: base_bot
+    environment:
+      - DEBUG=true
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_DB=vas3k_base
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres
+      - APP_HOST=http://127.0.0.1:8000
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-000000000:MOCK_TOKEN_REPLACE_ME}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-vas3k_base_bot}
+    restart: always
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:16
+    container_name: base_postgres
+    environment:
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_DB=vas3k_base
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
