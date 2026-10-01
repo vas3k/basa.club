@@ -111,6 +111,10 @@ class User(AbstractBaseUser, PermissionsMixin):
         User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
         self.upvotes += 1
 
+    def decrement_vote_count(self):
+        User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
+        self.upvotes -= 1
+
     @property
     def is_admin(self):
         return self.ROLE_ADMIN in self.roles

@@ -1,0 +1,44 @@
+{% extends "items/show/layout.html" %}
+
+{% block item %}
+    <div class="item-page">
+        <article class="block item-show{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+            <div class="item-main">
+                {% include "items/widgets/tags.html" %}
+
+                <h1 class="item-show-title">{{ item.title }}</h1>
+
+                {% include "items/widgets/badges.html" %}
+
+                {% if item.description %}
+                    <div class="item-show-description markdown-text">{{ item.description|markdown }}</div>
+                {% endif %}
+
+                <div class="item-stats">
+                    {% if item.published_at %}
+                        <span>Опубликовано {{ item.published_at|date:"j E Y" }}</span>
+                    {% else %}
+                        <span>Создано {{ item.created_at|date:"j E Y" }}</span>
+                    {% endif %}
+                    {% if item.updated_at|date:"Ymd" != item.created_at|date:"Ymd" %}
+                        <span>Обновлено {{ item.updated_at|date:"j E Y" }}</span>
+                    {% endif %}
+                    {% if item.expires_at %}
+                        <span>{% if item.is_expired %}Истекло{% else %}Актуально до{% endif %} {{ item.expires_at|date:"j E Y" }}</span>
+                    {% endif %}
+                    <span>Комментариев: {{ item.comment_count }}</span>
+                </div>
+
+                {% include "users/widgets/user_small.html" with user=item.author %}
+            </div>
+
+            <div class="item-upvote">
+                {% item_upvote item voted_items %}
+            </div>
+        </article>
+
+        {% if show_owner_actions %}
+            {% include "items/widgets/manage.html" %}
+        {% endif %}
+    </div>
+{% endblock %}

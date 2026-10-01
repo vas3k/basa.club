@@ -1,0 +1,20 @@
+<div class="reply" id="comment-{{ comment.id }}">
+    <div class="reply-body">
+        {% if comment.author %}
+            {% include "users/widgets/user_tiny.html" with user=comment.author %}
+        {% endif %}
+        <span class="reply-text">{{ comment.text }}</span>
+    </div>
+
+    <div class="reply-actions">
+        {% if request.user.is_authenticated %}
+            <button type="button" class="comment-action" title="Ответить" data-behavior="toggle" data-mode="show" data-target="#reply-form-{{ comment.reply_to_id }}">
+                <i class="fas fa-reply"></i>
+            </button>
+        {% endif %}
+        {% if request.user.is_authenticated and request.user.id == comment.author_id %}
+            {% include "comments/widgets/delete.html" %}
+        {% endif %}
+        {% comment_upvote comment voted_comments "tiny" %}
+    </div>
+</div>

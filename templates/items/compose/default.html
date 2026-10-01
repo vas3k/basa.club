@@ -1,0 +1,20 @@
+{% extends "items/compose/layout.html" %}
+
+{% block fields %}
+    {% island "LocationPicker" countries=countries_options country=form.country.value|default:"" city=form.city.value|default:"" %}
+    {% if form.country.errors %}<div class="form-error">{{ form.country.errors }}</div>{% endif %}
+    {% if form.city.errors %}<div class="form-error">{{ form.city.errors }}</div>{% endif %}
+
+    {% island "CategoryPicker" categories=categories_options category=form.category.value|default:"" subcategory=form.subcategory.value|default:"" %}
+    {% if form.category.errors %}<div class="form-error">{{ form.category.errors }}</div>{% endif %}
+    {% if form.subcategory.errors %}<div class="form-error">{{ form.subcategory.errors }}</div>{% endif %}
+
+    <div class="form-group item-form-title">
+        <label for="{{ form.title.id_for_label }}">{{ form.title.label }}</label>
+        {{ form.title }}
+        {% if form.title.errors %}<div class="form-error">{{ form.title.errors }}</div>{% endif %}
+    </div>
+
+    {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" %}
+    {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
+{% endblock %}

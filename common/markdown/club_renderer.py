@@ -2,7 +2,7 @@ import html
 import mistune
 from urllib.parse import unquote
 
-from slugify import slugify
+from django.utils.text import slugify
 
 from common.markdown.common import split_title_and_css_classes, normalize_url
 from common.regexp import IMAGE_RE, VIDEO_RE, YOUTUBE_RE, TWITTER_RE, USERNAME_RE
@@ -26,7 +26,8 @@ class ClubRenderer(mistune.HTMLRenderer):
 
     def heading(self, text, level, **attrs):
         tag = f"h{level}"
-        return f"<{tag}>{text}</{tag}>\n"
+        anchor = slugify(text[:24], allow_unicode=True)
+        return f"<{tag} id=\"{anchor}\"><a href=\"#{anchor}\">{text}</a></{tag}>\n"
 
     def link(self, text, url, title=None):
         if text == url:
@@ -54,7 +55,7 @@ class ClubRenderer(mistune.HTMLRenderer):
 
         # users can try to "hack" our parser by using non-image urls
         # so, if its not an image or video, display it as a link to avoid auto-loading
-        return f'<a href="{html.escape(url)}">{html.escape(url)}</a>'
+        return f'<a href="{self.safe_url(url)}">{html.escape(url)}</a>'
 
     def embed(self, url, text="", title=None):
         if IMAGE_RE.match(url):
@@ -84,11 +85,14 @@ class ClubRenderer(mistune.HTMLRenderer):
             playlist = f"list={html.escape(youtube_match.group(2))}&listType=playlist&"
         video_tag = (
             f'<span class="ratio-16-9">'
-            f'<iframe loading="lazy" src="https://www.youtube.com/embed/{html.escape(youtube_match.group(1) or "")}'
+            f'<iframe loading="lazy" frameborder="0"'
+            f' src="https://www.youtube.com/embed/{html.escape(youtube_match.group(1) or "")}'
             f'?{playlist}autoplay=0&amp;controls=1&amp;showinfo=1&amp;vq=hd1080"'
-            f'allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; fullscreen"'
-            f'allowfullscreen></iframe>'
-            f"</span>"
+            f' title="YouTube video player"'
+            f' allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share; fullscreen"'
+            f' referrerpolicy="strict-origin-when-cross-origin"'
+            f' allowfullscreen></iframe>'
+            f'</span>'
         )
         caption = f"<figcaption>{html.escape(title)}</figcaption>" if title else ""
         return f"<figure>{video_tag}{caption}</figure>"
@@ -104,6 +108,6 @@ class ClubRenderer(mistune.HTMLRenderer):
     def tweet(self, url, text="", title=None):
         tweet_match = TWITTER_RE.match(url)
         twitter_tag = f'<blockquote class="twitter-tweet" tw-align-center>' \
-                      f'<a href="{tweet_match.group(1)}"></a></blockquote><br>' \
-                      f'<a href="{url}" target="_blank">{url}</a>'
+                      f'<a href="{html.escape(tweet_match.group(1))}"></a></blockquote><br>' \
+                      f'<a href="{html.escape(url)}" target="_blank">{html.escape(url)}</a>'
         return twitter_tag

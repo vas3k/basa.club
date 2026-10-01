@@ -1,0 +1,25 @@
+<aside class="block item-manage">
+    <div class="item-manage-title">Управлять</div>
+
+    <div class="item-manage-actions">
+        <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+            <i class="fas fa-pen"></i> Редактировать
+        </a>
+
+        {% if item.visibility != "draft" %}
+            <form method="post" action="{% url "item_hide" item.id %}">
+                {% csrf_token %}
+                <button type="submit" class="button item-manage-button">
+                    <i class="fas fa-eye-slash"></i> Скрыть
+                </button>
+            </form>
+        {% endif %}
+
+        <form method="post" action="{% url "item_delete" item.id %}" data-behavior="confirm" data-confirm="Удалить объявление? Это нельзя отменить.">
+            {% csrf_token %}
+            <button type="submit" class="button item-manage-button">
+                <i class="fas fa-trash-alt"></i> Удалить
+            </button>
+        </form>
+    </div>
+</aside>

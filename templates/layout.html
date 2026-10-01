@@ -6,6 +6,7 @@
 
     <meta name="viewport" content="width=device-width, height=device-height, initial-scale=1.0">
     <meta name="format-detection" content="telephone=no">
+    <meta name="csrf-token" content="{{ csrf_token }}">
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     {% block meta %}
@@ -22,6 +23,7 @@
     <link rel="stylesheet" href="{% static 'css/index.css' %}?version={{ settings.RELEASE }}">
     <link rel="stylesheet" href="{% static 'css/items.css' %}?version={{ settings.RELEASE }}">
     <link rel="stylesheet" href="{% static 'css/users.css' %}?version={{ settings.RELEASE }}">
+    <link rel="stylesheet" href="{% static 'css/comments.css' %}?version={{ settings.RELEASE }}">
     <link rel="stylesheet" href="{% static 'css/mobile.css' %}?version={{ settings.RELEASE }}">
 
     {% block css %}
@@ -32,18 +34,20 @@
     <link rel="icon" type="image/png" sizes="16x16" href="{% static "images/favicon/favicon-16x16.png" %}">
     <link rel="manifest" href="{% static "images/favicon/site.webmanifest" %}">
 
-    <script type="module" src="{% static 'js/main.js' %}?version={{ settings.RELEASE }}"></script>
+    {% vite_hmr_client %}
+    {% vite_react_refresh %}
+    {% vite_asset "src/main.ts" %}
     {% block js %}
     {% endblock %}
 </head>
-<body>
+<body data-behavior="external-links">
     <div class="sidebar-overlay"></div>
 
     {% block header %}
         <header class="header">
             <div class="header-top">
                 <div class="header-logo">
-                    <button type="button" class="button button-icon header-menu-button" aria-label="Категории" aria-expanded="false">
+                    <button type="button" class="button button-icon header-menu-button" data-behavior="sidebar-toggle" aria-label="Категории" aria-expanded="false">
                         <i class="fas fa-bars"></i>
                     </button>
                     <a href="{% url "index" %}">{{ settings.APP_TITLE }}</a>
@@ -52,14 +56,14 @@
                 <div class="header-actions">
                     <div class="header-user">
                         {% if request.user.is_authenticated %}
-                            <a href="#" class="button button-small header-create">＋ Добавить свое</a>
+                            <a href="{% url "item_create" %}" class="button button-small header-create">＋ Добавить свое</a>
 
                             <a href="{% url "user_profile" "me" %}" class="button header-user-button">
                                 Мои объявления
                                 <span class="avatar" style="background-image: url('{{ request.user.default_avatar }}');"></span>
                             </a>
                         {% else %}
-                            <a href="{% url "login" %}" class="button button-small header-create header-create-guest">＋ Добавить свое</a>
+                            <a href="{% url "login" %}?next={% url "item_create" %}" class="button button-small header-create header-create-guest">＋ Добавить свое</a>
                             <a href="{% url "login" %}" class="button header-user-button header-login">
                                 Войти
                                 <span class="avatar header-anon"><i class="fas fa-user-secret"></i></span>

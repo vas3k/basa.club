@@ -1,5 +1,4 @@
 import logging
-from urllib.parse import urlparse
 
 import requests
 from authlib.integrations.base_client import OAuthError
@@ -10,6 +9,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods
 from requests import HTTPError
 
@@ -19,6 +19,8 @@ from users.models import User
 from vas3k_base.exceptions import RateLimitException
 
 log = logging.getLogger(__name__)
+
+LOGIN_NEXT_SESSION_KEY = "login_next"
 
 
 def start_session(request, user, redirect_to):
@@ -35,9 +37,26 @@ def home_for(user):
     return reverse("bot")
 
 
+def safe_next_url(request, url):
+    if url and url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}):
+        return url
+    return None
+
+
+def after_login_url(request, user, next_url=None):
+    # users without telegram must go through the bot onboarding first
+    next_url = safe_next_url(request, next_url or request.session.pop(LOGIN_NEXT_SESSION_KEY, None))
+    if next_url and user.telegram_id:
+        return next_url
+    return home_for(user)
+
+
 def log_in(request):
+    next_url = safe_next_url(request, request.GET.get("next"))
     if request.user.is_authenticated:
-        return redirect(home_for(request.user))
+        return redirect(after_login_url(request, request.user, next_url))
+    if next_url:
+        request.session[LOGIN_NEXT_SESSION_KEY] = next_url
     return render(request, "users/login.html")
 
 
@@ -117,13 +136,7 @@ def club_callback(request):
         club.apply_club_profile(user, club_profile)
         user.save()
 
-    goto = request.GET.get("goto")
-    if goto and urlparse(goto).netloc == request.get_host() and user.telegram_id:
-        redirect_to = goto
-    else:
-        redirect_to = home_for(user)
-
-    return start_session(request, user, redirect_to)
+    return start_session(request, user, after_login_url(request, user, request.GET.get("goto")))
 
 
 def login_telegram(request):
@@ -149,4 +162,4 @@ def telegram_continue(request):
     user = telegram.finish(request)
     if not isinstance(user, User):
         return user
-    return start_session(request, user, home_for(user))
+    return start_session(request, user, after_login_url(request, user))

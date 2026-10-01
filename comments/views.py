@@ -1,52 +1,46 @@
-from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect
 from django.views.decorators.http import require_POST
 
-from comments.forms import CommentForm
-from comments.models import Comment, CommentVote
-from common.request import parse_ip_address, parse_useragent
-from items.models import Item, ItemVote
-
-
-def _back_to_item(item):
-    return redirect(item.get_absolute_url() or "index")
-
-
-@login_required
-@require_POST
-def upvote_item(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    ItemVote.upvote(request.user, item, request)
-    return _back_to_item(item)
+from comments.forms import CommentForm, ReplyForm
+from comments.models import Comment
+from items.models import Item
+from items.views import render_item_page
 
 
 @login_required
 @require_POST
 def create_comment(request, item_id):
     item = get_object_or_404(Item, pk=item_id)
-    form = CommentForm(request.POST, item=item)
-    if not form.is_valid():
-        messages.error(request, " ".join(error for errors in form.errors.values() for error in errors))
-        return _back_to_item(item)
+    is_reply = bool(request.POST.get("reply_to"))
+    form = ReplyForm(request.POST, item=item) if is_reply else CommentForm(request.POST, item=item)
 
-    Comment.objects.create(
-        author=request.user,
-        item=item,
-        reply_to=form.cleaned_data["reply_to"],
-        text=form.cleaned_data["text"],
-        ipaddress=parse_ip_address(request),
-        useragent=parse_useragent(request),
+    if form.is_valid():
+        comment = form.save(author=request.user, request=request)
+        return redirect(f"{item.get_absolute_url()}#comment-{comment.id}")
+
+    return render_item_page(
+        request,
+        item,
+        comment_form=None if is_reply else form,
+        reply_form=form if is_reply else None,
+        status=400,
     )
-    return _back_to_item(item)
 
 
 @login_required
 @require_POST
-def upvote_comment(request, comment_id):
-    comment = get_object_or_404(Comment.objects.select_related("item", "author"), pk=comment_id, deleted_at__isnull=True)
-    if not comment.item_id:
+def delete_comment(request, comment_id):
+    comment = get_object_or_404(
+        Comment.objects.select_related("item", "author"),
+        pk=comment_id,
+        deleted_at__isnull=True,
+    )
+    if comment.author_id != request.user.pk:
         raise Http404()
-    CommentVote.upvote(request.user, comment, request)
-    return _back_to_item(comment.item)
+    comment.soft_delete(by_user=request.user)
+    url = comment.item.get_absolute_url()
+    if comment.reply_to_id:
+        return redirect(f"{url}#comment-{comment.reply_to_id}")
+    return redirect(f"{url}#comments")

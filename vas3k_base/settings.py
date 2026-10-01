@@ -36,6 +36,7 @@ INSTALLED_APPS = [
     "django.contrib.messages",
     "django.contrib.staticfiles",
     "django.contrib.postgres",
+    "django_vite",
     "authn.apps.AuthnConfig",
     "users.apps.UsersConfig",
     "categories.apps.CategoriesConfig",
@@ -77,6 +78,10 @@ TEMPLATES = [
             ],
             "builtins": [
                 "items.templatetags.listing",
+                "comments.templatetags.comments",
+                "common.templatetags.islands",
+                "common.templatetags.text",
+                "django_vite.templatetags.django_vite",
             ],
         },
     },
@@ -127,7 +132,23 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "/static/"
-STATICFILES_DIRS = [os.path.join(BASE_DIR, "static")]
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+    ("dist", os.path.join(BASE_DIR, "frontend", "dist")),
+]
+
+# Frontend (Vite)
+# dev mode loads JS from `npm run dev` server, otherwise from `npm run build` output in frontend/dist
+
+DJANGO_VITE = {
+    "default": {
+        "dev_mode": (os.getenv("VITE_DEV_MODE") or str(DEBUG)).lower() == "true",
+        "dev_server_host": os.getenv("VITE_DEV_SERVER_HOST") or "localhost",
+        "dev_server_port": int(os.getenv("VITE_DEV_SERVER_PORT") or 5173),
+        "static_url_prefix": "dist",
+        "manifest_path": os.path.join(BASE_DIR, "frontend", "dist", ".vite", "manifest.json"),
+    }
+}
 
 
 # Email

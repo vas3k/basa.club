@@ -52,6 +52,54 @@
     color: #fff;
 }
 
+/* templates/users/widgets/user_small.html */
+
+.user-small,
+.user-small:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    color: var(--text-color);
+    font-weight: 500;
+    text-decoration: none;
+}
+
+.user-small-avatar {
+    flex-shrink: 0;
+    width: 32px;
+    height: 32px;
+    background-size: cover;
+    background-position: center;
+}
+
+.user-small-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* templates/users/widgets/user_tiny.html */
+
+.user-tiny,
+.user-tiny:visited {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    vertical-align: middle;
+    color: var(--text-color);
+    font-weight: 700;
+    text-decoration: none;
+}
+
+.user-tiny-avatar {
+    flex-shrink: 0;
+    width: 20px;
+    height: 20px;
+    background-size: cover;
+    background-position: center;
+}
+
 .rating {
     flex-shrink: 0;
     font-weight: 700;

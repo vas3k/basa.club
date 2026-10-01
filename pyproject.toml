@@ -7,6 +7,8 @@ requires-python = ">=3.14"
 dependencies = [
     "authlib>=1.6.9",
     "django>=6.0.3",
+    "django-vite>=3.2.0",
+    "mistune>=3.3.4",
     "psycopg>=3.3.3",
     "python-telegram-bot>=22",
     "pyyaml>=6.0.3",

@@ -1,0 +1,24 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    {{ form_title }} — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="block-header">{{ form_title }}</div>
+
+        <form method="post" action="{{ form_url }}" class="item-form">
+            {% csrf_token %}
+
+            {% block fields %}{% endblock %}
+
+            {% block actions %}
+                <div class="form-actions">
+                    <button type="submit" name="action" value="publish" class="button">Опубликовать</button>
+                    <button type="submit" name="action" value="draft" class="button button-inverted">Сохранить черновик</button>
+                </div>
+            {% endblock %}
+        </form>
+    </div>
+{% endblock %}

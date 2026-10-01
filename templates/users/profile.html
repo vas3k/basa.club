@@ -63,7 +63,7 @@
     <div class="block-header block-header-with-button">Объявления</div>
     <section class="content-items">
         {% for item in active_items %}
-            {% include "items/item.html" with show_owner_actions=is_owner %}
+            {% include "items/list/default.html" with show_owner_actions=is_owner %}
         {% empty %}
             <div class="block">
                 {% if is_owner %}
@@ -79,7 +79,7 @@
         <div class="block-header block-header-with-button">Не в общей ленте</div>
         <section class="content-items">
             {% for item in inactive_items %}
-                {% include "items/item.html" with show_owner_actions=is_owner %}
+                {% include "items/list/default.html" with show_owner_actions=is_owner %}
             {% endfor %}
         </section>
     {% endif %}

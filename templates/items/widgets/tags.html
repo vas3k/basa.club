@@ -1,0 +1,19 @@
+<div class="item-tags">
+    {% if item.country %}
+        <a class="item-tag" href="{% listing_url country=item.country_id city="everywhere" %}" data-behavior="geo-link" data-country="{{ item.country_id }}" data-city="everywhere">
+            {% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}
+        </a>
+        {% if item.city %}
+            <span class="item-tag-separator">〉</span>
+            <a class="item-tag" href="{% listing_url country=item.city.country_id city=item.city_id %}" data-behavior="geo-link" data-country="{{ item.city.country_id }}" data-city="{{ item.city_id }}">
+                {% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}
+            </a>
+        {% endif %}
+    {% endif %}
+    {% if item.subcategory %}
+        {% if item.country %}<span class="item-tag-separator">·</span>{% endif %}
+        <a class="item-tag" href="{% listing_url category=item.category_id subcategory=item.subcategory_id %}">
+            {% if item.subcategory.icon %}{{ item.subcategory.icon|safe }} {% endif %}{{ item.subcategory.name }}
+        </a>
+    {% endif %}
+</div>

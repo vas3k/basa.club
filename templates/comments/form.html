@@ -1,0 +1,24 @@
+<form method="post" action="{% url "item_comment" item.id %}" class="block comment-form" id="comment-form">
+    {% csrf_token %}
+
+    {% if comment_form.non_field_errors %}
+        <div class="form-error">{{ comment_form.non_field_errors }}</div>
+    {% endif %}
+
+    <div class="comment-form-vibes">
+        {% for radio in comment_form.vibe %}
+            <label class="comment-form-vibe comment-vibe-{{ radio.data.value }}">
+                {{ radio.tag }}
+                <span>{{ radio.choice_label }}</span>
+            </label>
+        {% endfor %}
+    </div>
+    {% if comment_form.vibe.errors %}<div class="form-error">{{ comment_form.vibe.errors }}</div>{% endif %}
+
+    <div class="form-group">
+        {{ comment_form.text }}
+        {% if comment_form.text.errors %}<div class="form-error">{{ comment_form.text.errors }}</div>{% endif %}
+    </div>
+
+    <button type="submit" class="button">Отправить</button>
+</form>

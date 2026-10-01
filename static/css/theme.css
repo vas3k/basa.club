@@ -7,6 +7,7 @@
     --index-gap: 40px;
     --search-gap: 12px;
     --page-padding: 20px;
+    --item-content-width: 600px;
     --highlight-bg: rgba(0, 0, 0, 0.05);
     --highlight-bg-active: rgba(0, 0, 0, 0.12);
 

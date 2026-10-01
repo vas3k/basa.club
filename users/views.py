@@ -4,7 +4,7 @@ from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
 from common.users import get_user_or_404
-from items.models import Item
+from items.models import Item, ItemVote
 from users.forms import ProfileForm
 
 
@@ -20,6 +20,7 @@ def profile_page(request, slug):
         "is_owner": is_owner,
         "active_items": active_items,
         "inactive_items": inactive_items,
+        "voted_items": ItemVote.voted_item_ids(request.user, active_items),
     })
 
 

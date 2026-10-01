@@ -1,0 +1,9 @@
+{% if show_owner_actions %}
+    {% if item.visibility == "draft" or item.visibility == "link_only" or item.is_expired %}
+        <div class="item-badges">
+            {% if item.visibility == "draft" %}<span class="item-badge">Черновик</span>{% endif %}
+            {% if item.visibility == "link_only" %}<span class="item-badge">По ссылке</span>{% endif %}
+            {% if item.is_expired %}<span class="item-badge">Истекло</span>{% endif %}
+        </div>
+    {% endif %}
+{% endif %}

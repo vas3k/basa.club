@@ -14,7 +14,230 @@
     opacity: 0.72;
 }
 
-.comment-replies {
-    margin-top: 12px;
-    margin-left: 24px;
+.item-page {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-start;
+    gap: 24px;
+    margin-bottom: 30px;
+}
+
+.item-page > .item-show {
+    flex: 1 1 var(--item-content-width);
+    min-width: min(100%, var(--item-content-width));
+    margin-bottom: 0;
+}
+
+.item-manage {
+    flex: 0 1 260px;
+    margin-bottom: 0;
+}
+
+.item-manage-title {
+    margin-bottom: 18px;
+    font-size: 120%;
+    font-weight: 700;
+}
+
+.item-manage-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+.item-manage-actions form {
+    margin: 0;
+}
+
+.item-manage-button {
+    width: 100%;
+    justify-content: flex-start;
+}
+
+/* Item card (listing) and item page share the layout: content on the left, upvote on the right */
+
+.item-card,
+.item-show {
+    display: flex;
+    align-items: flex-start;
+    gap: 24px;
+}
+
+.item-card {
+    margin-bottom: 0;
+}
+
+.item-upvote {
+    flex-shrink: 0;
+    min-width: 56px;
+    min-height: 64px;
+}
+
+.item-main {
+    flex: 1;
+    min-width: 0;
+}
+
+.item-tags {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 4px 8px;
+    margin-bottom: 10px;
+    font-size: 90%;
+    font-weight: 700;
+}
+
+.item-tag,
+.item-tag:visited {
+    color: var(--text-color);
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.item-tag:hover {
+    opacity: 1;
+}
+
+.item-tag-separator {
+    opacity: 0.4;
+}
+
+.item-badges {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 14px;
+}
+
+.item-badge {
+    padding: 3px 10px;
+    border: 1px solid currentColor;
+    border-radius: var(--button-border-radius);
+    font-size: 80%;
+    font-weight: 600;
+    opacity: 0.7;
+}
+
+.item-card-title {
+    display: block;
+    margin-bottom: 10px;
+    font-size: 150%;
+    font-weight: 700;
+    line-height: 1.25;
+}
+
+.item-card-description {
+    margin-bottom: 16px;
+    line-height: 1.5;
+    opacity: 0.8;
+    overflow-wrap: anywhere;
+}
+
+.item-show-title {
+    margin: 0 0 24px;
+    font-size: 260%;
+    font-weight: 700;
+    line-height: 1.15;
+    overflow-wrap: anywhere;
+}
+
+.item-show-description {
+    font-size: 115%;
+    line-height: 1.6;
+    overflow-wrap: anywhere;
+}
+
+.item-show-description > :first-child {
+    margin-top: 0;
+}
+
+.item-show-description img,
+.item-show-description video,
+.item-show-description iframe {
+    max-width: 100%;
+}
+
+.item-stats {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 16px;
+    margin: 24px 0 20px;
+    font-size: 85%;
+    color: #888;
+}
+
+@media only screen and (max-width: 600px) {
+    .item-card,
+    .item-show {
+        gap: 14px;
+    }
+
+    .item-show-title {
+        font-size: 190%;
+    }
+}
+
+/* Upvote button (frontend/src/islands/UpvoteButton.tsx) */
+
+.upvote {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    border: var(--button-border);
+    border-radius: var(--button-border-radius);
+    background-color: var(--block-bg-color);
+    color: var(--text-color);
+    font-family: inherit;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    white-space: nowrap;
+    cursor: pointer;
+    transition: 0.1s ease-out;
+}
+
+.upvote-block {
+    flex-direction: column;
+    gap: 2px;
+    width: 56px;
+    height: 64px;
+    font-size: 110%;
+}
+
+.upvote-inline {
+    padding: 6px 14px;
+    font-size: 90%;
+}
+
+.upvote-tiny {
+    gap: 4px;
+    padding: 2px 8px;
+    border-width: 1px;
+    font-size: 85%;
+}
+
+.upvote:hover:not(:disabled),
+.upvote-voted {
+    background-color: var(--button-bg-color);
+    color: var(--button-color);
+}
+
+.upvote-voted:hover:not(:disabled) {
+    opacity: 0.85;
+}
+
+.upvote:disabled {
+    cursor: default;
+    opacity: 0.5;
+}
+
+.upvote-arrow {
+    font-size: 80%;
+}
+
+.item-form-title input[type=text] {
+    font-size: 200%;
+    font-weight: 700;
+    padding: 14px 20px;
 }

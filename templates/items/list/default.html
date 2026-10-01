@@ -1,0 +1,24 @@
+{% item_url item as url %}
+<article class="block item-card{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+    <div class="item-main">
+        {% include "items/widgets/tags.html" %}
+
+        {% if url %}
+            <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
+        {% else %}
+            <div class="item-card-title">{{ item.title }}</div>
+        {% endif %}
+
+        {% include "items/widgets/badges.html" %}
+
+        {% if item.description %}
+            <div class="item-card-description">{{ item.description|markdown_summary|truncatechars:240 }}</div>
+        {% endif %}
+
+        {% include "users/widgets/user_small.html" with user=item.author %}
+    </div>
+
+    <div class="item-upvote">
+        {% item_upvote item voted_items %}
+    </div>
+</article>

@@ -1,0 +1,34 @@
+{% extends "layout_with_sidebar.html" %}
+
+{% block title %}
+    {{ item.title }} — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    {% block item %}{% endblock %}
+
+    {% if messages %}
+        {% for message in messages %}
+            <div class="block">{{ message }}</div>
+        {% endfor %}
+    {% endif %}
+
+    {% block comments %}
+        <section class="comments" id="comments">
+            <div class="comments-header">
+                Комментарии
+                <span class="item-badge">{{ item.comment_count }}</span>
+            </div>
+
+            {% for node in comments_tree %}
+                {% include "comments/comment.html" with comment=node.comment replies=node.replies %}
+            {% endfor %}
+
+            {% if request.user.is_authenticated %}
+                {% include "comments/form.html" %}
+            {% else %}
+                <a href="{% url "login" %}?next={{ request.path|urlencode }}" class="button comments-login">Войти, чтобы комментировать</a>
+            {% endif %}
+        </section>
+    {% endblock %}
+{% endblock %}

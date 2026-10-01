@@ -160,6 +160,10 @@ class Item(models.Model):
         Item.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
         self.upvotes += 1
 
+    def decrement_vote_count(self):
+        Item.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
+        self.upvotes -= 1
+
     def refresh_comment_count(self):
         count = self.comments.filter(deleted_at__isnull=True).count()
         Item.objects.filter(pk=self.pk).update(comment_count=count)
@@ -202,3 +206,18 @@ class ItemVote(models.Model):
             if item.author_id:
                 item.author.increment_vote_count()
         return vote, created
+
+    @classmethod
+    def retract(cls, user, item):
+        deleted, _ = cls.objects.filter(user=user, item=item).delete()
+        if deleted:
+            item.decrement_vote_count()
+            if item.author_id:
+                item.author.decrement_vote_count()
+        return bool(deleted)
+
+    @classmethod
+    def voted_item_ids(cls, user, items):
+        if not user.is_authenticated:
+            return set()
+        return set(cls.objects.filter(user=user, item__in=items).values_list("item_id", flat=True))

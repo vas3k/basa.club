@@ -2,7 +2,7 @@
 
 {% block subheader %}
     <section class="subheader">
-        <form class="subheader-search" action="" method="get">
+        <form class="subheader-search" action="" method="get" data-behavior="geo-select">
             <select class="subheader-search-geo" data-geo="country" aria-label="Страна">
                 <option value="everywhere" data-url="{% listing_url country='everywhere' city='everywhere' category=current_category.id %}" {% if not current_country %}selected{% endif %}>
                     🌎 Весь мир

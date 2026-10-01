@@ -1,3 +1,14 @@
+FROM node:24-slim AS frontend
+
+WORKDIR /frontend
+
+COPY frontend/package.json frontend/package-lock.json ./
+RUN npm ci
+
+COPY frontend/ ./
+RUN npm run build
+
+
 FROM ghcr.io/astral-sh/uv:python3.14-bookworm-slim
 
 ENV UV_COMPILE_BYTECODE=1 \
@@ -17,5 +28,6 @@ COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
 COPY . .
+COPY --from=frontend /frontend/dist ./frontend/dist
 
 EXPOSE 8000

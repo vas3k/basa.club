@@ -3,6 +3,7 @@ from uuid import uuid4
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import F
+from django.utils import timezone
 
 from common.request import parse_ip_address, parse_useragent
 from items.models import Item
@@ -10,11 +11,21 @@ from users.models import User
 
 
 class Comment(models.Model):
+    VIBE_GOOD = "good"
+    VIBE_BAD = "bad"
+    VIBE_NEUTRAL = "neutral"
+    VIBES = (
+        (VIBE_GOOD, "👍 Попробовал, доволен"),
+        (VIBE_BAD, "👎 Попробовал, не доволен"),
+        (VIBE_NEUTRAL, "💬 Нейтрально"),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     author = models.ForeignKey(User, related_name="comments", null=True, on_delete=models.SET_NULL)
     item = models.ForeignKey(Item, related_name="comments", on_delete=models.CASCADE)
     reply_to = models.ForeignKey("self", related_name="replies", null=True, blank=True, on_delete=models.CASCADE)
     text = models.TextField()
+    vibe = models.CharField(max_length=16, choices=VIBES, null=True, blank=True)  # only top-level comments have it
     ipaddress = models.GenericIPAddressField(null=True)
     useragent = models.CharField(max_length=512, null=True, blank=True)
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
@@ -29,20 +40,30 @@ class Comment(models.Model):
 
     def save(self, *args, **kwargs):
         if self.reply_to_id:
-            parent = Comment.objects.select_related("reply_to__reply_to").filter(pk=self.reply_to_id).first()
+            parent = Comment.objects.filter(pk=self.reply_to_id).first()
             if not parent or parent.item_id != self.item_id:
                 raise ValidationError("Ответ должен быть к комментарию этого объявления")
-            if parent.reply_to_id and parent.reply_to and parent.reply_to.reply_to_id:
-                raise ValidationError("3 уровня комментариев это максимум")
+            if parent.reply_to_id:
+                raise ValidationError("Отвечать можно только на исходный комментарий")
         super().save(*args, **kwargs)
         self.item.refresh_comment_count()
 
     def is_deleted(self):
         return self.deleted_at is not None
 
+    def soft_delete(self, by_user):
+        self.deleted_at = timezone.now()
+        self.deleted_by = by_user.pk
+        Comment.objects.filter(pk=self.pk).update(deleted_at=self.deleted_at, deleted_by=self.deleted_by)
+        self.item.refresh_comment_count()
+
     def increment_vote_count(self):
         Comment.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
         self.upvotes += 1
+
+    def decrement_vote_count(self):
+        Comment.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
+        self.upvotes -= 1
 
     @classmethod
     def visible_objects(cls):
@@ -81,3 +102,12 @@ class CommentVote(models.Model):
             if comment.author_id:
                 comment.author.increment_vote_count()
         return vote, created
+
+    @classmethod
+    def retract(cls, user, comment):
+        deleted, _ = cls.objects.filter(user=user, comment=comment).delete()
+        if deleted:
+            comment.decrement_vote_count()
+            if comment.author_id:
+                comment.author.decrement_vote_count()
+        return bool(deleted)
