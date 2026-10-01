@@ -50,10 +50,6 @@
         gap: 12px;
     }
 
-    .header-create {
-        white-space: nowrap;
-    }
-
     .header-user {
         display: flex;
         flex-direction: row;
@@ -62,12 +58,21 @@
         align-items: center;
     }
 
+        .header-action {
+            font-size: 100%;
+            gap: 8px;
+            padding: 3px 14px;
+            min-height: 50px;
+        }
+
         .header-user-button {
-            font-size: 110%;
-            display: flex;
-            gap: 10px;
-            align-items: center;
-            padding: 3px 13px;
+            max-width: 240px;
+        }
+
+        .header-user-name {
+            overflow: hidden;
+            text-overflow: ellipsis;
+            min-width: 0;
         }
 
         .header-user .avatar {
@@ -116,8 +121,8 @@
 
 .main:not(:has(.sidebar)) .content {
     width: 100%;
-    max-width: 800px;
-    flex: 0 1 800px;
+    max-width: 1100px;
+    flex: 0 1 1100px;
 }
 
 .sidebar-overlay {

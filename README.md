@@ -66,6 +66,33 @@ templates/users/widgets/user_small.html   # avatar + name + reputation, reuse ev
 
 `default.html` is the only variant for now. To add a type, create e.g. `show/event.html` that extends the same layout.
 
+## Ratings
+
+Rating is not the same as upvotes. Upvotes are a plain counter of clicks, while rating is calculated from votes and comment vibes. Users, items and comments each have their own rating.
+
+All rules live in `common/ratings.py`. Ratings are updated only in views and APIs (never in models or forms), right after the action that changes them.
+
+| Action | Comment author | Item | Comment | Item author |
+|--------|----------------|------|---------|-------------|
+| Upvote an item | | +1 | | +1 |
+| Retract an item upvote | | -1 | | -1 |
+| Top-level comment with a "good" vibe | +5 | +5 | | |
+| Top-level comment with a "bad" vibe | -5 | -5 | | |
+| Neutral comment or reply | | | | |
+| «Полезно» on any comment | +1 | | +1 | |
+| «Полезно» on a "good" vibe comment | +1 | +1 | +1 | |
+| «Полезно» on a "bad" vibe comment | +1 | -1 | +1 | |
+| Retract «Полезно» | -1 | -1 / +1 for "good" / "bad" vibe | -1 | |
+| Delete a comment | vibe and «Полезно» points reversed | vibe and «Полезно» points reversed | all its «Полезно» points removed | |
+
+Ratings are stored as integers and displayed divided by 10 with the `rating` template filter (`{{ user.rating|rating }}` shows 15 as +1.5 and -7 as -0.7). Items and top-level comments show their rating under the upvote button via `templates/common/widgets/rating.html`: green if positive, red if negative, hidden if zero.
+
+To rebuild all ratings from scratch (after changing the rules, or if counters drift):
+
+```bash
+uv run python manage.py recalculate_ratings
+```
+
 ## Frontend
 
 All JS lives in `frontend/` and is bundled by Vite. Django renders the pages and owns forms, validation, and redirects. JS only makes parts of a page dynamic, in one of two ways:

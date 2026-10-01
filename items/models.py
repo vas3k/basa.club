@@ -4,6 +4,9 @@ from django.db import models
 from django.db.models import Count, F, Q
 from django.utils import timezone
 
+from categories.models import Category
+from common.request import parse_ip_address, parse_useragent
+from geo.models import GeoCity, GeoCountry
 from users.models import User
 
 
@@ -93,9 +96,6 @@ class Item(models.Model):
 
     @classmethod
     def recalculate_counters(cls):
-        from categories.models import Category
-        from geo.models import GeoCity, GeoCountry
-
         visible = cls.visible_objects().order_by()
 
         category_counts = {
@@ -143,17 +143,22 @@ class Item(models.Model):
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.recalculate_counters()
+        if self.author_id:
+            self.author.refresh_items_count()
 
     def delete(self, *args, **kwargs):
+        author = self.author if self.author_id else None
         result = super().delete(*args, **kwargs)
         self.recalculate_counters()
+        if author:
+            author.refresh_items_count()
         return result
 
     def get_absolute_url(self):
-        if not self.subcategory_id:
-            return ""
         country = self.country_id or "everywhere"
         city = self.city_id or "everywhere"
+        if not self.subcategory_id:
+            return f"/{country}/{city}/{self.category_id}/{self.id}/"
         return f"/{country}/{city}/{self.category_id}/{self.subcategory_id}/{self.id}/"
 
     def increment_vote_count(self):
@@ -188,8 +193,6 @@ class ItemVote(models.Model):
 
     @classmethod
     def upvote(cls, user, item, request):
-        from common.request import parse_ip_address, parse_useragent
-
         if user.pk == item.author_id:
             return None, False
 

@@ -1,12 +1,13 @@
 from uuid import uuid4
 
 from django.conf import settings
-from django.db.models import F
+from django.db.models import F, Q
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 
@@ -72,6 +73,8 @@ class User(AbstractBaseUser, PermissionsMixin):
     hat = models.JSONField(null=True, blank=True)
     rating = models.IntegerField(default=0)
     upvotes = models.IntegerField(default=0)
+    items_count = models.IntegerField(default=0)
+    comments_count = models.IntegerField(default=0)
 
     membership_started_at = models.DateTimeField(null=True, blank=True)
     membership_expires_at = models.DateTimeField(null=True, blank=True)
@@ -114,6 +117,21 @@ class User(AbstractBaseUser, PermissionsMixin):
     def decrement_vote_count(self):
         User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
         self.upvotes -= 1
+
+    def refresh_items_count(self):
+        now = timezone.now()
+        count = self.items.filter(
+            visibility=self.items.model.VISIBILITY_VISIBLE,
+        ).filter(
+            Q(expires_at__isnull=True) | Q(expires_at__gt=now),
+        ).count()
+        User.objects.filter(pk=self.pk).update(items_count=count)
+        self.items_count = count
+
+    def refresh_comments_count(self):
+        count = self.comments.filter(deleted_at__isnull=True).count()
+        User.objects.filter(pk=self.pk).update(comments_count=count)
+        self.comments_count = count
 
     @property
     def is_admin(self):

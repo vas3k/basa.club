@@ -1,9 +1,11 @@
-.comments {
+:root {
     --vibe-good-bg: #e7f6ec;
     --vibe-good-color: #1b7a3d;
     --vibe-bad-bg: #fdeceb;
     --vibe-bad-color: #c62a22;
+}
 
+.comments {
     max-width: var(--item-content-width);
     margin: 40px 0;
 }
@@ -99,6 +101,14 @@
     margin-bottom: 12px;
 }
 
+.comment-upvote {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    flex-shrink: 0;
+}
+
 .comment-text {
     font-size: 140%;
     line-height: 1.5;
@@ -125,8 +135,15 @@
     font-size: 85%;
 }
 
-.comment-date {
+.comment-date,
+.comment-date:visited {
+    color: inherit;
+    text-decoration: none;
     opacity: 0.6;
+}
+
+.comment-date:hover {
+    opacity: 1;
 }
 
 .comment-action {

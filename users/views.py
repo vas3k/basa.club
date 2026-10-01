@@ -3,6 +3,7 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
+from comments.models import Comment, CommentVote
 from common.users import get_user_or_404
 from items.models import Item, ItemVote
 from users.forms import ProfileForm
@@ -14,12 +15,23 @@ def profile_page(request, slug):
     is_owner = request.user.pk == profile_user.pk
     active_items = Item.visible_objects().filter(author=profile_user)
     inactive_items = Item.for_author(profile_user).exclude(pk__in=active_items.values("pk")) if is_owner else []
+    comments = list(
+        Comment.visible_objects()
+        .filter(author=profile_user, reply_to__isnull=True)
+        .select_related("item", "item__city", "item__subcategory")
+        .order_by("-created_at")
+    )
+    voted_comments = set(
+        CommentVote.objects.filter(user=request.user, comment__in=comments).values_list("comment_id", flat=True)
+    )
 
     return render(request, "users/profile.html", {
         "profile_user": profile_user,
         "is_owner": is_owner,
         "active_items": active_items,
         "inactive_items": inactive_items,
+        "comments": comments,
+        "voted_comments": voted_comments,
         "voted_items": ItemVote.voted_item_ids(request.user, active_items),
     })
 

@@ -1,6 +1,10 @@
 .profile {
-    padding: 30px;
-    max-width: 700px;
+    width: 100%;
+    margin: 30px auto 0;
+}
+
+.profile-feed {
+    max-width: 800px;
     margin: 0 auto;
 }
 
@@ -12,7 +16,8 @@
         display: flex;
         gap: 20px;
         justify-content: center;
-        padding-bottom: 40px;
+        margin-top: 10px;
+        margin-bottom: 40px;
     }
 
 .login-options {
@@ -32,24 +37,110 @@
         line-height: 1;
     }
 
-.profile-footer {
-    padding-top: 70px;
-    text-align: center;
+.profile-block {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 32px;
+    width: 100%;
 }
 
-.profile-rating {
-    max-width: none;
+.profile-person {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    min-width: 0;
+}
+
+.profile-avatar {
+    flex-shrink: 0;
+    width: 120px;
+    height: 120px;
+    border-radius: 50%;
+    object-fit: cover;
+}
+
+.profile-info {
+    min-width: 0;
+}
+
+.profile-name {
+    font-size: 180%;
+    font-weight: 700;
+    line-height: 1.15;
+}
+
+.profile-place,
+.profile-activity,
+.profile-position {
+    margin-top: 6px;
+}
+
+.profile-activity {
+    opacity: 0.65;
+    font-size: 90%;
+}
+
+.profile-position {
+    font-weight: 600;
+}
+
+.profile-comment-source,
+.profile-comment-source:visited {
+    display: block;
+    margin-bottom: 12px;
+    color: inherit;
+    font-weight: 700;
+    text-decoration: none;
+    opacity: 0.75;
+}
+
+.profile-comment-source:hover {
+    opacity: 1;
+}
+
+.profile-bio {
+    margin-top: 10px;
+}
+
+.profile-club {
+    margin-top: 16px;
+}
+
+.profile-stats {
+    flex-shrink: 0;
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 6px;
+    text-align: right;
+}
+
+.profile-stat-rating {
+    font-size: 300%;
+    font-weight: 700;
+    line-height: 1;
     font-variant-numeric: tabular-nums;
 }
 
-.profile-card-age.profile-rating-positive {
-    background-color: #1f8a4c;
-    color: #fff;
+.profile-stat {
+    font-variant-numeric: tabular-nums;
 }
 
-.profile-card-age.profile-rating-negative {
-    background-color: #ff1917;
-    color: #fff;
+@media only screen and (max-width: 600px) {
+    .profile-block {
+        flex-direction: column;
+        gap: 20px;
+    }
+
+    .profile-person {
+        flex-direction: column;
+    }
+
+    .profile-stats {
+        align-items: flex-start;
+        text-align: left;
+    }
 }
 
 /* templates/users/widgets/user_small.html */
@@ -118,161 +209,3 @@
 .rating-zero {
     opacity: 0.45;
 }
-
-.profile-badge {
-    max-width: 700px;
-    max-height: 700px;
-}
-
-.profile-card {
-    display: grid;
-    column-gap: 20px;
-    align-items: flex-start;
-    break-inside: avoid;
-    vertical-align: middle;
-    color: var(--opposite-text-color);
-    background-color: var(--opposite-bg-color);
-    color-adjust: exact;
-    grid-template-columns: 140px auto;
-    grid-template-rows: auto auto;
-    column-gap: 15px;
-    box-shadow: none;
-    margin-bottom: 0;
-    padding: 30px 20px 20px;
-    border-radius: 0;
-    max-width: 600px;
-    margin: 0 auto;
-    font-size: 120%;
-}
-
-    .profile-card-photo {
-        display: flex;
-        flex-direction: column;
-        justify-content: center;
-        align-items: center;
-    }
-
-    .profile-card-age {
-        font-size: 90%;
-        max-width: 60%;
-        display: inline-block;
-        text-align: center;
-        font-weight: 500;
-        line-height: 1.1em;
-        border-radius: 5px;
-        min-width: 25px;
-        padding: 6px 5px 6px;
-        color: var(--text-color);
-        background-color: color-mix(in srgb, var(--bg-color) 85%, transparent);
-        position: relative;
-        top: -17px;
-    }
-
-    .profile-card-info {
-        display: block;
-        text-align: left;
-        padding-top: 20px;
-        overflow: hidden;
-        font-size: 85%;
-        padding-top: 0;
-    }
-
-        .profile-user-job {
-            display: block;
-            font-weight: 500;
-            padding-bottom: 10px;
-            font-size: 120%;
-        }
-
-        .profile-user-avatar {
-            display: block;
-            width: 100%;
-            max-width: 180px;
-            aspect-ratio: 1/1;
-            margin: 0 auto;
-            position: relative;
-        }
-
-            .profile-user-avatar img {
-                position: absolute;
-                top: 0;
-                left: 0;
-                right: 0;
-                width: 100%;
-                height: 100%;
-                object-fit: cover;
-            }
-
-        .profile-user-location {
-            font-size: 120%;
-            opacity: 0.8;
-            position: relative;
-            left: -5px;
-        }
-
-        .profile-user-bio {
-            display: block;
-            opacity: 0.7;
-            font-size: 90%;
-        }
-
-            .profile-user-bio img {
-                max-width: 200px;
-            }
-
-            .profile-user-bio a {
-                color: var(--opposite-text-color);
-            }
-
-        .profile-user-name {
-            display: block;
-            font-weight: 600;
-            padding-bottom: 10px;
-            text-decoration: none;
-            word-break: break-word;
-            font-size: 200%;
-            padding-bottom: 7px;
-            line-height: 1.1em;
-        }
-
-            .profile-user-fullname {
-                margin-right: 0;
-                color: var(--opposite-text-color);
-            }
-
-            .profile-user-nickname {
-                font-weight: 300;
-                opacity: 0.4;
-                font-size: 88%;
-                color: var(--opposite-text-color);
-                position: relative;
-                top: -0.1em;
-                font-size: 70%;
-                opacity: 1;
-                color: #777;
-            }
-
-    .user-badges {
-        grid-column-start: 1;
-        grid-column-end: 3;
-        font-size: 80%;
-        gap: 10px;
-        display: flex;
-        justify-content: center;
-        padding-top: 15px;
-        padding-bottom: 0;
-
-        flex-direction: row;
-        flex-wrap: wrap;
-        align-items: center;
-
-        overflow: hidden;
-        max-height: 70px;
-    }
-
-    .user-badge-achievement {
-        width: 20px;
-        height: 20px;
-        padding: 3px;
-        border-radius: 5px;
-    }

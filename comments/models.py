@@ -31,6 +31,7 @@ class Comment(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     updated_at = models.DateTimeField(auto_now=True)
     upvotes = models.IntegerField(default=0)
+    rating = models.IntegerField(default=0)
     deleted_at = models.DateTimeField(null=True, blank=True)
     deleted_by = models.UUIDField(null=True, blank=True)
 
@@ -47,6 +48,8 @@ class Comment(models.Model):
                 raise ValidationError("Отвечать можно только на исходный комментарий")
         super().save(*args, **kwargs)
         self.item.refresh_comment_count()
+        if self.author_id:
+            self.author.refresh_comments_count()
 
     def is_deleted(self):
         return self.deleted_at is not None
@@ -56,6 +59,8 @@ class Comment(models.Model):
         self.deleted_by = by_user.pk
         Comment.objects.filter(pk=self.pk).update(deleted_at=self.deleted_at, deleted_by=self.deleted_by)
         self.item.refresh_comment_count()
+        if self.author_id:
+            self.author.refresh_comments_count()
 
     def increment_vote_count(self):
         Comment.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)

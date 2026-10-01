@@ -1,0 +1,23 @@
+<div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
+    <a class="profile-comment-source" href="{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">
+        {% if comment.item.city %}{% if comment.item.city.icon %}{{ comment.item.city.icon|safe }} {% endif %}{{ comment.item.city.name }} <span class="item-tag-separator">〉</span>{% endif %}
+        {% if comment.item.subcategory %}{% if comment.item.subcategory.icon %}{{ comment.item.subcategory.icon|safe }} {% endif %}{{ comment.item.subcategory.name }} <span class="item-tag-separator">〉</span>{% endif %}
+        {{ comment.item.title }}
+    </a>
+
+    <div class="comment-header">
+        {% if comment.author %}
+            {% include "users/widgets/user_small.html" with user=comment.author %}
+        {% endif %}
+        <div class="comment-upvote">
+            {% comment_upvote comment voted_comments %}
+            {% include "common/widgets/rating.html" with rating=comment.rating %}
+        </div>
+    </div>
+
+    <div class="comment-text">{{ comment.text|linebreaksbr }}</div>
+
+    <div class="comment-footer">
+        <a class="comment-date" href="{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
+    </div>
+</div>

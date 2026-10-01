@@ -56,15 +56,15 @@
                 <div class="header-actions">
                     <div class="header-user">
                         {% if request.user.is_authenticated %}
-                            <a href="{% url "item_create" %}" class="button button-small header-create">＋ Добавить свое</a>
+                            <a href="{% url "item_create" %}" class="button header-action"><i class="fas fa-plus"></i> Создать</a>
 
-                            <a href="{% url "user_profile" "me" %}" class="button header-user-button">
-                                Мои объявления
+                            <a href="{% url "user_profile" "me" %}" class="button header-action header-user-button">
+                                <span class="header-user-name">{% firstof request.user.full_name request.user.slug %}</span>
                                 <span class="avatar" style="background-image: url('{{ request.user.default_avatar }}');"></span>
                             </a>
                         {% else %}
-                            <a href="{% url "login" %}?next={% url "item_create" %}" class="button button-small header-create header-create-guest">＋ Добавить свое</a>
-                            <a href="{% url "login" %}" class="button header-user-button header-login">
+                            <a href="{% url "login" %}?next={% url "item_create" %}" class="button header-action header-create-guest"><i class="fas fa-plus"></i> Создать</a>
+                            <a href="{% url "login" %}" class="button header-action header-user-button header-login">
                                 Войти
                                 <span class="avatar header-anon"><i class="fas fa-user-secret"></i></span>
                             </a>

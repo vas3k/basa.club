@@ -40,6 +40,7 @@ urlpatterns = [
 
     path("<str:country>/<str:city>/", listing_page, name="listing"),
     path("<str:country>/<str:city>/<slug:category>/", listing_page, name="listing_category"),
+    path("<str:country>/<str:city>/<slug:category>/<uuid:item_id>/", item_page, name="item_without_subcategory"),
     path("<str:country>/<str:city>/<slug:category>/<slug:subcategory>/", listing_page, name="listing_subcategory"),
     path("<str:country>/<str:city>/<slug:category>/<slug:subcategory>/<uuid:item_id>/", item_page, name="item"),
 ]

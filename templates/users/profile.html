@@ -6,49 +6,42 @@
 
 {% block content %}
     <div class="profile">
-        <div class="profile-card">
-            <div class="profile-card-photo">
-                <div class="profile-user-avatar">
-                    <img src="{{ profile_user.default_avatar }}" alt="">
-                </div>
-                <div class="profile-card-age profile-rating {% if profile_user.rating > 0 %}profile-rating-positive{% elif profile_user.rating < 0 %}profile-rating-negative{% endif %}" title="Рейтинг">
-                    {% if profile_user.rating > 0 %}+{% endif %}{{ profile_user.rating }}
+        <div class="block profile-block">
+            <div class="profile-person">
+                <img class="profile-avatar" src="{{ profile_user.default_avatar }}" alt="">
+                <div class="profile-info">
+                    <div class="profile-name">{% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}</div>
+
+                    {% if profile_user.city or profile_user.country %}
+                        <div class="profile-place">
+                            {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
+                        </div>
+                    {% endif %}
+
+                    <div class="profile-activity">
+                        В базе {{ profile_user.created_at|timesince }} назад
+                        {% if profile_user.last_activity_at %}
+                            · был {{ profile_user.last_activity_at|timesince }} назад
+                        {% endif %}
+                    </div>
+
+                    {% if profile_user.position %}
+                        <div class="profile-position">{{ profile_user.position }}</div>
+                    {% endif %}
+
+                    {% if profile_user.bio %}
+                        <div class="profile-bio markdown-text">{{ profile_user.bio|markdown }}</div>
+                    {% endif %}
+
+                    <a class="button profile-club" href="{{ settings.CLUB_BASE_URL }}/user/{{ profile_user.slug }}/" target="_blank" rel="noopener noreferrer">Профиль в Вастрик Клубе</a>
                 </div>
             </div>
 
-            <div class="profile-card-info">
-                <div class="profile-user-name">
-                    <span class="profile-user-fullname">{% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}</span>
-                    {% if profile_user.full_name %}
-                        <span class="profile-user-nickname">@{{ profile_user.slug }}</span>
-                    {% endif %}
-                </div>
-
-                {% if profile_user.position or profile_user.company %}
-                    <div class="profile-user-job">
-                        {% if profile_user.position %}{{ profile_user.position }}{% endif %}{% if profile_user.position and profile_user.company %}, {% endif %}{% if profile_user.company %}{{ profile_user.company }}{% endif %}
-                    </div>
-                {% endif %}
-
-                {% if profile_user.city or profile_user.country %}
-                    <div class="profile-user-location">
-                        {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
-                    </div>
-                {% endif %}
-
-                {% if profile_user.contact %}
-                    <div class="profile-user-location">{{ profile_user.contact }}</div>
-                {% endif %}
-
-                <div class="profile-user-location">{{ profile_user.upvotes }} голосов</div>
-
-                {% if profile_user.membership_expires_at %}
-                    <div class="profile-user-location">Подписка до {{ profile_user.membership_expires_at|date:"j E Y" }}</div>
-                {% endif %}
-
-                {% if profile_user.bio %}
-                    <div class="profile-user-bio">{{ profile_user.bio|linebreaksbr }}</div>
-                {% endif %}
+            <div class="profile-stats">
+                <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
+                <div class="profile-stat">Объявления <b>{{ profile_user.items_count }}</b></div>
+                <div class="profile-stat">Комментарии <b>{{ profile_user.comments_count }}</b></div>
+                <div class="profile-stat">Голоса <b>{{ profile_user.upvotes }}</b></div>
             </div>
         </div>
 
@@ -60,27 +53,38 @@
         {% endif %}
     </div>
 
-    <div class="block-header block-header-with-button">Объявления</div>
-    <section class="content-items">
-        {% for item in active_items %}
-            {% include "items/list/default.html" with show_owner_actions=is_owner %}
-        {% empty %}
-            <div class="block">
-                {% if is_owner %}
-                    Активных объявлений пока нет.
-                {% else %}
-                    У этого человека пока нет объявлений.
-                {% endif %}
-            </div>
-        {% endfor %}
-    </section>
-
-    {% if is_owner and inactive_items %}
-        <div class="block-header block-header-with-button">Не в общей ленте</div>
+    <div class="profile-feed">
+        <div class="block-header block-header-with-button">Объявления</div>
         <section class="content-items">
-            {% for item in inactive_items %}
+            {% for item in active_items %}
                 {% include "items/list/default.html" with show_owner_actions=is_owner %}
+            {% empty %}
+                <div class="block">
+                    {% if is_owner %}
+                        Активных объявлений пока нет.
+                    {% else %}
+                        У этого человека пока нет объявлений.
+                    {% endif %}
+                </div>
             {% endfor %}
         </section>
-    {% endif %}
+
+        {% if is_owner and inactive_items %}
+            <div class="block-header block-header-with-button">Не в общей ленте</div>
+            <section class="content-items">
+                {% for item in inactive_items %}
+                    {% include "items/list/default.html" with show_owner_actions=is_owner %}
+                {% endfor %}
+            </section>
+        {% endif %}
+
+        <div class="block-header block-header-with-button">Комментарии</div>
+        <section class="content-items">
+            {% for comment in comments %}
+                {% include "comments/profile_comment.html" %}
+            {% empty %}
+                <div class="block">Комментариев пока нет.</div>
+            {% endfor %}
+        </section>
+    </div>
 {% endblock %}

@@ -5,6 +5,7 @@ from django.views.decorators.http import require_POST
 
 from comments.forms import CommentForm, ReplyForm
 from comments.models import Comment
+from common import ratings
 from items.models import Item
 from items.views import render_item_page
 
@@ -18,6 +19,7 @@ def create_comment(request, item_id):
 
     if form.is_valid():
         comment = form.save(author=request.user, request=request)
+        ratings.apply_comment_vibe(comment)
         return redirect(f"{item.get_absolute_url()}#comment-{comment.id}")
 
     return render_item_page(
@@ -40,6 +42,7 @@ def delete_comment(request, comment_id):
     if comment.author_id != request.user.pk:
         raise Http404()
     comment.soft_delete(by_user=request.user)
+    ratings.undo_comment(comment)
     url = comment.item.get_absolute_url()
     if comment.reply_to_id:
         return redirect(f"{url}#comment-{comment.reply_to_id}")

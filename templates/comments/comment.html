@@ -8,14 +8,17 @@
             {% if comment.author %}
                 {% include "users/widgets/user_small.html" with user=comment.author %}
             {% endif %}
-            {% comment_upvote comment voted_comments %}
+            <div class="comment-upvote">
+                {% comment_upvote comment voted_comments %}
+                {% include "common/widgets/rating.html" with rating=comment.rating %}
+            </div>
         </div>
 
         <div class="comment-text">{{ comment.text|linebreaksbr }}</div>
 
         <div class="comment-footer">
             <div class="comment-actions">
-                <span class="comment-date">{{ comment.created_at|date:"j E Y" }}</span>
+                <a class="comment-date" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
                 {% if request.user.is_authenticated %}
                     <button type="button" class="comment-action" data-behavior="toggle" data-target="#reply-form-{{ comment.id }}">
                         <i class="fas fa-reply"></i> Ответить

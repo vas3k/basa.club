@@ -102,7 +102,7 @@ def render_item_page(request, item, *, comment_form=None, reply_form=None, statu
     }, status=status)
 
 
-def item_page(request, country, city, category, subcategory, item_id):
+def item_page(request, country, city, category, item_id, subcategory=None):
     try:
         item = Item.fetch(
             pk=item_id,

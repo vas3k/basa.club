@@ -20,5 +20,6 @@
 
     <div class="item-upvote">
         {% item_upvote item voted_items %}
+        {% include "common/widgets/rating.html" with rating=item.rating %}
     </div>
 </article>
