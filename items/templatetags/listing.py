@@ -1,9 +1,22 @@
+from urllib.parse import urlencode
+
 from django import template
 from django.urls import reverse
 
 from common.templatetags.islands import island
 
 register = template.Library()
+
+
+def feed_querystring(request):
+    params = {}
+    sort = request.GET.get("sort")
+    if sort in {"date", "rating"}:
+        params["sort"] = sort
+    hide = (request.GET.get("hide_global") or "").lower()
+    if hide in {"1", "true", "on", "yes"}:
+        params["hide_global"] = "1"
+    return urlencode(params)
 
 
 @register.simple_tag(takes_context=True)
@@ -13,14 +26,17 @@ def listing_url(context, country="", city="", category="", subcategory=""):
     city = city or request.city_id
 
     if country == "everywhere" and city == "everywhere" and not category:
-        return "/"
+        path = "/"
+    else:
+        path = f"/{country}/{city}/"
+        if category:
+            path += f"{category}/"
+            if subcategory:
+                path += f"{subcategory}/"
 
-    path = f"/{country}/{city}/"
-    if category:
-        path += f"{category}/"
-        if subcategory:
-            path += f"{subcategory}/"
-    return path
+    query = feed_querystring(request)
+    return f"{path}?{query}" if query else path
+
 
 
 @register.simple_tag

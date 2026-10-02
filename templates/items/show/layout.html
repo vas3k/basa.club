@@ -1,8 +1,7 @@
 {% extends "layout_with_sidebar.html" %}
 
-{% block title %}
-    {{ item.title }} — {{ block.super }}
-{% endblock %}
+{% block title %}{{ item.title }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
+{% block og_title %}{{ item.title }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
 
 {% block content %}
     {% block item %}{% endblock %}

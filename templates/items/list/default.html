@@ -1,25 +1,45 @@
 {% item_url item as url %}
 <article class="block item-card{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
-    <div class="item-main">
+    <div class="item-head">
         {% include "items/widgets/tags.html" %}
-
-        {% if url %}
-            <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
-        {% else %}
-            <div class="item-card-title">{{ item.title }}</div>
-        {% endif %}
-
-        {% include "items/widgets/badges.html" %}
-
-        {% if item.description %}
-            <div class="item-card-description">{{ item.description|markdown_summary|truncatechars:240 }}</div>
-        {% endif %}
-
-        {% include "users/widgets/user_small.html" with user=item.author %}
+        <div class="item-upvote">
+            {% item_upvote item voted_items %}
+            {% include "common/widgets/rating.html" with rating=item.rating %}
+        </div>
     </div>
 
-    <div class="item-upvote">
-        {% item_upvote item voted_items %}
-        {% include "common/widgets/rating.html" with rating=item.rating %}
+    <div class="item-body">
+        {% if item.images and item.images.0.image %}
+            {% if url %}
+                <a class="item-thumb" href="{{ url }}">
+                    <img src="{{ item.images.0.image }}" alt="">
+                </a>
+            {% else %}
+                <span class="item-thumb">
+                    <img src="{{ item.images.0.image }}" alt="">
+                </span>
+            {% endif %}
+        {% endif %}
+
+        <div class="item-main">
+            {% if url %}
+                <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
+            {% else %}
+                <div class="item-card-title">{{ item.title }}</div>
+            {% endif %}
+
+            {% include "items/widgets/badges.html" %}
+
+            {% if item.description %}
+                <div class="item-card-description">{{ item.description|markdown_summary|truncatechars:240 }}</div>
+            {% endif %}
+
+            {% include "items/widgets/promo_code.html" %}
+        </div>
+    </div>
+
+    <div class="item-footer">
+        {% include "users/widgets/user_small.html" with user=item.author %}
+        {% include "items/widgets/actions.html" %}
     </div>
 </article>

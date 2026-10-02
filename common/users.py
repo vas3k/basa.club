@@ -6,4 +6,4 @@ from users.models import User
 def get_user_or_404(request, slug):
     if slug == "me":
         return request.user
-    return get_object_or_404(User, slug=slug, deleted_at__isnull=True)
+    return get_object_or_404(User, slug=slug)

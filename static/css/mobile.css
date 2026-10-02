@@ -86,7 +86,11 @@
 
     .content-subcategories {
         gap: 16px;
-        margin-bottom: 16px;
+        margin-bottom: 14px;
+    }
+
+    .content-feed-settings {
+        margin-bottom: 24px;
     }
 
         .content-subcategory {

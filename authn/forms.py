@@ -1,5 +1,6 @@
 from django import forms
 
+from common.images import is_hosted_image
 from users.models import User
 
 
@@ -30,6 +31,11 @@ class TelegramSignupForm(forms.Form):
         widget=forms.TextInput(),
         error_messages={"required": "Заполните поле", "max_length": "Слишком длинное значение"},
     )
+    avatar = forms.URLField(
+        label="Аватар",
+        required=False,
+        assume_scheme="https",
+    )
     contact = forms.CharField(
         label="Контакт",
         max_length=256,
@@ -56,3 +62,9 @@ class TelegramSignupForm(forms.Form):
         if User.objects.filter(email__iexact=email).exists():
             raise forms.ValidationError("Эта почта уже есть. Войдите через Клуб и привяжите бота там.")
         return email
+
+    def clean_avatar(self):
+        avatar = (self.cleaned_data.get("avatar") or "").strip()
+        if avatar and not is_hosted_image(avatar):
+            raise forms.ValidationError("Картинка должна быть загружена")
+        return avatar

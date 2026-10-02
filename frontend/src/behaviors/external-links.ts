@@ -7,6 +7,7 @@ export default function externalLinks(element: HTMLElement) {
 
         link.setAttribute("target", "_blank");
         link.setAttribute("rel", "noopener");
+        if (link.hasAttribute("data-nofavicon")) return;
 
         const domain = link.host.split(":")[0];
         const img = document.createElement("img");

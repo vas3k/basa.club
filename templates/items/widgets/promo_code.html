@@ -1,0 +1,5 @@
+{% if item.promo_code %}
+    <button type="button" class="promo-code" data-behavior="copy" data-copy="{{ item.promo_code }}">
+        <span class="promo-code-value">{{ item.promo_code }}</span>
+    </button>
+{% endif %}

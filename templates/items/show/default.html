@@ -3,38 +3,53 @@
 {% block item %}
     <div class="item-page">
         <article class="block item-show{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
-            <div class="item-main">
+            <div class="item-head">
                 {% include "items/widgets/tags.html" %}
+                <div class="item-upvote">
+                    {% item_upvote item voted_items %}
+                    {% include "common/widgets/rating.html" with rating=item.rating %}
+                </div>
+            </div>
 
+            <div class="item-main">
                 <h1 class="item-show-title">{{ item.title }}</h1>
 
                 {% include "items/widgets/badges.html" %}
+
+                {% include "items/widgets/gallery.html" %}
 
                 {% if item.description %}
                     <div class="item-show-description markdown-text">{{ item.description|markdown }}</div>
                 {% endif %}
 
-                <div class="item-stats">
-                    {% if item.published_at %}
-                        <span>Опубликовано {{ item.published_at|date:"j E Y" }}</span>
-                    {% else %}
-                        <span>Создано {{ item.created_at|date:"j E Y" }}</span>
-                    {% endif %}
-                    {% if item.updated_at|date:"Ymd" != item.created_at|date:"Ymd" %}
-                        <span>Обновлено {{ item.updated_at|date:"j E Y" }}</span>
-                    {% endif %}
-                    {% if item.expires_at %}
-                        <span>{% if item.is_expired %}Истекло{% else %}Актуально до{% endif %} {{ item.expires_at|date:"j E Y" }}</span>
-                    {% endif %}
-                    <span>Комментариев: {{ item.comment_count }}</span>
+                {% include "items/widgets/contacts.html" %}
+
+                {% if item.location %}
+                    <div class="item-location">
+                        <span class="item-location-icon">🌍</span>
+                        <div class="item-location-text markdown-text">{{ item.location|markdown }}</div>
+                    </div>
+                {% endif %}
+
+                {% include "items/widgets/promo_code.html" %}
+
+                <div class="item-byline">
+                    {% include "users/widgets/user_small.html" with user=item.author %}
+                    <div class="item-stats">
+                        {% if item.published_at %}
+                            <span title="Опубликовано">📅 {{ item.published_at|date:"j E Y" }}</span>
+                        {% else %}
+                            <span title="Создано">📅 {{ item.created_at|date:"j E Y" }}</span>
+                        {% endif %}
+                        {% if item.updated_at|date:"Ymd" != item.created_at|date:"Ymd" %}
+                            <span title="Обновлено">✏️ {{ item.updated_at|date:"j E Y" }}</span>
+                        {% endif %}
+                        {% if item.expires_at %}
+                            <span title="{% if item.is_expired %}Истекло{% else %}Актуально до{% endif %}">{% if item.is_expired %}⌛{% else %}⏳{% endif %} {{ item.expires_at|date:"j E Y" }}</span>
+                        {% endif %}
+                    </div>
+                    {% include "items/widgets/actions.html" %}
                 </div>
-
-                {% include "users/widgets/user_small.html" with user=item.author %}
-            </div>
-
-            <div class="item-upvote">
-                {% item_upvote item voted_items %}
-                {% include "common/widgets/rating.html" with rating=item.rating %}
             </div>
         </article>
 

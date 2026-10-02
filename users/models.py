@@ -1,17 +1,20 @@
 from uuid import uuid4
 
 from django.conf import settings
-from django.db.models import F, Q
 from django.contrib.auth.base_user import AbstractBaseUser, BaseUserManager
 from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
-from django.utils import timezone
 from django.utils.text import slugify
+
+from common.models import SoftDeleteMixin, SoftDeleteQuerySet
 
 
 class UserAccountManager(BaseUserManager):
+    def get_queryset(self):
+        return SoftDeleteQuerySet(self.model, using=self._db).filter(deleted_at__isnull=True)
+
     def create_superuser(self, username, email, password, **other_fields):
         other_fields.setdefault("is_staff", True)
         other_fields.setdefault("is_superuser", True)
@@ -52,7 +55,7 @@ class UserAccountManager(BaseUserManager):
         return user
 
 
-class User(AbstractBaseUser, PermissionsMixin):
+class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     ROLE_ADMIN = "admin"
     ROLES = (
         (ROLE_ADMIN, ROLE_ADMIN),
@@ -92,9 +95,9 @@ class User(AbstractBaseUser, PermissionsMixin):
 
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
-    deleted_at = models.DateTimeField(null=True)
 
     objects = UserAccountManager()
+    all_objects = models.Manager()
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = ["slug"]
@@ -109,29 +112,6 @@ class User(AbstractBaseUser, PermissionsMixin):
         if self.avatar:
             return self.avatar
         return settings.DEFAULT_AVATAR
-
-    def increment_vote_count(self):
-        User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
-        self.upvotes += 1
-
-    def decrement_vote_count(self):
-        User.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
-        self.upvotes -= 1
-
-    def refresh_items_count(self):
-        now = timezone.now()
-        count = self.items.filter(
-            visibility=self.items.model.VISIBILITY_VISIBLE,
-        ).filter(
-            Q(expires_at__isnull=True) | Q(expires_at__gt=now),
-        ).count()
-        User.objects.filter(pk=self.pk).update(items_count=count)
-        self.items_count = count
-
-    def refresh_comments_count(self):
-        count = self.comments.filter(deleted_at__isnull=True).count()
-        User.objects.filter(pk=self.pk).update(comments_count=count)
-        self.comments_count = count
 
     @property
     def is_admin(self):

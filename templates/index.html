@@ -1,5 +1,8 @@
 {% extends "layout_with_sidebar.html" %}
 
+{% block title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
 {% block content %}
     {% if current_category %}
         <section class="content-subcategories">
@@ -30,6 +33,24 @@
         </section>
     {% endif %}
 
+    <form class="content-feed-settings" method="get" data-behavior="form-change">
+        {% if request.GET.query %}
+            <input type="hidden" name="query" value="{{ request.GET.query }}">
+        {% endif %}
+        <label class="content-feed-setting">
+            Сортировка
+            <select name="sort">
+                <option value="" {% if feed_sort == "standard" %}selected{% endif %}>Стандартная</option>
+                <option value="date" {% if feed_sort == "date" %}selected{% endif %}>По дате</option>
+                <option value="rating" {% if feed_sort == "rating" %}selected{% endif %}>По рейтингу</option>
+            </select>
+        </label>
+        <label class="content-feed-setting">
+            <input type="checkbox" name="hide_global" value="1" {% if hide_global %}checked{% endif %}>
+            Скрыть глобальные объявления
+        </label>
+    </form>
+
     <section class="content-items">
         {% for item in items %}
             {% include "items/list/default.html" %}
@@ -37,4 +58,6 @@
             <div class="block">Тут пока ничего нет</div>
         {% endfor %}
     </section>
+
+    {% paginator items %}
 {% endblock %}

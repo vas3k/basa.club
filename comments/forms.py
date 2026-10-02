@@ -72,7 +72,6 @@ class ReplyForm(forms.ModelForm):
         self.fields["reply_to"].queryset = Comment.objects.filter(
             item=item,
             reply_to__isnull=True,
-            deleted_at__isnull=True,
         )
 
     def save(self, *, author, request, commit=True):

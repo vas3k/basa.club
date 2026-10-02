@@ -18,7 +18,10 @@
                 <i class="fab fa-telegram"></i>
                 Открыть бота
             </a>
-            <a href="{% url "logout" %}" class="button button-inverted">Выйти</a>
+            <form method="post" action="{% url "logout" %}">
+                {% csrf_token %}
+                <button type="submit" class="button button-inverted">Выйти</button>
+            </form>
         </div>
     </div>
 {% endblock %}

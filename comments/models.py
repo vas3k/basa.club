@@ -2,15 +2,31 @@ from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import F
+from django.db.models import Q
 from django.utils import timezone
 
-from common.request import parse_ip_address, parse_useragent
+from common.models import SoftDeleteManager, SoftDeleteMixin, SoftDeleteQuerySet
 from items.models import Item
 from users.models import User
 
 
-class Comment(models.Model):
+class CommentQuerySet(SoftDeleteQuerySet):
+    def delete(self, by=None):
+        now = timezone.now()
+        pks = list(self.values_list("pk", flat=True))
+        count = self.model.all_objects.filter(Q(pk__in=pks) | Q(reply_to_id__in=pks)).update(
+            deleted_at=now,
+            deleted_by=by,
+        )
+        return count, {self.model._meta.label: count}
+
+
+class CommentManager(SoftDeleteManager):
+    def get_queryset(self):
+        return CommentQuerySet(self.model, using=self._db).filter(deleted_at__isnull=True)
+
+
+class Comment(SoftDeleteMixin, models.Model):
     VIBE_GOOD = "good"
     VIBE_BAD = "bad"
     VIBE_NEUTRAL = "neutral"
@@ -32,8 +48,9 @@ class Comment(models.Model):
     updated_at = models.DateTimeField(auto_now=True)
     upvotes = models.IntegerField(default=0)
     rating = models.IntegerField(default=0)
-    deleted_at = models.DateTimeField(null=True, blank=True)
-    deleted_by = models.UUIDField(null=True, blank=True)
+
+    objects = CommentManager()
+    all_objects = models.Manager()
 
     class Meta:
         db_table = "comments"
@@ -47,32 +64,22 @@ class Comment(models.Model):
             if parent.reply_to_id:
                 raise ValidationError("Отвечать можно только на исходный комментарий")
         super().save(*args, **kwargs)
-        self.item.refresh_comment_count()
-        if self.author_id:
-            self.author.refresh_comments_count()
 
-    def is_deleted(self):
-        return self.deleted_at is not None
+    def delete(self, using=None, keep_parents=False, by=None):
+        super().delete(using=using, keep_parents=keep_parents, by=by)
+        if not self.reply_to_id:
+            type(self).objects.filter(reply_to=self).update(
+                deleted_at=self.deleted_at,
+                deleted_by=self.deleted_by,
+            )
 
-    def soft_delete(self, by_user):
-        self.deleted_at = timezone.now()
-        self.deleted_by = by_user.pk
-        Comment.objects.filter(pk=self.pk).update(deleted_at=self.deleted_at, deleted_by=self.deleted_by)
-        self.item.refresh_comment_count()
-        if self.author_id:
-            self.author.refresh_comments_count()
-
-    def increment_vote_count(self):
-        Comment.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
-        self.upvotes += 1
-
-    def decrement_vote_count(self):
-        Comment.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
-        self.upvotes -= 1
+    @property
+    def is_on_own_item(self):
+        return bool(self.author_id and self.author_id == self.item.author_id)
 
     @classmethod
     def visible_objects(cls):
-        return cls.objects.filter(deleted_at__isnull=True).select_related("author", "reply_to")
+        return cls.objects.select_related("author", "reply_to")
 
 
 class CommentVote(models.Model):
@@ -87,32 +94,3 @@ class CommentVote(models.Model):
     class Meta:
         db_table = "comment_votes"
         unique_together = [["user", "comment"]]
-
-    @classmethod
-    def upvote(cls, user, comment, request):
-        if comment.author_id and user.pk == comment.author_id:
-            return None, False
-
-        vote, created = cls.objects.get_or_create(
-            user=user,
-            comment=comment,
-            defaults={
-                "item": comment.item,
-                "ipaddress": parse_ip_address(request),
-                "useragent": parse_useragent(request),
-            },
-        )
-        if created:
-            comment.increment_vote_count()
-            if comment.author_id:
-                comment.author.increment_vote_count()
-        return vote, created
-
-    @classmethod
-    def retract(cls, user, comment):
-        deleted, _ = cls.objects.filter(user=user, comment=comment).delete()
-        if deleted:
-            comment.decrement_vote_count()
-            if comment.author_id:
-                comment.author.decrement_vote_count()
-        return bool(deleted)

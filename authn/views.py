@@ -10,7 +10,7 @@ from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.http import url_has_allowed_host_and_scheme
-from django.views.decorators.http import require_http_methods
+from django.views.decorators.http import require_http_methods, require_POST
 from requests import HTTPError
 
 from authn.providers import club, telegram
@@ -55,11 +55,14 @@ def log_in(request):
     next_url = safe_next_url(request, request.GET.get("next"))
     if request.user.is_authenticated:
         return redirect(after_login_url(request, request.user, next_url))
+
     if next_url:
         request.session[LOGIN_NEXT_SESSION_KEY] = next_url
+
     return render(request, "users/login.html")
 
 
+@require_POST
 def log_out(request):
     logout(request)
     response = redirect("index")
@@ -150,10 +153,12 @@ def login_telegram(request):
 def bot_page(request):
     if request.user.telegram_id:
         return redirect("user_profile", slug="me")
+
     try:
         url = telegram.bot_url(request, user=request.user)
     except RateLimitException as ex:
         return render(request, "error.html", {"title": ex.title, "message": ex.message})
+
     return render(request, "authn/bot.html", {"bot_url": url})
 
 
@@ -162,4 +167,5 @@ def telegram_continue(request):
     user = telegram.finish(request)
     if not isinstance(user, User):
         return user
+
     return start_session(request, user, after_login_url(request, user))

@@ -17,7 +17,7 @@ SECRET_KEY = os.getenv("SECRET_KEY") or "wow-so-secret"
 DEBUG = (os.getenv("DEBUG") != "false")
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0", "base.vas3k.club"]
-INTERNAL_IPS = ["127.0.0.1"]
+INTERNAL_IPS = ["127.0.0.1", "::1"]
 CSRF_TRUSTED_ORIGINS = ["https://base.vas3k.club"]
 RELEASE = random_string(length=8)
 
@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "geo.apps.GeoConfig",
     "items.apps.ItemsConfig",
     "comments.apps.CommentsConfig",
+    "bookmarks.apps.BookmarksConfig",
 ]
 
 MIDDLEWARE = [
@@ -79,8 +80,11 @@ TEMPLATES = [
             "builtins": [
                 "items.templatetags.listing",
                 "comments.templatetags.comments",
+                "bookmarks.templatetags.bookmarks",
                 "common.templatetags.islands",
                 "common.templatetags.text",
+                "common.templatetags.paginator",
+                "common.templatetags.query_params",
                 "django_vite.templatetags.django_vite",
             ],
         },
@@ -103,6 +107,14 @@ DATABASES = {
         "PASSWORD": os.getenv("POSTGRES_PASSWORD") or "",
         "HOST": os.getenv("POSTGRES_HOST") or "localhost",
         "PORT": os.getenv("POSTGRES_PORT") or 5432,
+    }
+}
+
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "vas3k-base",
+        "TIMEOUT": 60 * 60 * 24,
     }
 }
 
@@ -195,6 +207,11 @@ APP_HOST = os.environ.get("APP_HOST") or "http://127.0.0.1:8000"
 if not TELEGRAM_BOT_WEBHOOK_URL:
     TELEGRAM_BOT_WEBHOOK_URL = f"{APP_HOST}/telegram/webhook/"
 DEFAULT_AVATAR = "https://i.vas3k.club/v.png"
+DEFAULT_PAGE_SIZE = 70
+PROFILE_POSTS_PAGE_SIZE = 30
+PROFILE_COMMENTS_PAGE_SIZE = 100
+MEDIA_UPLOAD_URL = "https://i.vas3k.club/upload/multipart/"
+MEDIA_UPLOAD_CODE = os.getenv("MEDIA_UPLOAD_CODE") or ""
 SENTRY_DSN = os.getenv("SENTRY_DSN")
 LOGIN_URL = "/login/"
 SESSION_COOKIE_AGE = 60 * 60 * 24 * 365 * 2
@@ -233,6 +250,14 @@ AUTH_MAX_CODE_TIMEDELTA = timedelta(hours=3)
 AUTH_MAX_CODE_COUNT = 3
 AUTH_MAX_CODE_COUNT_PER_IP = 5
 AUTH_MAX_CODE_COUNT_TOTAL = 100
+
+# Debug toolbar
+
+if DEBUG:
+    INSTALLED_APPS = ["debug_toolbar", *INSTALLED_APPS]
+    MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
+    # App template dirs are off in production; the toolbar ships its own templates.
+    TEMPLATES[0]["APP_DIRS"] = True
 
 # Sentry
 

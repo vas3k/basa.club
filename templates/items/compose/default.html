@@ -17,4 +17,56 @@
 
     {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" %}
     {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
+
+    <div class="form-optionals">
+        <div class="form-optional">
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-images" {% if form.images.errors or form.images.value and form.images.value != "[]" and form.images.value != "null" %}hidden{% endif %}>+ Добавить фото</button>
+            <div class="block form-section" id="item-images" {% if not form.images.errors and not form.images.value or not form.images.errors and form.images.value == "[]" or not form.images.errors and form.images.value == "null" %}hidden{% endif %}>
+                <div class="form-section-title">Фото</div>
+                {% island "ImageList" name="images" images=form.images.value %}
+                {% if form.images.errors %}<div class="form-error">{{ form.images.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-optional">
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-location" {% if form.location.errors or form.location.value %}hidden{% endif %}>+ Добавить локацию или адрес</button>
+            <div class="block form-section" id="item-location" {% if not form.location.errors and not form.location.value %}hidden{% endif %}>
+                <div class="form-section-title">🌍 Локация</div>
+                <div class="form-group">
+                    {{ form.location }}
+                    {% if form.location.errors %}<div class="form-error">{{ form.location.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-optional">
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-contacts" {% if form.contacts.errors or form.contacts.value and form.contacts.value != "[]" and form.contacts.value != "null" %}hidden{% endif %}>+ Добавить контакты и ссылки</button>
+            <div class="block form-section" id="item-contacts" {% if not form.contacts.errors and not form.contacts.value or not form.contacts.errors and form.contacts.value == "[]" or not form.contacts.errors and form.contacts.value == "null" %}hidden{% endif %}>
+                {% island "RecordList" name="contacts" label="Контакты и ссылки" add_label="Добавить контакт" fields=contact_fields records=form.contacts.value %}
+                {% if form.contacts.errors %}<div class="form-error">{{ form.contacts.errors }}</div>{% endif %}
+            </div>
+        </div>
+
+        <div class="form-optional">
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-promo" {% if form.promo_code.errors or form.promo_code.value %}hidden{% endif %}>+ Добавить промо-код</button>
+            <div class="block form-section" id="item-promo" {% if not form.promo_code.errors and not form.promo_code.value %}hidden{% endif %}>
+                <div class="form-section-title">Промокод</div>
+                <div class="form-group">
+                    {{ form.promo_code }}
+                    {% if form.promo_code.errors %}<div class="form-error">{{ form.promo_code.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+
+        <div class="form-optional">
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-expires" {% if form.expires_in.errors or form.expires_in.value != "never" and form.expires_in.value %}hidden{% endif %}>+ Указать срок актуальности</button>
+            <div class="block form-section" id="item-expires" {% if not form.expires_in.errors and form.expires_in.value == "never" or not form.expires_in.errors and not form.expires_in.value %}hidden{% endif %}>
+                <div class="form-group">
+                    <label class="form-section-title" for="{{ form.expires_in.id_for_label }}">{{ form.expires_in.label }}</label>
+                    {{ form.expires_in }}
+                    {% if form.expires_in.errors %}<div class="form-error">{{ form.expires_in.errors }}</div>{% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
 {% endblock %}

@@ -134,6 +134,7 @@ def finish(request):
             city=form.cleaned_data["city"],
             country=form.cleaned_data["country"],
             contact=form.cleaned_data["contact"],
+            avatar=form.cleaned_data["avatar"] or None,
         )
         user.telegram_id = telegram_id
         user.telegram_data = auth_code.telegram_data

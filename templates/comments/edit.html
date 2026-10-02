@@ -1,0 +1,31 @@
+{% extends "layout.html" %}
+
+{% block title %}{{ form_title }} — {{ block.super }}{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="block-header">{{ form_title }}</div>
+
+        <form method="post" action="{% url "comment_edit" comment.id %}" class="comment-form">
+            {% csrf_token %}
+
+            {% if form.non_field_errors %}
+                <div class="form-error">{{ form.non_field_errors }}</div>
+            {% endif %}
+
+            {% if is_reply %}
+                {{ form.reply_to }}
+            {% endif %}
+
+            <div class="form-group">
+                {{ form.text }}
+                {% if form.text.errors %}<div class="form-error">{{ form.text.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Сохранить</button>
+                <a href="{{ item.get_absolute_url }}#comment-{{ comment.id }}" class="button button-inverted">Отмена</a>
+            </div>
+        </form>
+    </div>
+{% endblock %}

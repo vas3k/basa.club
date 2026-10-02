@@ -1,5 +1,6 @@
 from django import forms
 
+from common.images import is_hosted_image
 from geo.models import GeoCountry
 
 
@@ -26,6 +27,11 @@ class ProfileForm(forms.Form):
         choices=[],
         widget=forms.Select(),
     )
+    avatar = forms.URLField(
+        label="Аватар",
+        required=False,
+        assume_scheme="https",
+    )
     bio = forms.CharField(
         label="О себе",
         required=False,
@@ -43,3 +49,9 @@ class ProfileForm(forms.Form):
         if current and current not in {value for value, _label in choices}:
             choices.append((current, current))
         self.fields["country"].choices = choices
+
+    def clean_avatar(self):
+        avatar = (self.cleaned_data.get("avatar") or "").strip()
+        if avatar and not is_hosted_image(avatar):
+            raise forms.ValidationError("Картинка должна быть загружена")
+        return avatar

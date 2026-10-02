@@ -1,35 +1,32 @@
 {# {% include "comments/comment.html" with comment=node.comment replies=node.replies %} #}
 {% with open_reply_to=reply_form.reply_to.value %}
 <div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
-    {% if comment.is_deleted %}
-        <div class="comment-deleted">Комментарий удален</div>
-    {% else %}
-        <div class="comment-header">
-            {% if comment.author %}
-                {% include "users/widgets/user_small.html" with user=comment.author %}
+    <div class="comment-header">
+        {% if comment.author %}
+            {% include "users/widgets/user_small.html" with user=comment.author %}
+        {% endif %}
+        <div class="comment-upvote">
+            {% comment_upvote comment voted_comments %}
+            {% include "common/widgets/rating.html" with rating=comment.rating %}
+        </div>
+    </div>
+
+    <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
+
+    <div class="comment-footer">
+        <div class="comment-actions">
+            <a class="comment-date" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
+            {% if request.user.is_authenticated and request.user.id == comment.author_id %}
+                {% include "comments/widgets/edit.html" %}
+                {% include "comments/widgets/delete.html" %}
             {% endif %}
-            <div class="comment-upvote">
-                {% comment_upvote comment voted_comments %}
-                {% include "common/widgets/rating.html" with rating=comment.rating %}
-            </div>
         </div>
-
-        <div class="comment-text">{{ comment.text|linebreaksbr }}</div>
-
-        <div class="comment-footer">
-            <div class="comment-actions">
-                <a class="comment-date" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
-                {% if request.user.is_authenticated %}
-                    <button type="button" class="comment-action" data-behavior="toggle" data-target="#reply-form-{{ comment.id }}">
-                        <i class="fas fa-reply"></i> Ответить
-                    </button>
-                {% endif %}
-                {% if request.user.is_authenticated and request.user.id == comment.author_id %}
-                    {% include "comments/widgets/delete.html" %}
-                {% endif %}
-            </div>
-        </div>
-    {% endif %}
+        {% if request.user.is_authenticated %}
+            <button type="button" class="comment-action comment-reply-action" data-behavior="toggle" data-target="#reply-form-{{ comment.id }}">
+                <i class="fas fa-reply"></i> Ответить
+            </button>
+        {% endif %}
+    </div>
 
     {% if replies %}
         <div class="comment-replies">
@@ -39,7 +36,7 @@
         </div>
     {% endif %}
 
-    {% if request.user.is_authenticated and not comment.is_deleted %}
+    {% if request.user.is_authenticated %}
         <form method="post"
               action="{% url "item_comment" item.id %}"
               class="comment-reply-form"

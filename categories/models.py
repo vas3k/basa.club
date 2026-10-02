@@ -21,7 +21,6 @@ class Category(models.Model):
         related_name="descendants",
     )
     sort_order = models.PositiveIntegerField(default=0)
-    items_count = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

@@ -1,0 +1,20 @@
+{% item_url item as item_link %}
+<div class="item-actions">
+    {% item_bookmark item %}
+    <a class="item-action" href="{{ item_link }}#comments" title="Комментарии" aria-label="Комментарии {{ item.comment_count }}">
+        <i class="far fa-comment"></i>
+        <span class="item-action-count">{{ item.comment_count }}</span>
+    </a>
+    <button type="button" class="item-action item-action-icon" data-behavior="copy" data-copy="{{ request.scheme }}://{{ request.get_host }}{{ item_link }}" title="Скопировать ссылку" aria-label="Скопировать ссылку">
+        <i class="fas fa-share-alt"></i>
+    </button>
+    {% if show_bookmark_remove %}
+        <form method="post" action="{% url "bookmark_remove" item.id %}" class="item-bookmark-remove">
+            {% csrf_token %}
+            <input type="hidden" name="next" value="{{ request.get_full_path }}">
+            <button type="submit" class="item-action item-action-icon" title="Убрать из закладок" aria-label="Убрать из закладок">
+                <i class="fas fa-times"></i>
+            </button>
+        </form>
+    {% endif %}
+</div>

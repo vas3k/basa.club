@@ -1,8 +1,12 @@
-from django.urls import path
+from django.conf import settings
+from django.urls import include, path
 
 from authn.views import bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
+from bookmarks.api import toggle_item_bookmark
+from bookmarks.views import bookmarks_page, remove_bookmark
 from comments.api import retract_comment_vote, upvote_comment
-from comments.views import create_comment, delete_comment
+from comments.views import create_comment, delete_comment, edit_comment
+from common.api import upload_image
 from items.api import retract_item_vote, upvote_item
 from items.views import (
     create_item,
@@ -26,15 +30,20 @@ urlpatterns = [
     path("auth/telegram/", telegram_continue, name="telegram_continue"),
     path("user/<slug:slug>/edit/", edit_profile, name="user_profile_edit"),
     path("user/<slug:slug>/", profile_page, name="user_profile"),
+    path("bookmarks/", bookmarks_page, name="bookmarks"),
+    path("bookmarks/<uuid:item_id>/remove/", remove_bookmark, name="bookmark_remove"),
     path("items/new/", create_item, name="item_create"),
     path("items/<uuid:item_id>/edit/", edit_item, name="item_edit"),
     path("items/<uuid:item_id>/hide/", hide_item, name="item_hide"),
     path("items/<uuid:item_id>/delete/", delete_item, name="item_delete"),
     path("items/<uuid:item_id>/comments/", create_comment, name="item_comment"),
+    path("comments/<uuid:comment_id>/edit/", edit_comment, name="comment_edit"),
     path("comments/<uuid:comment_id>/delete/", delete_comment, name="comment_delete"),
 
     path("api/items/<uuid:item_id>/upvote/", upvote_item, name="item_upvote"),
+    path("api/items/<uuid:item_id>/bookmark/", toggle_item_bookmark, name="item_bookmark"),
     path("api/items/<uuid:item_id>/retract_vote/", retract_item_vote, name="item_retract_vote"),
+    path("api/images/", upload_image, name="image_upload"),
     path("api/comments/<uuid:comment_id>/upvote/", upvote_comment, name="comment_upvote"),
     path("api/comments/<uuid:comment_id>/retract_vote/", retract_comment_vote, name="comment_retract_vote"),
 
@@ -44,3 +53,9 @@ urlpatterns = [
     path("<str:country>/<str:city>/<slug:category>/<slug:subcategory>/", listing_page, name="listing_subcategory"),
     path("<str:country>/<str:city>/<slug:category>/<slug:subcategory>/<uuid:item_id>/", item_page, name="item"),
 ]
+
+if settings.DEBUG:
+    urlpatterns = [
+        path("__debug__/", include("debug_toolbar.urls")),
+        *urlpatterns,
+    ]

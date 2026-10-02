@@ -1,0 +1,19 @@
+{% if item.contact_links %}
+    <div class="item-contacts">
+        {% for contact in item.contact_links %}
+            {% if contact.href %}
+                <a class="button button-small item-contact" href="{{ contact.href }}" data-nofavicon{% if contact.external %} target="_blank" rel="noopener noreferrer"{% endif %}>
+                    <span class="item-contact-icon">{{ contact.icon }}</span>
+                    <span>{{ contact.text }}</span>
+                    {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
+                </a>
+            {% else %}
+                <span class="button button-small item-contact item-contact-static">
+                    <span class="item-contact-icon">{{ contact.icon }}</span>
+                    <span>{{ contact.text }}</span>
+                    {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
+                </span>
+            {% endif %}
+        {% endfor %}
+    </div>
+{% endif %}

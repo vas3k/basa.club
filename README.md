@@ -70,7 +70,7 @@ templates/users/widgets/user_small.html   # avatar + name + reputation, reuse ev
 
 Rating is not the same as upvotes. Upvotes are a plain counter of clicks, while rating is calculated from votes and comment vibes. Users, items and comments each have their own rating.
 
-All rules live in `common/ratings.py`. Ratings are updated only in views and APIs (never in models or forms), right after the action that changes them.
+All rules live in `common/counters.py`. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Models and forms never touch ratings or counters.
 
 | Action | Comment author | Item | Comment | Item author |
 |--------|----------------|------|---------|-------------|
@@ -83,14 +83,14 @@ All rules live in `common/ratings.py`. Ratings are updated only in views and API
 | «Полезно» on a "good" vibe comment | +1 | +1 | +1 | |
 | «Полезно» on a "bad" vibe comment | +1 | -1 | +1 | |
 | Retract «Полезно» | -1 | -1 / +1 for "good" / "bad" vibe | -1 | |
-| Delete a comment | vibe and «Полезно» points reversed | vibe and «Полезно» points reversed | all its «Полезно» points removed | |
+Comments on your own item (and upvotes on those comments) do not change anyone's rating. Deleting a comment does not change ratings; run `recalculate_counters` if they drift.
 
 Ratings are stored as integers and displayed divided by 10 with the `rating` template filter (`{{ user.rating|rating }}` shows 15 as +1.5 and -7 as -0.7). Items and top-level comments show their rating under the upvote button via `templates/common/widgets/rating.html`: green if positive, red if negative, hidden if zero.
 
-To rebuild all ratings from scratch (after changing the rules, or if counters drift):
+To rebuild ratings and counters from scratch (after changing the rules, or if they drift):
 
 ```bash
-uv run python manage.py recalculate_ratings
+uv run python manage.py recalculate_counters
 ```
 
 ## Frontend

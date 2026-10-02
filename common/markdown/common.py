@@ -1,4 +1,5 @@
 import html
+import re
 
 ALLOWED_CSS_CLASSES_IN_MARKDOWN = {
     "image-wide",
@@ -11,6 +12,9 @@ ALLOWED_CSS_CLASSES_IN_MARKDOWN = {
     "block",
     "border",
 }
+
+SCHEME_RE = re.compile(r"^[a-zA-Z][a-zA-Z0-9+.-]*:")
+
 
 def split_title_and_css_classes(value) -> tuple[str, list]:
     if value.startswith("."):
@@ -32,8 +36,8 @@ def normalize_url(url: str, default_scheme: str = "https") -> str:
     if not url:
         return ""
 
-    # add scheme if missing
-    if not url.startswith("#") and not url.startswith("/") and not url.startswith("mailto:") and "://" not in url:
-        url = f"{default_scheme}://{url}"
+    # Keep absolute paths, hashes and anything that already has a scheme
+    if url.startswith(("#", "/")) or SCHEME_RE.match(url):
+        return url
 
-    return url
+    return f"{default_scheme}://{url}"

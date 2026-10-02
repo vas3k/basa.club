@@ -10,7 +10,14 @@
             <div class="profile-person">
                 <img class="profile-avatar" src="{{ profile_user.default_avatar }}" alt="">
                 <div class="profile-info">
-                    <div class="profile-name">{% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}</div>
+                    <div class="profile-name">
+                        {% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}
+                        {% if is_owner %}
+                            <a href="{% url "user_profile_edit" profile_user.slug %}" class="profile-edit" title="Редактировать" aria-label="Редактировать">
+                                <i class="fas fa-edit"></i>
+                            </a>
+                        {% endif %}
+                    </div>
 
                     {% if profile_user.city or profile_user.country %}
                         <div class="profile-place">
@@ -44,13 +51,6 @@
                 <div class="profile-stat">Голоса <b>{{ profile_user.upvotes }}</b></div>
             </div>
         </div>
-
-        {% if is_owner %}
-            <div class="profile-buttons">
-                <a href="{% url "user_profile_edit" profile_user.slug %}" class="button">Редактировать</a>
-                <a href="{% url "logout" %}" class="button button-red">Выйти</a>
-            </div>
-        {% endif %}
     </div>
 
     <div class="profile-feed">
@@ -68,14 +68,16 @@
                 </div>
             {% endfor %}
         </section>
+        {% paginator active_items %}
 
-        {% if is_owner and inactive_items %}
+        {% if is_owner and inactive_items.paginator.count %}
             <div class="block-header block-header-with-button">Не в общей ленте</div>
             <section class="content-items">
                 {% for item in inactive_items %}
                     {% include "items/list/default.html" with show_owner_actions=is_owner %}
                 {% endfor %}
             </section>
+            {% paginator inactive_items "inactive_page" %}
         {% endif %}
 
         <div class="block-header block-header-with-button">Комментарии</div>
@@ -86,5 +88,6 @@
                 <div class="block">Комментариев пока нет.</div>
             {% endfor %}
         </section>
+        {% paginator comments "comments_page" %}
     </div>
 {% endblock %}

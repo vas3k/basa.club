@@ -13,7 +13,7 @@ def markdown_text(text, renderer=ClubRenderer, uniq_id=None, disable_mentions=Fa
             uniq_id=uniq_id,
             disable_mentions=disable_mentions
         ),
-        plugins=["strikethrough", "url", "table"]
+        plugins=["strikethrough", "url"],
     )
     return (markdown(text) or "").strip()
 

@@ -1,16 +1,15 @@
 from uuid import uuid4
 
 from django.db import models
-from django.db.models import Count, F, Q
+from django.db.models import Q
 from django.utils import timezone
 
-from categories.models import Category
-from common.request import parse_ip_address, parse_useragent
-from geo.models import GeoCity, GeoCountry
+from common.contacts import present_contacts
+from common.models import SoftDeleteMixin
 from users.models import User
 
 
-class Item(models.Model):
+class Item(SoftDeleteMixin, models.Model):
     VISIBILITY_DRAFT = "draft"
     VISIBILITY_VISIBLE = "visible"
     VISIBILITY_LINK_ONLY = "link_only"
@@ -23,6 +22,10 @@ class Item(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default="")
+    location = models.CharField(max_length=4000, blank=True, default="")
+    contacts = models.JSONField(blank=True, default=list)
+    promo_code = models.CharField(max_length=32, blank=True, default="")
+    images = models.JSONField(blank=True, default=list)
     category = models.ForeignKey(
         "categories.Category",
         on_delete=models.CASCADE,
@@ -59,6 +62,7 @@ class Item(models.Model):
     upvotes = models.IntegerField(default=0)
     rating = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
+    bookmark_count = models.IntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True, db_index=True)
     expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -94,66 +98,6 @@ class Item(models.Model):
             "category", "subcategory", "country", "city", "author",
         ).get(**lookup)
 
-    @classmethod
-    def recalculate_counters(cls):
-        visible = cls.visible_objects().order_by()
-
-        category_counts = {
-            row["category_id"]: row["n"]
-            for row in visible.values("category_id").annotate(n=Count("pk"))
-        }
-        subcategory_counts = {
-            row["subcategory_id"]: row["n"]
-            for row in visible.exclude(subcategory__isnull=True).values("subcategory_id").annotate(n=Count("pk"))
-        }
-        categories = list(Category.objects.all())
-        for category in categories:
-            if category.parent_id:
-                category.items_count = subcategory_counts.get(category.id, 0)
-            else:
-                category.items_count = category_counts.get(category.id, 0)
-        if categories:
-            Category.objects.bulk_update(categories, ["items_count"])
-
-        global_items = visible.filter(country__isnull=True).count()
-        country_counts = {
-            row["country_id"]: row["n"]
-            for row in visible.exclude(country__isnull=True).values("country_id").annotate(n=Count("pk"))
-        }
-        countries = list(GeoCountry.objects.all())
-        for country in countries:
-            country.items_count = country_counts.get(country.id, 0) + global_items
-        if countries:
-            GeoCountry.objects.bulk_update(countries, ["items_count"])
-
-        city_counts = {
-            row["city_id"]: row["n"]
-            for row in visible.exclude(city__isnull=True).values("city_id").annotate(n=Count("pk"))
-        }
-        countrywide = {
-            row["country_id"]: row["n"]
-            for row in visible.filter(city__isnull=True, country__isnull=False).values("country_id").annotate(n=Count("pk"))
-        }
-        cities = list(GeoCity.objects.all())
-        for city in cities:
-            city.items_count = city_counts.get(city.id, 0) + countrywide.get(city.country_id, 0) + global_items
-        if cities:
-            GeoCity.objects.bulk_update(cities, ["items_count"])
-
-    def save(self, *args, **kwargs):
-        super().save(*args, **kwargs)
-        self.recalculate_counters()
-        if self.author_id:
-            self.author.refresh_items_count()
-
-    def delete(self, *args, **kwargs):
-        author = self.author if self.author_id else None
-        result = super().delete(*args, **kwargs)
-        self.recalculate_counters()
-        if author:
-            author.refresh_items_count()
-        return result
-
     def get_absolute_url(self):
         country = self.country_id or "everywhere"
         city = self.city_id or "everywhere"
@@ -161,22 +105,17 @@ class Item(models.Model):
             return f"/{country}/{city}/{self.category_id}/{self.id}/"
         return f"/{country}/{city}/{self.category_id}/{self.subcategory_id}/{self.id}/"
 
-    def increment_vote_count(self):
-        Item.objects.filter(pk=self.pk).update(upvotes=F("upvotes") + 1)
-        self.upvotes += 1
-
-    def decrement_vote_count(self):
-        Item.objects.filter(pk=self.pk).update(upvotes=F("upvotes") - 1)
-        self.upvotes -= 1
-
-    def refresh_comment_count(self):
-        count = self.comments.filter(deleted_at__isnull=True).count()
-        Item.objects.filter(pk=self.pk).update(comment_count=count)
-        self.comment_count = count
+    @property
+    def contact_links(self):
+        return present_contacts(self.contacts)
 
     @property
     def is_expired(self):
         return bool(self.expires_at and self.expires_at <= timezone.now())
+
+    @property
+    def is_listed(self):
+        return self.visibility == self.VISIBILITY_VISIBLE and not self.is_expired
 
 
 class ItemVote(models.Model):
@@ -190,34 +129,6 @@ class ItemVote(models.Model):
     class Meta:
         db_table = "item_votes"
         unique_together = [["user", "item"]]
-
-    @classmethod
-    def upvote(cls, user, item, request):
-        if user.pk == item.author_id:
-            return None, False
-
-        vote, created = cls.objects.get_or_create(
-            user=user,
-            item=item,
-            defaults={
-                "ipaddress": parse_ip_address(request),
-                "useragent": parse_useragent(request),
-            },
-        )
-        if created:
-            item.increment_vote_count()
-            if item.author_id:
-                item.author.increment_vote_count()
-        return vote, created
-
-    @classmethod
-    def retract(cls, user, item):
-        deleted, _ = cls.objects.filter(user=user, item=item).delete()
-        if deleted:
-            item.decrement_vote_count()
-            if item.author_id:
-                item.author.decrement_vote_count()
-        return bool(deleted)
 
     @classmethod
     def voted_item_ids(cls, user, items):

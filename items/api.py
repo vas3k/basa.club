@@ -2,7 +2,8 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from common import ratings
+from common import counters
+from common.request import parse_ip_address, parse_useragent
 from items.models import Item, ItemVote
 
 
@@ -19,9 +20,17 @@ def upvote_item(request, item_id):
     if item.author_id == request.user.pk:
         return JsonResponse({"error": "Нельзя голосовать за свое"}, status=403)
 
-    _, created = ItemVote.upvote(request.user, item, request)
+    _, created = ItemVote.objects.get_or_create(
+        user=request.user,
+        item=item,
+        defaults={
+            "ipaddress": parse_ip_address(request),
+            "useragent": parse_useragent(request),
+        },
+    )
     if created:
-        ratings.apply_item_vote(item, +1)
+        counters.item_upvoted(item)
+
     return JsonResponse({"upvotes": item.upvotes, "voted": True})
 
 
@@ -35,6 +44,8 @@ def retract_item_vote(request, item_id):
         pk=item_id,
         visibility__in=[Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY],
     )
-    if ItemVote.retract(request.user, item):
-        ratings.apply_item_vote(item, -1)
+    deleted, _ = ItemVote.objects.filter(user=request.user, item=item).delete()
+    if deleted:
+        counters.item_unvoted(item)
+
     return JsonResponse({"upvotes": item.upvotes, "voted": False})
