@@ -1,0 +1,5 @@
+{% with value as comment %}
+    {% if comment %}
+        <a href="{{ comment.item.get_absolute_url }}">{{ comment.text|truncatechars:80 }}</a>
+    {% endif %}
+{% endwith %}

@@ -1,0 +1,15 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Аккаунт заблокирован — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="block error">
+        <div class="block-icon">❌</div>
+        <div class="block-header">Аккаунт заблокирован</div>
+        <div class="block-description block-description-center">
+            Доступ к Базе закрыт модераторами
+        </div>
+    </div>
+{% endblock %}

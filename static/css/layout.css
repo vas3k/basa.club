@@ -65,7 +65,8 @@
             min-height: 50px;
         }
 
-        .header-bookmarks {
+        .header-bookmarks,
+        .header-godmode {
             width: 50px;
             min-width: 50px;
             padding: 0;

@@ -1,0 +1,5 @@
+{% with value as item %}
+    {% if item %}
+        <a href="{{ item.get_absolute_url }}">{{ item.title }}</a>
+    {% endif %}
+{% endwith %}

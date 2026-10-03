@@ -57,9 +57,11 @@ class UserAccountManager(BaseUserManager):
 
 
 class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
-    ROLE_ADMIN = "admin"
+    ROLE_GOD = "god"
+    ROLE_MODERATOR = "moderator"
     ROLES = (
-        (ROLE_ADMIN, ROLE_ADMIN),
+        (ROLE_GOD, "Бог"),
+        (ROLE_MODERATOR, "Модератор"),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
@@ -94,6 +96,7 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     telegram_id = models.CharField(max_length=64, unique=True, null=True, blank=True)
 
     roles = ArrayField(models.CharField(max_length=32, choices=ROLES), default=list, null=False)
+    is_banned_until = models.DateTimeField(null=True, blank=True)
 
     is_staff = models.BooleanField(default=False)
     is_superuser = models.BooleanField(default=False)
@@ -116,8 +119,18 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
         return settings.DEFAULT_AVATAR
 
     @property
-    def is_admin(self):
-        return self.ROLE_ADMIN in self.roles
+    def is_god(self):
+        return bool(self.roles and self.ROLE_GOD in self.roles)
+
+    @property
+    def is_moderator(self):
+        return bool(self.roles and self.ROLE_MODERATOR in self.roles) or self.is_god
+
+    @property
+    def is_banned(self):
+        if self.is_god:
+            return False
+        return bool(self.is_banned_until and self.is_banned_until > timezone.now())
 
     @property
     def is_active_membership(self):

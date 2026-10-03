@@ -1,10 +1,19 @@
 from django.conf import settings
 from django.urls import include, path
 
-from authn.views import bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
+from authn.views import banned, bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
 from bookmarks.api import toggle_item_bookmark
 from bookmarks.views import bookmarks_page, remove_bookmark
 from comments.api import retract_comment_vote, upvote_comment
+from godmode.views.main import (
+    godmode,
+    godmode_action,
+    godmode_create_model,
+    godmode_delete_model,
+    godmode_edit_model,
+    godmode_list_model,
+    godmode_show_page,
+)
 from comments.views import create_comment, delete_comment, edit_comment
 from common.api import upload_image
 from items.api import retract_item_vote, upvote_item
@@ -23,6 +32,7 @@ from users.views import edit_profile, profile_page, welcome
 urlpatterns = [
     path("", index_page, name="index"),
     path("login/", log_in, name="login"),
+    path("banned/", banned, name="banned"),
     path("logout/", log_out, name="logout"),
     path("welcome/", welcome, name="welcome"),
     path("bot/", bot_page, name="bot"),
@@ -48,6 +58,15 @@ urlpatterns = [
     path("api/items/<uuid:item_id>/bookmark/", toggle_item_bookmark, name="item_bookmark"),
     path("api/items/<uuid:item_id>/retract_vote/", retract_item_vote, name="item_retract_vote"),
     path("api/images/", upload_image, name="image_upload"),
+
+    path("godmode/", godmode, name="godmode"),
+    path("godmode/page/<slug:page_name>/", godmode_show_page, name="godmode_show_page"),
+    path("godmode/<slug:model_name>/", godmode_list_model, name="godmode_list_model"),
+    path("godmode/<slug:model_name>/create/", godmode_create_model, name="godmode_create_model"),
+    path("godmode/<slug:model_name>/<str:item_id>/edit/", godmode_edit_model, name="godmode_edit_model"),
+    path("godmode/<slug:model_name>/<str:item_id>/delete/", godmode_delete_model, name="godmode_delete_model"),
+    path("godmode/<slug:model_name>/<str:item_id>/action/<str:action_code>/", godmode_action, name="godmode_action"),
+
     path("api/comments/<uuid:comment_id>/upvote/", upvote_comment, name="comment_upvote"),
     path("api/comments/<uuid:comment_id>/retract_vote/", retract_comment_vote, name="comment_retract_vote"),
 

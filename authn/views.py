@@ -40,6 +40,10 @@ def log_in(request):
     return render(request, "users/login.html")
 
 
+def banned(request):
+    return render(request, "banned.html", status=403)
+
+
 @require_POST
 def log_out(request):
     logout(request)

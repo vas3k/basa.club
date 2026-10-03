@@ -45,6 +45,7 @@ INSTALLED_APPS = [
     "comments.apps.CommentsConfig",
     "bookmarks.apps.BookmarksConfig",
     "notifications.apps.NotificationsConfig",
+    "godmode.apps.GodmodeConfig",
 ]
 
 MIDDLEWARE = [

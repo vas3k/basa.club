@@ -1,0 +1,73 @@
+{% extends "godmode/layout.html" %}
+{% load godmode_filters %}
+
+{% block title %}
+    Редактировать {{ admin_model.title }} — {{ block.super }}
+{% endblock %}
+
+{% block godmode_content %}
+    <div class="godmode-edit">
+        <div class="godmode-header">
+            <span class="godmode-icon">{{ admin_model.icon }}</span>
+            <a href="{% url "godmode_list_model" admin_model.name %}" class="godmode-title">{{ admin_model.title }}</a>
+            <span>→</span>
+            {% if admin_model.title_field %}
+                <span class="godmode-title">{{ item|get_attr:admin_model.title_field }}</span>
+            {% else %}
+                <span class="godmode-title">ID: {{ item|get_attr:primary_key_field }}</span>
+            {% endif %}
+        </div>
+
+        {% if actions %}
+            <div class="godmode-actions">
+                {% for action_code, action in actions.items %}
+                    <a
+                        href="{% url 'godmode_action' admin_model.name item|get_attr:primary_key_field action_code %}"
+                        class="button button-inverted"
+                    >
+                        {{ action.title }}
+                    </a>
+                {% endfor %}
+            </div>
+        {% endif %}
+
+        {% if show_edit_form %}
+            <form action="." method="post">
+                {% csrf_token %}
+
+                <div class="godmode-form">
+                    {% for field in form %}
+                        <div class="godmode-form-row">
+                            <div class="godmode-form-label">{{ field.label_tag }}</div>
+                            <div class="godmode-form-input">
+                                <div>{{ field }}</div>
+                                {% if field.help_text %}
+                                    <div class="godmode-form-help">{{ field.help_text }}</div>
+                                {% endif %}
+                            </div>
+                            {% if field.errors %}
+                                <div class="godmode-form-errors">{{ field.errors }}</div>
+                            {% endif %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="godmode-form-actions">
+                        {% if show_delete_button %}
+                            <a
+                                href="{% url 'godmode_delete_model' model_name=admin_model.name item_id=item|get_attr:primary_key_field %}"
+                                class="button button-inverted"
+                            >Удалить</a>
+                        {% else %}
+                            <span>&nbsp;</span>
+                        {% endif %}
+                        <button type="submit" class="button">Сохранить</button>
+                    </div>
+                </div>
+            </form>
+        {% else %}
+            <div class="godmode-message">
+                <div class="godmode-message-text">Редактировать пользователей могут только боги. Забанить можно действием выше.</div>
+            </div>
+        {% endif %}
+    </div>
+{% endblock %}

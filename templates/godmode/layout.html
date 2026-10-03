@@ -1,0 +1,50 @@
+{% extends "layout.html" %}
+{% load static %}
+
+{% block title %}
+    {{ title | default:"Админка" }} — {{ block.super }}
+{% endblock %}
+
+{% block css %}
+    <link rel="stylesheet" href="{% static 'css/godmode.css' %}?version={{ settings.RELEASE }}">
+{% endblock %}
+
+{% block content %}
+    <div class="godmode" id="godmode">
+        <div class="godmode-container">
+            <div class="block godmode-sidebar godmode-groups">
+                <button type="button" class="godmode-mobile-menu-close" onclick="document.getElementById('godmode').classList.remove('mobile-menu-opened')">
+                    ✕
+                </button>
+                {% for group in admin.groups %}
+                    <div class="godmode-group">
+                        <div class="godmode-group-header">
+                            <span class="godmode-group-icon">{{ group.icon }}</span>
+                            <span class="godmode-group-name">{{ group.title }}</span>
+                        </div>
+                        <div class="godmode-group-items">
+                            {% for item in group.models %}
+                                <span class="godmode-group-item">
+                                    <span>→ </span>
+                                    <span class="godmode-item-icon">{{ item.icon }}</span>
+                                    <a href="{{ item.get_absolute_url }}" class="godmode-item-name" onclick="document.getElementById('godmode').classList.remove('mobile-menu-opened')">{{ item.title }}</a>
+                                </span>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            </div>
+            <div class="block godmode-content">
+                <button type="button" class="godmode-mobile-menu-toggle" onclick="document.getElementById('godmode').classList.toggle('mobile-menu-opened')">
+                    ≡ Админка
+                </button>
+                {% block godmode_content %}
+                    <div class="godmode-message">
+                        <div class="godmode-message-title">{{ admin.title }}</div>
+                        <div class="godmode-message-text">Выберите раздел слева</div>
+                    </div>
+                {% endblock %}
+            </div>
+        </div>
+    </div>
+{% endblock %}

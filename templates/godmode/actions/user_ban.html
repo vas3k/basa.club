@@ -1,0 +1,51 @@
+{% extends "godmode/action.html" %}
+
+{% block title %}
+    Забанить — {{ block.super }}
+{% endblock %}
+
+{% block godmode_action_form %}
+    <p>
+        {% if item.is_banned %}
+            Сейчас забанен до {{ item.is_banned_until|date:"Y-m-d H:i" }}.
+        {% else %}
+            Сейчас не забанен.
+        {% endif %}
+        {% if item.metadata.last_ban %}
+            Прошлый бан: {{ item.metadata.last_ban.days }} дн., «{{ item.metadata.last_ban.reason }}».
+        {% endif %}
+    </p>
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <div class="godmode-form">
+            <div class="godmode-form-row">
+                <div class="godmode-form-label">{{ form.days.label_tag }}</div>
+                <div class="godmode-form-input">{{ form.days }}</div>
+            </div>
+            <div class="godmode-form-row">
+                <div class="godmode-form-label">{{ form.reason.label_tag }}</div>
+                <div class="godmode-form-input">{{ form.reason }}</div>
+            </div>
+            <div class="godmode-form-row">
+                <div class="godmode-form-label">{{ form.is_permanent.label_tag }}</div>
+                <div class="godmode-form-input">{{ form.is_permanent }}</div>
+            </div>
+            <div class="godmode-form-actions">
+                <span></span>
+                <button type="submit" class="button">Забанить</button>
+            </div>
+        </div>
+    </form>
+
+    <form action="." method="post">
+        {% csrf_token %}
+        <input type="hidden" name="is_unbanned" value="on">
+        <div class="godmode-form">
+            <div class="godmode-form-actions">
+                <span></span>
+                <button type="submit" class="button button-inverted">Разбанить</button>
+            </div>
+        </div>
+    </form>
+{% endblock %}
