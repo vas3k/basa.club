@@ -1,6 +1,16 @@
+.main:not(:has(.sidebar)):has(.godmode) {
+    justify-content: stretch;
+}
+
+.main:not(:has(.sidebar)):has(.godmode) .content {
+    max-width: none;
+    flex: 1 1 auto;
+}
+
 .godmode {
-    margin: 0 auto;
-    max-width: 1440px;
+    margin: 0;
+    max-width: none;
+    width: 100%;
     overflow: hidden;
 }
 

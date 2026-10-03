@@ -3,52 +3,6 @@
     margin: 30px auto 0;
 }
 
-.profile-subscriptions {
-    max-width: 800px;
-    margin: 40px auto 0;
-}
-
-.profile-subscriptions-title {
-    font-weight: 700;
-    margin-bottom: 8px;
-}
-
-.profile-subscription {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    gap: 12px;
-    padding: 8px 0;
-}
-
-.profile-subscription + .profile-subscription {
-    border-top: 1px solid rgba(0, 0, 0, 0.08);
-}
-
-.profile-subscription-label {
-    min-width: 0;
-}
-
-.profile-subscription-remove {
-    flex-shrink: 0;
-    border: 0;
-    background: none;
-    padding: 4px 6px;
-    color: inherit;
-    font-size: 14px;
-    line-height: 1;
-    opacity: 0.4;
-    cursor: pointer;
-}
-
-.profile-subscription-remove:hover {
-    opacity: 1;
-}
-
-.profile-subscriptions-empty {
-    opacity: 0.65;
-}
-
 .profile-feed {
     max-width: 800px;
     margin: 0 auto;
@@ -164,7 +118,7 @@
 }
 
 .profile-name {
-    font-size: 180%;
+    font-size: 220%;
     font-weight: 700;
     line-height: 1.15;
 }
@@ -187,9 +141,10 @@
 }
 
 .profile-place,
-.profile-activity,
-.profile-position {
-    margin-top: 6px;
+.profile-activity {
+    margin-top: 10px;
+    font-size: 120%;
+    font-weight: 500;
 }
 
 .profile-activity {
@@ -197,8 +152,20 @@
     font-size: 90%;
 }
 
-.profile-position {
-    font-weight: 600;
+.profile-club,
+.profile-club:visited {
+    margin-left: 0.12em;
+    color: inherit;
+    font-size: 1.05em;
+    font-weight: 400;
+    line-height: 1;
+    text-decoration: none;
+    vertical-align: -0.02em;
+    opacity: 0.85;
+}
+
+.profile-club:hover {
+    opacity: 1;
 }
 
 .profile-comment-source,
@@ -221,10 +188,6 @@
 
 .profile-bio {
     margin-top: 10px;
-}
-
-.profile-club {
-    margin-top: 16px;
 }
 
 .profile-stats {
@@ -288,6 +251,11 @@
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
+    font-size: 108%;
+}
+
+.user-small .rating {
+    font-size: 108%;
 }
 
 /* templates/users/widgets/user_tiny.html */

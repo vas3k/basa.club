@@ -1,5 +1,6 @@
 from authn.models import Code
 from bookmarks.models import Bookmark
+from complaints.models import Flag
 from categories.models import Category
 from comments.models import Comment, CommentVote
 from geo.models import GeoCity, GeoCountry
@@ -46,7 +47,7 @@ ADMIN = ClubAdmin(
                         "is_banned_until",
                         "deleted_at",
                     ],
-                    hide_fields=["password", "profile_cache"],
+                    hide_fields=["password"],
                     actions={
                         "profile": ClubAdminAction(
                             title="🪪 Профиль",
@@ -59,29 +60,15 @@ ADMIN = ClubAdmin(
                         ),
                     },
                 ),
-                ClubAdminModel(
-                    model=Code,
-                    title="Коды входа",
-                    icon="🔑",
-                    name="auth_codes",
-                    list_fields=[
-                        "recipient",
-                        "user",
-                        "code",
-                        "created_at",
-                        "expires_at",
-                        "ipaddress",
-                    ],
-                ),
             ],
         ),
         ClubAdminGroup(
-            title="Объявления",
+            title="Записи",
             icon="✏️",
             models=[
                 ClubAdminModel(
                     model=Item,
-                    title="Объявления",
+                    title="Записи",
                     icon="📝",
                     name="items",
                     title_field="title",
@@ -135,28 +122,19 @@ ADMIN = ClubAdmin(
                     ],
                 ),
                 ClubAdminModel(
-                    model=ItemVote,
-                    title="Голоса за объявления",
-                    icon="👍",
-                    name="item_votes",
+                    model=Flag,
+                    title="Жалобы",
+                    icon="🚩",
+                    name="flags",
                     list_fields=[
-                        "user",
                         "item",
-                        "created_at",
-                        "ipaddress",
-                    ],
-                ),
-                ClubAdminModel(
-                    model=CommentVote,
-                    title="Голоса за комментарии",
-                    icon="💬",
-                    name="comment_votes",
-                    list_fields=[
                         "user",
+                        "reason",
                         "comment",
-                        "item",
                         "created_at",
+                        "updated_at",
                     ],
+                    create_roles=set(),
                 ),
             ],
         ),

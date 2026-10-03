@@ -26,11 +26,11 @@
 
     <div class="block-header block-header-with-button">Закладки</div>
     <section class="content-items">
-        {% for bookmark in bookmarks %}
-            {% include "items/list/default.html" with item=bookmark.item show_bookmark_remove=True %}
+        {% for item in items %}
+            {% include "items/list/default.html" with show_bookmark_remove=True %}
         {% empty %}
             <div class="block">В закладках пока ничего нет.</div>
         {% endfor %}
     </section>
-    {% paginator bookmarks %}
+    {% paginator items %}
 {% endblock %}

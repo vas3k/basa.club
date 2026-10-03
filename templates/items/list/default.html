@@ -1,11 +1,7 @@
 {% item_url item as url %}
 <article class="block item-card{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
-    <div class="item-head">
+    <div class="item-header">
         {% include "items/widgets/tags.html" %}
-        <div class="item-upvote">
-            {% item_upvote item voted_items %}
-            {% include "common/widgets/rating.html" with rating=item.rating %}
-        </div>
     </div>
 
     <div class="item-body">
@@ -22,11 +18,14 @@
         {% endif %}
 
         <div class="item-main">
-            {% if url %}
-                <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
-            {% else %}
-                <div class="item-card-title">{{ item.title }}</div>
-            {% endif %}
+            <div class="item-title-row">
+                {% if url %}
+                    <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
+                {% else %}
+                    <div class="item-card-title">{{ item.title }}</div>
+                {% endif %}
+                {% item_upvote item %}
+            </div>
 
             {% include "items/widgets/badges.html" %}
 

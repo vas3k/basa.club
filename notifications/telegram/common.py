@@ -13,6 +13,13 @@ log = logging.getLogger(__name__)
 TEXT_LIMIT = 4096
 CAPTION_LIMIT = 1024
 
+BOT_BLOCKED_MARKERS = (
+    "bot was blocked by the user",
+    "user is deactivated",
+    "bot can't initiate conversation with a user",
+    "chat not found",
+)
+
 
 def send_telegram_message(chat_id, text, reply_markup=None):
     if not bot:
@@ -33,6 +40,17 @@ def send_telegram_message(chat_id, text, reply_markup=None):
         )
     except TelegramError as ex:
         log.warning("Telegram error: %s", ex)
+        message = str(ex).lower()
+        marker = next((marker for marker in BOT_BLOCKED_MARKERS if marker in message), None)
+        if marker:
+            from users.models import User
+
+            user = User.objects.filter(telegram_id=str(chat_id)).first()
+            if user and (user.metadata or {}).get("telegram_problem") != marker:
+                metadata = dict(user.metadata or {})
+                metadata["telegram_problem"] = marker
+                user.metadata = metadata
+                user.save(update_fields=["metadata"])
         return None
 
 
@@ -54,6 +72,17 @@ def send_telegram_photo(chat_id, photo, caption, reply_markup=None):
         )
     except TelegramError as ex:
         log.warning("Telegram error: %s", ex)
+        message = str(ex).lower()
+        marker = next((marker for marker in BOT_BLOCKED_MARKERS if marker in message), None)
+        if marker:
+            from users.models import User
+
+            user = User.objects.filter(telegram_id=str(chat_id)).first()
+            if user and (user.metadata or {}).get("telegram_problem") != marker:
+                metadata = dict(user.metadata or {})
+                metadata["telegram_problem"] = marker
+                user.metadata = metadata
+                user.save(update_fields=["metadata"])
         return None
 
 

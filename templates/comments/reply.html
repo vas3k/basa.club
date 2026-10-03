@@ -11,7 +11,7 @@
             {% include "comments/widgets/edit.html" %}
             {% include "comments/widgets/delete.html" %}
         {% endif %}
-        {% comment_upvote comment voted_comments "tiny" %}
+        {% comment_upvote comment "tiny" %}
         {% if request.user.is_authenticated %}
             <button type="button" class="comment-action comment-reply-action" title="Ответить" data-behavior="toggle" data-mode="show" data-target="#reply-form-{{ comment.reply_to_id }}">
                 <i class="fas fa-reply"></i>

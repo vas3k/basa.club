@@ -136,7 +136,7 @@ Mount an island from any template using the `island` tag (available everywhere, 
 {% island "MarkdownEditor" name="description" value=form.description.value|default:"" %}
 ```
 
-Keyword arguments become React props, so they must be JSON-serializable. Names are converted to camelCase (`upvote_url=...` becomes `upvoteUrl`). If props need Python logic (permissions, URLs), wrap the island in a template tag, like `{% item_upvote item voted_items %}` in `items/templatetags/listing.py`. Inside a `<form>`, an island renders regular inputs with proper `name` attributes, so a normal form POST submits them.
+Keyword arguments become React props, so they must be JSON-serializable. Names are converted to camelCase (`upvote_url=...` becomes `upvoteUrl`). If props need Python logic (permissions, URLs), wrap the island in a template tag, like `{% item_upvote item %}` in `items/templatetags/listing.py`. Inside a `<form>`, an island renders regular inputs with proper `name` attributes, so a normal form POST submits them.
 
 Islands are code-split: React and each island's code load only on pages that use them, so heavy islands (like the markdown editor) don't slow down other pages.
 

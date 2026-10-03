@@ -12,6 +12,9 @@
                 <div class="profile-info">
                     <div class="profile-name">
                         {% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}
+                        {% if profile_user.club_slug %}
+                            <a class="profile-club" href="{{ settings.CLUB_BASE_URL }}/user/{{ profile_user.club_slug }}/" target="_blank" rel="noopener noreferrer" title="Профиль в Вастрик Клубе" aria-label="Профиль в Вастрик Клубе">✖︎</a>
+                        {% endif %}
                         {% if is_owner %}
                             <a href="{% url "user_profile_edit" profile_user.slug %}" class="profile-edit" title="Редактировать" aria-label="Редактировать">
                                 <i class="fas fa-edit"></i>
@@ -21,56 +24,26 @@
 
                     {% if profile_user.city or profile_user.country %}
                         <div class="profile-place">
-                            {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
+                            🌍 {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
                         </div>
-                    {% endif %}
-
-                    <div class="profile-activity">
-                        В базе {{ profile_user.created_at|timesince }} назад
-                        {% if profile_user.last_activity_at %}
-                            · был {{ profile_user.last_activity_at|timesince }} назад
-                        {% endif %}
-                    </div>
-
-                    {% if profile_user.position %}
-                        <div class="profile-position">{{ profile_user.position }}</div>
                     {% endif %}
 
                     {% if profile_user.bio %}
                         <div class="profile-bio markdown-text">{{ profile_user.bio|markdown }}</div>
                     {% endif %}
-
-                    <a class="button profile-club" href="{{ settings.CLUB_BASE_URL }}/user/{{ profile_user.slug }}/" target="_blank" rel="noopener noreferrer">Профиль в Вастрик Клубе</a>
                 </div>
             </div>
 
             <div class="profile-stats">
                 <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
-                <div class="profile-stat">Объявления <b>{{ profile_user.items_count }}</b></div>
-                <div class="profile-stat">Комментарии <b>{{ profile_user.comments_count }}</b></div>
-                <div class="profile-stat">Голоса <b>{{ profile_user.upvotes }}</b></div>
+                <div class="profile-stat">Зарегистрирован: {{ profile_user.created_at|date:"F Y" }}</div>
+                <div class="profile-stat">Активность: {{ profile_user.last_activity_at|timesince }} назад</div>
+                <div class="profile-stat"><b>{{ profile_user.items_count }}</b> {{ profile_user.items_count|pluralize:"запись,записи,записей" }}</div>
+                <div class="profile-stat"><b>{{ profile_user.comments_count }}</b> {{ profile_user.comments_count|pluralize:"комментарий,комментария,комментариев" }}</div>
+
             </div>
         </div>
     </div>
-
-    {% if is_owner %}
-        <div class="block profile-subscriptions">
-            <div class="profile-subscriptions-title">Уведомления</div>
-            {% for subscription in subscriptions %}
-                <div class="profile-subscription">
-                    <span class="profile-subscription-label">{{ subscription.label }}</span>
-                    <form method="post" action="{% url "subscription_remove" subscription.id %}">
-                        {% csrf_token %}
-                        <button type="submit" class="profile-subscription-remove" title="Отписаться" aria-label="Отписаться">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </form>
-                </div>
-            {% empty %}
-                <div class="profile-subscriptions-empty">Подписок пока нет</div>
-            {% endfor %}
-        </div>
-    {% endif %}
 
     <div class="profile-feed">
         <div class="block-header block-header-with-button">Объявления</div>

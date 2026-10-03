@@ -1,0 +1,72 @@
+{% extends "layout_with_sidebar.html" %}
+
+{% block title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block og_title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+
+{% block content %}
+    {% if current_category %}
+        <section class="content-subcategories">
+            <a href="{% listing_url category=current_category.id %}" class="content-subcategory {% if not current_subcategory %}content-subcategory-active{% endif %}">
+                <span class="content-subcategory-icon">
+                    <i class="fas fa-th-large"></i>
+                </span>
+                <span class="content-subcategory-name">
+                    Все
+                    {% if current_category.items_count %}
+                        <span class="content-subcategory-count">{{ current_category.items_count }}</span>
+                    {% endif %}
+                </span>
+            </a>
+            {% for subcategory in current_category.children.all %}
+                <a href="{% listing_url category=current_category.id subcategory=subcategory.id %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
+                    <span class="content-subcategory-icon">
+                        {{ subcategory.icon|safe }}
+                    </span>
+                    <span class="content-subcategory-name">
+                        {{ subcategory.name }}
+                        {% if subcategory.items_count %}
+                            <span class="content-subcategory-count">{{ subcategory.items_count }}</span>
+                        {% endif %}
+                    </span>
+                </a>
+            {% endfor %}
+        </section>
+    {% endif %}
+
+    <div class="content-feed-bar">
+        <form class="content-feed-settings" method="get" data-behavior="form-change">
+            {% if request.GET.query %}
+                <input type="hidden" name="query" value="{{ request.GET.query }}">
+            {% endif %}
+            <label class="content-feed-setting">
+                Сортировка
+                <select name="sort">
+                    <option value="" {% if feed_sort == "standard" %}selected{% endif %}>Стандартная</option>
+                    <option value="date" {% if feed_sort == "date" %}selected{% endif %}>По дате</option>
+                    <option value="rating" {% if feed_sort == "rating" %}selected{% endif %}>По рейтингу</option>
+                </select>
+            </label>
+            <label class="content-feed-setting">
+                <input type="checkbox" name="hide_global" value="1" {% if hide_global %}checked{% endif %}>
+                Скрыть глобальные
+            </label>
+        </form>
+        {% if show_listing_subscribe %}
+            {% include "notifications/widgets/subscribe_button.html" %}
+        {% endif %}
+    </div>
+
+    <section class="content-items">
+        {% for item in items %}
+            {% include "items/list/default.html" %}
+        {% empty %}
+            <div class="block feed-empty">
+                <p>Тут пока ничего нет</p>
+                <p>Но вы можете добавить сюда что-то свое!</p>
+                <a href="{% url "item_create" %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+            </div>
+        {% endfor %}
+    </section>
+
+    {% paginator items %}
+{% endblock %}

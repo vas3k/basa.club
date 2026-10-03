@@ -812,7 +812,6 @@ def insert_users(users):
             "0",
             "0",
             "0",
-            "'{}'::jsonb",
             sql_quote(user["created_at"]),
             sql_quote(user["created_at"]),
             "'{}'::varchar[]",
@@ -822,7 +821,7 @@ def insert_users(users):
     return f"""
 INSERT INTO users (
     id, password, slug, email, full_name, bio, city, country,
-    rating, upvotes, items_count, comments_count, profile_cache,
+    rating, upvotes, items_count, comments_count,
     created_at, updated_at, roles, is_staff, is_superuser
 ) VALUES
 {','.join(values)};

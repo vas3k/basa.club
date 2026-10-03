@@ -54,7 +54,7 @@
     justify-content: flex-start;
 }
 
-/* Item page and list card: tags and upvote on top, actions on the bottom right. */
+/* Item page and list card: place and category with the rating button, actions on the bottom right. */
 
 .item-show {
     display: flex;
@@ -67,18 +67,16 @@
     display: flex;
     flex-direction: column;
     align-items: stretch;
-    gap: 14px;
+    gap: 24px;
     margin-bottom: 0;
+    padding-top: 15px;
 }
 
-.item-head {
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
+.item-header {
     width: 100%;
 }
 
-.item-head .item-tags {
+.item-header .item-tags {
     flex: 1;
     min-width: 0;
     margin-bottom: 0;
@@ -100,13 +98,63 @@
     width: 100%;
 }
 
-.item-upvote {
+.item-title-row {
     display: flex;
-    flex-direction: row;
     align-items: center;
-    gap: 8px;
+    gap: 12px;
+    margin-bottom: 8px;
+}
+
+.item-title-row .item-card-title,
+.item-title-row .item-show-title {
+    flex: 1;
+    min-width: 0;
+    margin-bottom: 0;
+}
+
+.item-upvote {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
     flex-shrink: 0;
     margin-left: auto;
+    height: 40px;
+    padding: 0 12px;
+    border: 2px solid #1f8a4c;
+    border-radius: var(--button-border-radius);
+    background: var(--block-bg-color);
+    color: #1f8a4c;
+    font-family: inherit;
+    font-size: 132%;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+}
+
+.item-upvote-rating {
+    font-weight: 800;
+}
+
+.item-upvote:hover:not(:disabled) {
+    background: #e7f6ee;
+}
+
+.item-upvote.is-voted {
+    background: #1f8a4c;
+    color: #fff;
+}
+
+.item-upvote.is-voted:hover:not(:disabled) {
+    background: #187a42;
+    color: #fff;
+}
+
+.item-upvote:disabled {
+    cursor: default;
+    opacity: 0.55;
 }
 
 .item-main {
@@ -181,6 +229,10 @@
     font-size: 70%;
 }
 
+    .item-tag-separator-wide {
+        margin: 0 10px;
+    }
+
 .item-badges {
     display: flex;
     flex-wrap: wrap;
@@ -199,7 +251,7 @@
 
 .item-card-title {
     display: block;
-    margin-bottom: 10px;
+    margin: 0;
     font-size: 180%;
     font-weight: 700;
     line-height: 1.25;
@@ -213,11 +265,15 @@
 }
 
 .item-show-title {
-    margin: 0 0 24px;
+    margin: 0;
     font-size: 260%;
     font-weight: 700;
     line-height: 1.15;
     overflow-wrap: anywhere;
+}
+
+.item-show .item-title-row {
+    margin-bottom: 12px;
 }
 
 .item-show-description {
@@ -361,14 +417,14 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: 6px;
+    gap: 4px;
     box-sizing: border-box;
-    min-width: 42px;
-    height: 42px;
-    padding: 0 10px;
-    border: var(--button-border);
+    min-width: 32px;
+    height: 32px;
+    padding: 0 8px;
+    border: none;
     border-radius: var(--button-border-radius);
-    background: var(--block-bg-color);
+    background: var(--highlight-bg);
     color: var(--text-color);
     font-family: inherit;
     font-size: 90%;
@@ -382,8 +438,17 @@
 
 .item-action:hover,
 .item-action[data-copied] {
-    background-color: var(--button-bg-color);
-    color: var(--button-color);
+    background-color: var(--highlight-bg-active);
+    color: var(--text-color);
+}
+
+.item-action-static {
+    cursor: default;
+}
+
+.item-action-static:hover {
+    background: var(--highlight-bg);
+    color: var(--text-color);
 }
 
 .item-action:disabled {
@@ -392,12 +457,76 @@
 }
 
 .item-action-icon {
-    width: 42px;
+    width: 32px;
     padding: 0;
 }
 
 .item-action[data-copied] .fa-share-alt::before {
     content: "\f00c";
+}
+
+.flag-popup-backdrop {
+    position: fixed;
+    inset: 0;
+    z-index: 80;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+    background: rgba(0, 0, 0, 0.45);
+}
+
+.flag-popup {
+    width: min(420px, 100%);
+    box-sizing: border-box;
+    padding: 24px;
+    background: var(--block-bg-color);
+    border-radius: var(--block-border-radius);
+    box-shadow: var(--block-shadow-hover);
+}
+
+.flag-popup-title {
+    font-size: 130%;
+    font-weight: 700;
+}
+
+.flag-popup-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin: 16px 0;
+}
+
+.flag-popup-reason {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    font-weight: 500;
+    cursor: pointer;
+}
+
+.flag-popup-reason input {
+    width: 18px;
+    height: 18px;
+    margin: 0;
+    cursor: pointer;
+}
+
+.flag-popup-comment {
+    min-height: 90px;
+}
+
+.flag-popup-error {
+    margin-top: 8px;
+    color: #ff1917;
+    font-size: 90%;
+}
+
+.flag-popup-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 8px;
+    margin-top: 16px;
 }
 
 .item-bookmark-remove {

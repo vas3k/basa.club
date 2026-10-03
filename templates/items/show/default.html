@@ -3,16 +3,15 @@
 {% block item %}
     <div class="item-page">
         <article class="block item-show{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
-            <div class="item-head">
+            <div class="item-header">
                 {% include "items/widgets/tags.html" %}
-                <div class="item-upvote">
-                    {% item_upvote item voted_items %}
-                    {% include "common/widgets/rating.html" with rating=item.rating %}
-                </div>
             </div>
 
             <div class="item-main">
-                <h1 class="item-show-title">{{ item.title }}</h1>
+                <div class="item-title-row">
+                    <h1 class="item-show-title">{{ item.title }}</h1>
+                    {% item_upvote item %}
+                </div>
 
                 {% include "items/widgets/badges.html" %}
 

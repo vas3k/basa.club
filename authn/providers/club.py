@@ -6,24 +6,46 @@ from django.conf import settings
 oauth = OAuth()
 oauth.register(**settings.CLUB_OPENID_CONFIG)
 
-PROFILE_FIELDS = ("full_name", "avatar", "bio", "company", "position", "city", "country", "contact")
+PROFILE_FIELDS = ("full_name", "avatar", "city", "country", "contact")
 
 
-def apply_club_profile(user, profile):
+def _text(value):
+    if isinstance(value, dict):
+        value = value.get("name") or value.get("title") or ""
+    if value is None:
+        return ""
+    return str(value).strip()
+
+
+def club_bio(profile):
+    """position, company, then the club bio, joined into one markdown field."""
+    data = profile.get("user") if isinstance(profile, dict) else None
+    if not isinstance(data, dict):
+        data = {}
+    headline = " — ".join(part for part in (_text(data.get("position")), _text(data.get("company"))) if part)
+    if headline:
+        headline = f"💼 {headline}"
+    bio = _text(data.get("bio"))
+    return "\n\n".join(part for part in (headline, bio) if part)
+
+
+def apply_club_profile(user, profile, *, club_slug=None, fill_bio=False):
     """Copy whatever the Club API sent. Every field is optional."""
     data = profile.get("user") if isinstance(profile, dict) else None
     if not isinstance(data, dict):
         data = {}
 
     for field in PROFILE_FIELDS:
-        value = data.get(field)
-        if isinstance(value, dict):
-            value = value.get("name") or value.get("title") or ""
-        if value is None:
-            continue
-        value = str(value).strip()
+        value = _text(data.get(field))
         if value:
             setattr(user, field, value)
+
+    if fill_bio:
+        user.bio = club_bio(profile) or None
+
+    slug = _text(club_slug) or _text(data.get("slug"))
+    if slug:
+        user.club_slug = slug[:64]
 
     upvotes = data.get("upvotes")
     if isinstance(upvotes, bool) or upvotes is None:
@@ -55,5 +77,4 @@ def apply_club_profile(user, profile):
     if isinstance(hat, (dict, list)) and hat:
         user.hat = hat
 
-    user.profile_cache = profile if isinstance(profile, dict) else {}
     return user

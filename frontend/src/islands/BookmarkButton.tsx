@@ -3,7 +3,7 @@ import { useState } from "react";
 import { postJson } from "../lib/http";
 
 type Props = {
-    bookmarkCount: number;
+    bookmarkCount: string;
     bookmarkUrl: string;
     loginUrl?: string | null;
 };
@@ -26,7 +26,7 @@ export default function BookmarkButton({ bookmarkCount, bookmarkUrl, loginUrl }:
         setIsPending(true);
         try {
             const data = await postJson<BookmarkResponse>(bookmarkUrl);
-            setCount(data.bookmark_count);
+            setCount(String(data.bookmark_count));
         } catch (error) {
             console.error("Bookmark failed", error);
         } finally {

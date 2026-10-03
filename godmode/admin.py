@@ -42,6 +42,8 @@ class ClubAdminField:
                 rendered = "✅" if value else "❌"
             else:
                 rendered = str(value)
+                if self.model_field is not None and self.model_field.choices:
+                    rendered = str(dict(self.model_field.flatchoices).get(value, rendered))
                 if len(rendered) > 150:
                     rendered = rendered[:150] + "..."
         except Exception:

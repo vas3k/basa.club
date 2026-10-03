@@ -8,7 +8,7 @@
             {% include "users/widgets/user_small.html" with user=comment.author %}
         {% endif %}
         <div class="comment-upvote">
-            {% comment_upvote comment voted_comments %}
+            {% comment_upvote comment %}
             {% include "common/widgets/rating.html" with rating=comment.rating %}
         </div>
     </div>

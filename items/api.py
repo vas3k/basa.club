@@ -4,6 +4,7 @@ from django.views.decorators.http import require_POST
 
 from common import counters
 from common.request import parse_ip_address, parse_useragent
+from common.templatetags.text import rating as format_rating
 from items.models import Item, ItemVote
 
 
@@ -31,7 +32,7 @@ def upvote_item(request, item_id):
     if created:
         counters.item_upvoted(item)
 
-    return JsonResponse({"upvotes": item.upvotes, "voted": True})
+    return JsonResponse({"rating": format_rating(item.rating), "voted": True})
 
 
 @require_POST
@@ -48,4 +49,4 @@ def retract_item_vote(request, item_id):
     if deleted:
         counters.item_unvoted(item)
 
-    return JsonResponse({"upvotes": item.upvotes, "voted": False})
+    return JsonResponse({"rating": format_rating(item.rating), "voted": False})

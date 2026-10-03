@@ -4,6 +4,7 @@ from django import template
 from django.urls import reverse
 
 from common.templatetags.islands import island
+from common.templatetags.text import rating
 
 register = template.Library()
 
@@ -25,8 +26,8 @@ def listing_url(context, country="", city="", category="", subcategory=""):
     country = country or request.country_id
     city = city or request.city_id
 
-    if country == "everywhere" and city == "everywhere" and not category:
-        path = "/"
+    if not category and city == "everywhere":
+        path = "/" if country == "everywhere" else f"/{country}/"
     else:
         path = f"/{country}/{city}/"
         if category:
@@ -45,16 +46,17 @@ def item_url(item):
 
 
 @register.simple_tag(takes_context=True)
-def item_upvote(context, item, voted_items=None):
-    """{% item_upvote item voted_items %} where voted_items is a set of item ids voted by the current user"""
+def item_upvote(context, item):
+    """{% item_upvote item %} — item.upvoted_at comes from Item.objects_for_user"""
     user = context["request"].user
     is_own = user.is_authenticated and user.pk == item.author_id
+    voted = bool(getattr(item, "upvoted_at", None))
     return island(
-        "UpvoteButton",
-        upvotes=item.upvotes,
-        voted=item.id in (voted_items or ()),
+        "ItemUpvote",
+        rating=rating(item.rating),
+        voted=voted,
         upvote_url=reverse("item_upvote", args=[item.id]),
         retract_url=reverse("item_retract_vote", args=[item.id]),
         login_url=None if user.is_authenticated else reverse("login"),
-        disabled=is_own or item.visibility == item.VISIBILITY_DRAFT,
+        disabled=(is_own or item.visibility == item.VISIBILITY_DRAFT) and not voted,
     )

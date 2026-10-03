@@ -159,7 +159,7 @@ def godmode_delete_model(request, model_name, item_id):
         return render(request, "godmode/confirm.html", {
             "admin": ADMIN,
             "title": f"Удалить {admin_model.title}: {item_id}?",
-            "message": "Для объявлений, комментариев и пользователей это мягкое удаление",
+            "message": "Для записей, комментариев и пользователей это мягкое удаление",
             "button": "Да, удаляем",
         })
 

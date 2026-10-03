@@ -3,6 +3,7 @@ from django.urls import include, path
 
 from authn.views import banned, bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
 from bookmarks.api import toggle_item_bookmark
+from complaints.api import flag_item
 from bookmarks.views import bookmarks_page, remove_bookmark
 from comments.api import retract_comment_vote, upvote_comment
 from godmode.views.main import (
@@ -56,6 +57,7 @@ urlpatterns = [
     path("api/subscriptions/toggle/", toggle_listing_subscription, name="subscription_toggle"),
     path("api/items/<uuid:item_id>/upvote/", upvote_item, name="item_upvote"),
     path("api/items/<uuid:item_id>/bookmark/", toggle_item_bookmark, name="item_bookmark"),
+    path("api/items/<uuid:item_id>/flag/", flag_item, name="item_flag"),
     path("api/items/<uuid:item_id>/retract_vote/", retract_item_vote, name="item_retract_vote"),
     path("api/images/", upload_image, name="image_upload"),
 
@@ -70,6 +72,7 @@ urlpatterns = [
     path("api/comments/<uuid:comment_id>/upvote/", upvote_comment, name="comment_upvote"),
     path("api/comments/<uuid:comment_id>/retract_vote/", retract_comment_vote, name="comment_retract_vote"),
 
+    path("<str:country>/", index_page, name="country_index"),
     path("<str:country>/<str:city>/", listing_page, name="listing"),
     path("<str:country>/<str:city>/<slug:category>/", listing_page, name="listing_category"),
     path("<str:country>/<str:city>/<slug:category>/<uuid:item_id>/", item_page, name="item_without_subcategory"),

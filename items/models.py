@@ -1,7 +1,8 @@
 from uuid import uuid4
 
 from django.db import models
-from django.db.models import Q
+from django.db.models import BigIntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Extract, Round
 from django.utils import timezone
 
 from common.contacts import present_contacts
@@ -63,6 +64,7 @@ class Item(SoftDeleteMixin, models.Model):
     rating = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
     bookmark_count = models.IntegerField(default=0)
+    view_count = models.IntegerField(default=0)
     published_at = models.DateTimeField(null=True, blank=True, db_index=True)
     expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
@@ -87,16 +89,32 @@ class Item(SoftDeleteMixin, models.Model):
         )
 
     @classmethod
+    def objects_for_user(cls, user, queryset=None):
+        queryset = cls.visible_objects() if queryset is None else queryset
+        if not user or not user.is_authenticated:
+            return queryset
+
+        vote_qs = ItemVote.objects.filter(item=OuterRef("pk"), user=user)
+        return queryset.annotate(
+            upvoted_at=Subquery(
+                vote_qs.annotate(
+                    epoch_ms=Round(Extract("created_at", "epoch") * 1000)
+                ).values("epoch_ms")[:1],
+                output_field=BigIntegerField(),
+            ),
+        )
+
+    @classmethod
     def for_author(cls, author):
         return cls.objects.select_related(
             "category", "subcategory", "country", "city", "author",
         ).filter(author=author)
 
     @classmethod
-    def fetch(cls, **lookup):
-        return cls.objects.select_related(
+    def fetch(cls, *, user=None, **lookup):
+        return cls.objects_for_user(user, cls.objects.select_related(
             "category", "subcategory", "country", "city", "author",
-        ).get(**lookup)
+        )).get(**lookup)
 
     def get_absolute_url(self):
         country = self.country_id or "everywhere"
@@ -129,9 +147,3 @@ class ItemVote(models.Model):
     class Meta:
         db_table = "item_votes"
         unique_together = [["user", "item"]]
-
-    @classmethod
-    def voted_item_ids(cls, user, items):
-        if not user.is_authenticated:
-            return set()
-        return set(cls.objects.filter(user=user, item__in=items).values_list("item_id", flat=True))

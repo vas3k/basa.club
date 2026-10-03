@@ -16,7 +16,7 @@
         <section class="comments" id="comments">
             <div class="comments-header">
                 Комментарии
-                <span class="item-badge">{{ item.comment_count }}</span>
+                <span class="item-badge">{{ item.comment_count|cool_number }}</span>
             </div>
 
             {% for node in comments_tree %}

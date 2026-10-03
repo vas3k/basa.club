@@ -2,7 +2,8 @@ from uuid import uuid4
 
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import Q
+from django.db.models import BigIntegerField, OuterRef, Q, Subquery
+from django.db.models.functions import Extract, Round
 from django.utils import timezone
 
 from common.models import SoftDeleteManager, SoftDeleteMixin, SoftDeleteQuerySet
@@ -31,8 +32,8 @@ class Comment(SoftDeleteMixin, models.Model):
     VIBE_BAD = "bad"
     VIBE_NEUTRAL = "neutral"
     VIBES = (
-        (VIBE_GOOD, "👍 Попробовал, доволен"),
-        (VIBE_BAD, "👎 Попробовал, не доволен"),
+        (VIBE_GOOD, "👍 Пробовал, доволен"),
+        (VIBE_BAD, "👎 Пробовал, не доволен"),
         (VIBE_NEUTRAL, "💬 Нейтрально"),
     )
 
@@ -60,9 +61,11 @@ class Comment(SoftDeleteMixin, models.Model):
         if self.reply_to_id:
             parent = Comment.objects.filter(pk=self.reply_to_id).first()
             if not parent or parent.item_id != self.item_id:
-                raise ValidationError("Ответ должен быть к комментарию этого объявления")
+                raise ValidationError("Этот комментарий не существует")
+
             if parent.reply_to_id:
                 raise ValidationError("Отвечать можно только на исходный комментарий")
+
         super().save(*args, **kwargs)
 
     def delete(self, using=None, keep_parents=False, by=None):
@@ -80,6 +83,22 @@ class Comment(SoftDeleteMixin, models.Model):
     @classmethod
     def visible_objects(cls):
         return cls.objects.select_related("author", "reply_to")
+
+    @classmethod
+    def objects_for_user(cls, user, queryset=None):
+        queryset = cls.visible_objects() if queryset is None else queryset
+        if not user or not user.is_authenticated:
+            return queryset
+
+        vote_qs = CommentVote.objects.filter(comment=OuterRef("pk"), user=user)
+        return queryset.annotate(
+            upvoted_at=Subquery(
+                vote_qs.annotate(
+                    epoch_ms=Round(Extract("created_at", "epoch") * 1000)
+                ).values("epoch_ms")[:1],
+                output_field=BigIntegerField(),
+            ),
+        )
 
 
 class CommentVote(models.Model):

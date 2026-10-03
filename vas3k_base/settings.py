@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "items.apps.ItemsConfig",
     "comments.apps.CommentsConfig",
     "bookmarks.apps.BookmarksConfig",
+    "complaints.apps.ComplaintsConfig",
     "notifications.apps.NotificationsConfig",
     "godmode.apps.GodmodeConfig",
 ]
@@ -85,6 +86,7 @@ TEMPLATES = [
                 "items.templatetags.listing",
                 "comments.templatetags.comments",
                 "bookmarks.templatetags.bookmarks",
+                "complaints.templatetags.complaints",
                 "common.templatetags.islands",
                 "common.templatetags.text",
                 "common.templatetags.paginator",

@@ -112,14 +112,14 @@ def club_callback(request):
     if user:
         if not user.email or user.email != userinfo["email"]:
             user.email = userinfo["email"]
-        club.apply_club_profile(user, club_profile)
+        club.apply_club_profile(user, club_profile, club_slug=user_slug)
         user.save()
     else:
         user = User.objects.create_user(
             username=userinfo["sub"],
             email=userinfo["email"],
         )
-        club.apply_club_profile(user, club_profile)
+        club.apply_club_profile(user, club_profile, club_slug=user_slug, fill_bio=True)
         user.save()
         created = True
 

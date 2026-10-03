@@ -6,35 +6,31 @@ from django.views.decorators.http import require_POST
 from bookmarks.models import Bookmark
 from common import counters
 from common.pagination import paginate
-from items.models import Item, ItemVote
+from items.models import Item
 from notifications.models import Subscription
 
 
 @login_required
 def bookmarks_page(request):
-    bookmarks = paginate(
+    items = paginate(
         request,
-        Bookmark.objects.filter(user=request.user, item__deleted_at__isnull=True)
-        .select_related(
-            "item",
-            "item__category",
-            "item__subcategory",
-            "item__country",
-            "item__city",
-            "item__author",
-        )
-        .order_by("-created_at"),
+        Item.objects_for_user(request.user, Item.objects.select_related(
+            "category",
+            "subcategory",
+            "country",
+            "city",
+            "author",
+        ).filter(bookmarks__user=request.user).order_by("-bookmarks__created_at")),
     )
-    items = [bookmark.item for bookmark in bookmarks]
     subscriptions = (
         Subscription.objects.filter(user=request.user)
         .select_related("country", "city", "category")
         .order_by("-created_at")
     )
+    
     return render(request, "bookmarks/index.html", {
-        "bookmarks": bookmarks,
+        "items": items,
         "subscriptions": subscriptions,
-        "voted_items": ItemVote.voted_item_ids(request.user, items),
     })
 
 
@@ -42,6 +38,7 @@ def bookmarks_page(request):
 @require_POST
 def remove_bookmark(request, item_id):
     deleted, _ = Bookmark.objects.filter(user=request.user, item_id=item_id).delete()
+
     if deleted:
         item = Item.objects.filter(pk=item_id).first()
         if item:
@@ -50,4 +47,5 @@ def remove_bookmark(request, item_id):
     next_url = request.POST.get("next") or ""
     if next_url != "/bookmarks" and not next_url.startswith("/bookmarks?") and not next_url.startswith("/bookmarks/"):
         next_url = reverse("bookmarks")
+
     return redirect(next_url)

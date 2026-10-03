@@ -4,11 +4,11 @@ from django.http import Http404
 from django.shortcuts import redirect, render
 from django.views.decorators.http import require_http_methods
 
-from comments.models import Comment, CommentVote
+from comments.models import Comment
 from common.pagination import paginate
 from common.users import get_user_or_404
 from geo.models import GeoCity, GeoCountry
-from items.models import Item, ItemVote
+from items.models import Item
 from users.forms import EVERYWHERE, ProfileForm, WelcomeForm
 from notifications.subscriptions import subscribe_to_geo
 
@@ -24,26 +24,23 @@ def profile_page(request, slug):
     is_owner = request.user.pk == profile_user.pk
     active_items = paginate(
         request,
-        Item.visible_objects().filter(author=profile_user),
+        Item.objects_for_user(request.user).filter(author=profile_user),
         settings.PROFILE_POSTS_PAGE_SIZE,
     )
     inactive_items = paginate(
         request,
-        Item.for_author(profile_user).exclude(pk__in=Item.visible_objects().filter(author=profile_user).values("pk")) if is_owner else Item.objects.none(),
+        Item.objects_for_user(request.user, Item.for_author(profile_user).exclude(pk__in=Item.visible_objects().filter(author=profile_user).values("pk"))) if is_owner else Item.objects.none(),
         settings.PROFILE_POSTS_PAGE_SIZE,
         "inactive_page",
     )
     comments = paginate(
         request,
-        Comment.visible_objects()
+        Comment.objects_for_user(request.user)
         .filter(author=profile_user, reply_to__isnull=True)
         .select_related("item", "item__city", "item__subcategory")
         .order_by("-created_at"),
         settings.PROFILE_COMMENTS_PAGE_SIZE,
         "comments_page",
-    )
-    voted_comments = set(
-        CommentVote.objects.filter(user=request.user, comment__in=comments.object_list).values_list("comment_id", flat=True)
     )
 
     return render(request, "users/profile.html", {
@@ -52,8 +49,6 @@ def profile_page(request, slug):
         "active_items": active_items,
         "inactive_items": inactive_items,
         "comments": comments,
-        "voted_comments": voted_comments,
-        "voted_items": ItemVote.voted_item_ids(request.user, list(active_items) + list(inactive_items)),
     })
 
 
@@ -98,13 +93,16 @@ def welcome(request):
         "country": country_id,
         "city": city_id,
     })
+    
     if request.method == "POST" and form.is_valid():
         user = form.save(commit=False)
         metadata = dict(user.metadata or {})
         metadata["welcome_completed"] = True
         user.metadata = metadata
-        subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
         user.save()
+
+        subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
+        
         return redirect("user_profile", slug="me")
 
     country_id = form["country"].value() or ""

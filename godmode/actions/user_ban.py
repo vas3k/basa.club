@@ -82,7 +82,7 @@ def post_ban_action(request, user: User, **context):
         return render(request, "godmode/message.html", {
             **context,
             "title": f"{user.full_name or user.slug} разбанен",
-            "message": "Снова может публиковать объявления",
+            "message": "Снова можно писать и комментировать",
         })
 
     if data["is_permanent"]:

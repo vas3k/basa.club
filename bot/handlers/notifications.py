@@ -19,9 +19,10 @@ async def unsubscribe_callback(update: Update, context: CallbackContext) -> None
             await query.answer("Это не ваша подписка", show_alert=True)
             return
         if result == "removed":
-            await query.answer("Больше не присылаем такие объявления")
+            await query.answer("Ок, больше не присылаем новое из этого раздела")
         else:
-            await query.answer("Подписка уже снята")
+            await query.answer("Вы уже отписались от этого раздела")
+
         await _drop_unsubscribe_button(query)
     finally:
         close_old_connections()
@@ -35,6 +36,7 @@ async def _drop_unsubscribe_button(query):
             kept = [button for button in row if not (button.callback_data or "").startswith("unsub:")]
             if kept:
                 rows.append(kept)
+                
     try:
         await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(rows))
     except Exception:

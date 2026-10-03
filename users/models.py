@@ -71,8 +71,7 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     full_name = models.CharField(max_length=128, null=True, blank=True)
     avatar = models.URLField(null=True, blank=True)
     bio = models.TextField(null=True, blank=True)
-    company = models.TextField(null=True, blank=True)
-    position = models.TextField(null=True, blank=True)
+    club_slug = models.CharField(max_length=64, null=True, blank=True)
     city = models.CharField(max_length=128, null=True, blank=True)
     country = models.CharField(max_length=128, null=True, blank=True)
     contact = models.CharField(max_length=256, null=True, blank=True)
@@ -87,7 +86,6 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     telegram_data = models.JSONField(null=True, blank=True)
     last_activity_at = models.DateTimeField(null=True, blank=True)
 
-    profile_cache = models.JSONField(default=dict, null=True, blank=True)
     metadata = models.JSONField(default=dict, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
