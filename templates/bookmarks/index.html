@@ -3,6 +3,27 @@
 {% block title %}Закладки — {{ block.super }}{% endblock %}
 
 {% block content %}
+    {% if subscriptions %}
+        <div class="block-header block-header-with-button">Уведомления</div>
+        <section class="block subscriptions">
+            {% for subscription in subscriptions %}
+                <div class="subscription-row">
+                    <a class="subscription-label" href="{{ subscription.listing_url }}" data-behavior="geo-link" data-country="{{ subscription.country_id|default:'everywhere' }}" data-city="{{ subscription.city_id|default:'everywhere' }}">
+                        <i class="far fa-bell"></i>
+                        <span>{{ subscription.label }}</span>
+                    </a>
+                    <form method="post" action="{% url "subscription_remove" subscription.id %}" class="subscription-remove">
+                        {% csrf_token %}
+                        <input type="hidden" name="next" value="{{ request.get_full_path }}">
+                        <button type="submit" class="item-action item-action-icon" title="Отписаться" aria-label="Отписаться от {{ subscription.label }}">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+            {% endfor %}
+        </section>
+    {% endif %}
+
     <div class="block-header block-header-with-button">Закладки</div>
     <section class="content-items">
         {% for bookmark in bookmarks %}

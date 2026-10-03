@@ -53,6 +53,25 @@
         </div>
     </div>
 
+    {% if is_owner %}
+        <div class="block profile-subscriptions">
+            <div class="profile-subscriptions-title">Уведомления</div>
+            {% for subscription in subscriptions %}
+                <div class="profile-subscription">
+                    <span class="profile-subscription-label">{{ subscription.label }}</span>
+                    <form method="post" action="{% url "subscription_remove" subscription.id %}">
+                        {% csrf_token %}
+                        <button type="submit" class="profile-subscription-remove" title="Отписаться" aria-label="Отписаться">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </form>
+                </div>
+            {% empty %}
+                <div class="profile-subscriptions-empty">Подписок пока нет</div>
+            {% endfor %}
+        </div>
+    {% endif %}
+
     <div class="profile-feed">
         <div class="block-header block-header-with-button">Объявления</div>
         <section class="content-items">

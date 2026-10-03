@@ -26,7 +26,7 @@
             {% if request.user.is_authenticated %}
                 {% include "comments/form.html" %}
             {% else %}
-                <a href="{% url "login" %}?next={{ request.path|urlencode }}" class="button comments-login">Войти, чтобы комментировать</a>
+                <a href="{% url "login" %}" class="button comments-login">Войти, чтобы комментировать</a>
             {% endif %}
         </section>
     {% endblock %}

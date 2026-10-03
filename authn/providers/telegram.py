@@ -140,4 +140,5 @@ def finish(request):
         user.telegram_data = auth_code.telegram_data
         user.save()
         auth_code.delete()
+    user.just_created = True
     return user

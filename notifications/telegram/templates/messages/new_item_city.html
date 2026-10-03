@@ -1,0 +1,3 @@
+{% if subscription.city.icon %}{{ subscription.city.icon }} {% endif %}<b>Новое объявление: {{ subscription.city.name }}</b>{% if subscription.country %}, {{ subscription.country.name }}{% endif %}
+
+{% include "messages/_item.html" %}

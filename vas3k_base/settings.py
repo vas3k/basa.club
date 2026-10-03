@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     "items.apps.ItemsConfig",
     "comments.apps.CommentsConfig",
     "bookmarks.apps.BookmarksConfig",
+    "notifications.apps.NotificationsConfig",
 ]
 
 MIDDLEWARE = [
@@ -66,6 +67,7 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
+            os.path.join(BASE_DIR, "notifications", "telegram", "templates"),
         ],
         "APP_DIRS": False,
         "OPTIONS": {
@@ -76,6 +78,7 @@ TEMPLATES = [
                 "vas3k_base.context_processors.settings_processor",
                 "categories.context_processors.categories",
                 "geo.context_processors.geo",
+                "notifications.context_processors.listing_subscription",
             ],
             "builtins": [
                 "items.templatetags.listing",

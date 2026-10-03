@@ -6,6 +6,7 @@ from django.contrib.auth.models import PermissionsMixin
 from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
+from django.utils import timezone
 from django.utils.text import slugify
 
 from common.models import SoftDeleteMixin, SoftDeleteQuerySet
@@ -85,6 +86,7 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     last_activity_at = models.DateTimeField(null=True, blank=True)
 
     profile_cache = models.JSONField(default=dict, null=True, blank=True)
+    metadata = models.JSONField(default=dict, blank=True)
 
     created_at = models.DateTimeField(auto_now_add=True)
     updated_at = models.DateTimeField(auto_now=True)
@@ -116,3 +118,12 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
     @property
     def is_admin(self):
         return self.ROLE_ADMIN in self.roles
+
+    @property
+    def is_active_membership(self):
+        now = timezone.now()
+        if not self.membership_expires_at or self.membership_expires_at < now:
+            return False
+        if self.membership_started_at and self.membership_started_at > now:
+            return False
+        return True

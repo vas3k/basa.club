@@ -1,0 +1,54 @@
+{% extends "layout.html" %}
+
+{% block title %}
+    Добро пожаловать — {{ block.super }}
+{% endblock %}
+
+{% block content %}
+    <div class="block">
+        <div class="block-header">Добро пожаловать</div>
+        <div class="block-description">
+            Коротко о себе. Страну и город можно поменять потом.
+        </div>
+
+        <form method="post" action="{% url "welcome" %}">
+            {% csrf_token %}
+
+            <div class="form-group">
+                <label>{{ form.avatar.label }}</label>
+                {% island "ImageUpload" name="avatar" value=form.avatar.value|default:"" %}
+                {% if form.avatar.errors %}<div class="form-error">{{ form.avatar.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
+                {{ form.full_name }}
+                {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
+                {{ form.bio }}
+                {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors }}</div>{% endif %}
+            </div>
+
+            <div class="form-group">
+                <label for="{{ form.contact.id_for_label }}">{{ form.contact.label }}</label>
+                {{ form.contact }}
+                {% if form.contact.errors %}<div class="form-error">{{ form.contact.errors }}</div>{% endif %}
+            </div>
+
+            <div class="welcome-place">
+                {% island "LocationPicker" countries=countries_options country=country_id city=city_id allow_everywhere=True %}
+                <p class="form-help">Если вашей страны или города нет в списке, мы их пока не поддерживаем. Можно выбрать «Весь мир» или «Везде». Новые объявления для выбранного места будут приходить в телеграм.</p>
+                {% if form.country.errors or form.city.errors %}
+                    <div class="form-error">{{ form.country.errors }}{{ form.city.errors }}</div>
+                {% endif %}
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="button">Сохранить</button>
+            </div>
+        </form>
+    </div>
+{% endblock %}

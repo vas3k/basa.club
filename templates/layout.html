@@ -69,7 +69,7 @@
                                 <span class="avatar" style="background-image: url('{{ request.user.default_avatar }}');"></span>
                             </a>
                         {% else %}
-                            <a href="{% url "login" %}?next={% url "item_create" %}" class="button header-action header-create-guest"><i class="fas fa-plus"></i> Создать</a>
+                            <a href="{% url "login" %}" class="button header-action header-create-guest"><i class="fas fa-plus"></i> Создать</a>
                             <a href="{% url "bookmarks" %}" class="button header-action header-bookmarks" title="Закладки" aria-label="Закладки"><i class="far fa-star"></i></a>
                             <a href="{% url "login" %}" class="button header-action header-user-button header-login">
                                 Войти

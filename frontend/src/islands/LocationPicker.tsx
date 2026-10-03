@@ -6,13 +6,17 @@ type Props = {
     countries: CountryOption[];
     country?: string;
     city?: string;
+    allowEverywhere?: boolean;
 };
 
-export default function LocationPicker({ countries, country = "", city = "" }: Props) {
+const everywhere = "everywhere";
+
+export default function LocationPicker({ countries, country = "", city = "", allowEverywhere = false }: Props) {
     const [countryId, setCountryId] = useState(country);
-    const [cityId, setCityId] = useState(city);
+    const [cityId, setCityId] = useState(city || (allowEverywhere ? everywhere : ""));
 
     const cities = countries.find((c) => c.id === countryId)?.cities ?? [];
+    const wholeWorld = allowEverywhere && countryId === everywhere;
 
     return (
         <div className="form-row">
@@ -25,12 +29,16 @@ export default function LocationPicker({ countries, country = "", city = "" }: P
                     value={countryId}
                     onChange={(event) => {
                         setCountryId(event.target.value);
-                        setCityId("");
+                        setCityId(allowEverywhere ? everywhere : "");
                     }}
                 >
-                    <option value="" disabled>
-                        Выберите страну
-                    </option>
+                    {allowEverywhere ? (
+                        <option value={everywhere}>🌎 Весь мир</option>
+                    ) : (
+                        <option value="" disabled>
+                            Выберите страну
+                        </option>
+                    )}
                     {countries.map((c) => (
                         <option key={c.id} value={c.id}>
                             {c.icon} {c.name}
@@ -41,14 +49,19 @@ export default function LocationPicker({ countries, country = "", city = "" }: P
 
             <div className="form-group">
                 <label htmlFor="id_city">Город</label>
+                {wholeWorld && <input type="hidden" name="city" value={everywhere} />}
                 <select
                     id="id_city"
-                    name="city"
-                    value={cityId}
-                    disabled={!countryId}
+                    name={wholeWorld ? undefined : "city"}
+                    value={wholeWorld ? everywhere : cityId}
+                    disabled={!countryId || wholeWorld}
                     onChange={(event) => setCityId(event.target.value)}
                 >
-                    <option value="">Вся страна</option>
+                    {allowEverywhere ? (
+                        <option value={everywhere}>Везде</option>
+                    ) : (
+                        <option value="">Вся страна</option>
+                    )}
                     {cities.map((c) => (
                         <option key={c.id} value={c.id}>
                             {c.icon} {c.name}

@@ -34,7 +34,7 @@
     font-weight: 600;
     text-align: center;
     padding-bottom: 20px;
-    margin: 0 auto;
+    margin: 35px auto 0;
 }
 
 .block-header-big {
@@ -47,7 +47,7 @@
     align-items: center;
     text-align: left;
     padding-bottom: 20px;
-    margin: 0;
+    margin: 35px 0 0;
 }
 
 @media only screen and (max-width : 600px) {

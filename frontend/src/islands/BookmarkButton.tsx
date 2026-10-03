@@ -18,7 +18,7 @@ export default function BookmarkButton({ bookmarkCount, bookmarkUrl, loginUrl }:
 
     async function toggle() {
         if (loginUrl) {
-            window.location.href = `${loginUrl}?next=${encodeURIComponent(location.pathname + location.search)}`;
+            window.location.href = loginUrl;
             return;
         }
         if (isPending) return;

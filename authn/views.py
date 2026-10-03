@@ -9,7 +9,6 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.http import url_has_allowed_host_and_scheme
 from django.views.decorators.http import require_http_methods, require_POST
 from requests import HTTPError
 
@@ -20,44 +19,23 @@ from vas3k_base.exceptions import RateLimitException
 
 log = logging.getLogger(__name__)
 
-LOGIN_NEXT_SESSION_KEY = "login_next"
 
-
-def start_session(request, user, redirect_to):
+def start_session(request, user, *, new_user=False):
     login(request, user)
+    if new_user:
+        # False sends the user through /welcome/. A missing key is an older account.
+        metadata = dict(user.metadata or {})
+        metadata["welcome_completed"] = False
+        user.metadata = metadata
     request.session.set_expiry(settings.SESSION_COOKIE_AGE)
     user.last_activity_at = timezone.now()
-    user.save(update_fields=["last_activity_at"])
-    return redirect(redirect_to)
-
-
-def home_for(user):
-    if user.telegram_id:
-        return reverse("user_profile", kwargs={"slug": "me"})
-    return reverse("bot")
-
-
-def safe_next_url(request, url):
-    if url and url_has_allowed_host_and_scheme(url, allowed_hosts={request.get_host()}):
-        return url
-    return None
-
-
-def after_login_url(request, user, next_url=None):
-    # users without telegram must go through the bot onboarding first
-    next_url = safe_next_url(request, next_url or request.session.pop(LOGIN_NEXT_SESSION_KEY, None))
-    if next_url and user.telegram_id:
-        return next_url
-    return home_for(user)
+    user.save(update_fields=["last_activity_at", "metadata"])
+    return redirect("user_profile", slug="me")
 
 
 def log_in(request):
-    next_url = safe_next_url(request, request.GET.get("next"))
     if request.user.is_authenticated:
-        return redirect(after_login_url(request, request.user, next_url))
-
-    if next_url:
-        request.session[LOGIN_NEXT_SESSION_KEY] = next_url
+        return redirect("user_profile", slug="me")
 
     return render(request, "users/login.html")
 
@@ -125,6 +103,7 @@ def club_callback(request):
                        "<a href=\"https://vas3k.club\">Продлите</a> её здесь."
         })
 
+    created = False
     user = User.objects.filter(Q(email=userinfo["email"]) | Q(slug=userinfo["sub"])).first()
     if user:
         if not user.email or user.email != userinfo["email"]:
@@ -138,15 +117,13 @@ def club_callback(request):
         )
         club.apply_club_profile(user, club_profile)
         user.save()
+        created = True
 
-    return start_session(request, user, after_login_url(request, user, request.GET.get("goto")))
+    return start_session(request, user, new_user=created)
 
 
 def login_telegram(request):
-    try:
-        return redirect(telegram.bot_url(request))
-    except RateLimitException as ex:
-        return render(request, "error.html", {"title": ex.title, "message": ex.message})
+    return redirect("login")
 
 
 @login_required
@@ -168,4 +145,4 @@ def telegram_continue(request):
     if not isinstance(user, User):
         return user
 
-    return start_session(request, user, after_login_url(request, user))
+    return start_session(request, user, new_user=getattr(user, "just_created", False))

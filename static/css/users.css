@@ -3,6 +3,52 @@
     margin: 30px auto 0;
 }
 
+.profile-subscriptions {
+    max-width: 800px;
+    margin: 40px auto 0;
+}
+
+.profile-subscriptions-title {
+    font-weight: 700;
+    margin-bottom: 8px;
+}
+
+.profile-subscription {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 8px 0;
+}
+
+.profile-subscription + .profile-subscription {
+    border-top: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.profile-subscription-label {
+    min-width: 0;
+}
+
+.profile-subscription-remove {
+    flex-shrink: 0;
+    border: 0;
+    background: none;
+    padding: 4px 6px;
+    color: inherit;
+    font-size: 14px;
+    line-height: 1;
+    opacity: 0.4;
+    cursor: pointer;
+}
+
+.profile-subscription-remove:hover {
+    opacity: 1;
+}
+
+.profile-subscriptions-empty {
+    opacity: 0.65;
+}
+
 .profile-feed {
     max-width: 800px;
     margin: 0 auto;
@@ -15,12 +61,8 @@
     padding-bottom: 0;
 }
 
-.profile-feed .block-header:first-child {
-    margin-top: 40px;
-}
-
     .profile-header {
-        margin-top: 30px;
+        margin-top: 40px;
     }
 
     .profile-buttons {
@@ -30,6 +72,18 @@
         margin-top: 10px;
         margin-bottom: 40px;
     }
+
+.welcome-place {
+    margin-bottom: 24px;
+}
+
+.welcome-place .form-group {
+    margin-bottom: 0;
+}
+
+.welcome-place .form-help {
+    margin-top: 8px;
+}
 
 .login-options {
     display: flex;

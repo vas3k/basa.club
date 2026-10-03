@@ -14,6 +14,7 @@ from common.contacts import CONTACT_EDITOR_FIELDS
 from geo.models import GeoCountry
 from items.forms import ItemForm
 from items.models import Item, ItemVote
+import notifications
 
 FEED_SORTS = {
     "standard": ("-created_at",),
@@ -148,6 +149,7 @@ def create_item(request):
         item.save()
         if item.is_listed:
             counters.item_created(item)
+            notifications.item_created(item)
         return redirect(item.get_absolute_url())
 
     countries = [
@@ -194,6 +196,7 @@ def edit_item(request, item_id):
             counters.item_hidden(old)
         elif item.is_listed:
             counters.item_created(item)
+            notifications.item_created(item)
         return redirect(item.get_absolute_url())
 
     countries = [

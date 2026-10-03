@@ -33,23 +33,28 @@
         </section>
     {% endif %}
 
-    <form class="content-feed-settings" method="get" data-behavior="form-change">
-        {% if request.GET.query %}
-            <input type="hidden" name="query" value="{{ request.GET.query }}">
+    <div class="content-feed-bar">
+        <form class="content-feed-settings" method="get" data-behavior="form-change">
+            {% if request.GET.query %}
+                <input type="hidden" name="query" value="{{ request.GET.query }}">
+            {% endif %}
+            <label class="content-feed-setting">
+                Сортировка
+                <select name="sort">
+                    <option value="" {% if feed_sort == "standard" %}selected{% endif %}>Стандартная</option>
+                    <option value="date" {% if feed_sort == "date" %}selected{% endif %}>По дате</option>
+                    <option value="rating" {% if feed_sort == "rating" %}selected{% endif %}>По рейтингу</option>
+                </select>
+            </label>
+            <label class="content-feed-setting">
+                <input type="checkbox" name="hide_global" value="1" {% if hide_global %}checked{% endif %}>
+                Скрыть глобальные объявления
+            </label>
+        </form>
+        {% if show_listing_subscribe %}
+            {% include "notifications/widgets/subscribe_button.html" %}
         {% endif %}
-        <label class="content-feed-setting">
-            Сортировка
-            <select name="sort">
-                <option value="" {% if feed_sort == "standard" %}selected{% endif %}>Стандартная</option>
-                <option value="date" {% if feed_sort == "date" %}selected{% endif %}>По дате</option>
-                <option value="rating" {% if feed_sort == "rating" %}selected{% endif %}>По рейтингу</option>
-            </select>
-        </label>
-        <label class="content-feed-setting">
-            <input type="checkbox" name="hide_global" value="1" {% if hide_global %}checked{% endif %}>
-            Скрыть глобальные объявления
-        </label>
-    </form>
+    </div>
 
     <section class="content-items">
         {% for item in items %}

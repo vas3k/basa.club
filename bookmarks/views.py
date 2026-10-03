@@ -7,6 +7,7 @@ from bookmarks.models import Bookmark
 from common import counters
 from common.pagination import paginate
 from items.models import Item, ItemVote
+from notifications.models import Subscription
 
 
 @login_required
@@ -25,8 +26,14 @@ def bookmarks_page(request):
         .order_by("-created_at"),
     )
     items = [bookmark.item for bookmark in bookmarks]
+    subscriptions = (
+        Subscription.objects.filter(user=request.user)
+        .select_related("country", "city", "category")
+        .order_by("-created_at")
+    )
     return render(request, "bookmarks/index.html", {
         "bookmarks": bookmarks,
+        "subscriptions": subscriptions,
         "voted_items": ItemVote.voted_item_ids(request.user, items),
     })
 

@@ -34,7 +34,7 @@ export default function UpvoteButton({
 
     async function toggle() {
         if (loginUrl) {
-            window.location.href = `${loginUrl}?next=${encodeURIComponent(location.pathname)}`;
+            window.location.href = loginUrl;
             return;
         }
         if (isPending) return;

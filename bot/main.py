@@ -14,7 +14,7 @@ from django.conf import settings
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, filters
 
 from bot.config import WELCOME_MESSAGE
-from bot.handlers import auth
+from bot.handlers import auth, notifications
 
 log = logging.getLogger(__name__)
 
@@ -32,6 +32,7 @@ def main() -> None:
     application.add_handler(CommandHandler("start", auth.command_start, filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("help", command_help, filters.ChatType.PRIVATE))
     application.add_handler(CallbackQueryHandler(auth.confirm_callback, pattern=r"^link:.+"))
+    application.add_handler(CallbackQueryHandler(notifications.unsubscribe_callback, pattern=r"^unsub:"))
     if settings.DEBUG:
         application.run_polling()
     else:

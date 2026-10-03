@@ -7,12 +7,19 @@ from django.views.decorators.http import require_http_methods
 from comments.models import Comment, CommentVote
 from common.pagination import paginate
 from common.users import get_user_or_404
+from geo.models import GeoCity, GeoCountry
 from items.models import Item, ItemVote
-from users.forms import ProfileForm
+from users.forms import EVERYWHERE, ProfileForm, WelcomeForm
+from notifications.subscriptions import subscribe_to_geo
 
 
 @login_required
 def profile_page(request, slug):
+    if (request.user.metadata or {}).get("welcome_completed") is False:
+        return redirect("welcome")
+    if not request.user.telegram_id:
+        return redirect("bot")
+
     profile_user = get_user_or_404(request, slug)
     is_owner = request.user.pk == profile_user.pk
     active_items = paginate(
@@ -77,3 +84,61 @@ def edit_profile(request, slug):
         "form": form,
         "slug": slug,
     })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
+def welcome(request):
+    if (request.user.metadata or {}).get("welcome_completed") is not False:
+        return redirect("user_profile", slug="me")
+
+    user = request.user
+    country_id, city_id = _geo_selection(user)
+    form = WelcomeForm(request.POST or None, instance=user, initial={
+        "country": country_id,
+        "city": city_id,
+    })
+    if request.method == "POST" and form.is_valid():
+        user = form.save(commit=False)
+        metadata = dict(user.metadata or {})
+        metadata["welcome_completed"] = True
+        user.metadata = metadata
+        subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
+        user.save()
+        return redirect("user_profile", slug="me")
+
+    country_id = form["country"].value() or ""
+    city_id = form["city"].value() or ""
+
+    return render(request, "users/welcome.html", {
+        "form": form,
+        "country_id": country_id,
+        "city_id": city_id,
+        "countries_options": _country_options(),
+    })
+
+
+def _country_options():
+    return [
+        {
+            "id": country.id,
+            "name": country.name,
+            "icon": country.icon,
+            "cities": [{"id": city.id, "name": city.name, "icon": city.icon} for city in country.cities.all()],
+        }
+        for country in GeoCountry.objects.prefetch_related("cities")
+    ]
+
+
+def _geo_selection(user):
+    if not user.country:
+        return EVERYWHERE, EVERYWHERE
+    country = GeoCountry.objects.filter(name=user.country).first()
+    if not country:
+        return EVERYWHERE, EVERYWHERE
+    if not user.city:
+        return country.id, EVERYWHERE
+    city = GeoCity.objects.filter(country=country, name=user.city).first()
+    if not city:
+        return country.id, EVERYWHERE
+    return country.id, city.id
