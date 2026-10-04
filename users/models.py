@@ -118,15 +118,15 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
 
     @property
     def is_god(self):
-        return bool(self.roles and self.ROLE_GOD in self.roles)
+        return self.is_superuser
 
     @property
     def is_moderator(self):
-        return bool(self.roles and self.ROLE_MODERATOR in self.roles) or self.is_god
+        return self.is_staff or self.is_superuser
 
     @property
     def is_banned(self):
-        if self.is_god:
+        if self.is_superuser:
             return False
         return bool(self.is_banned_until and self.is_banned_until > timezone.now())
 

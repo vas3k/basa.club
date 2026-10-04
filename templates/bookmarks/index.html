@@ -15,7 +15,7 @@
                     <form method="post" action="{% url "subscription_remove" subscription.id %}" class="subscription-remove">
                         {% csrf_token %}
                         <input type="hidden" name="next" value="{{ request.get_full_path }}">
-                        <button type="submit" class="item-action item-action-icon" title="Отписаться" aria-label="Отписаться от {{ subscription.label }}">
+                        <button type="submit" class="inline-block item-action item-action-icon" title="Отписаться" aria-label="Отписаться от {{ subscription.label }}">
                             <i class="fas fa-times"></i>
                         </button>
                     </form>

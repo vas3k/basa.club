@@ -51,16 +51,18 @@ class ClubAdminField:
         return escape(rendered)
 
 
+def is_admin(user: User) -> bool:
+    return bool(getattr(user, "is_staff", False) or getattr(user, "is_superuser", False))
+
+
 @dataclass
 class ClubAdminAction:
     title: str = None
     get: Callable = None
     post: Callable = None
 
-    access_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
-
     def has_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.access_roles or []))
+        return is_admin(user)
 
 
 @dataclass
@@ -74,11 +76,7 @@ class ClubAdminModel:
     list_fields: list | ClubAdminField = field(default_factory=list)
     edit_fields: list = field(default_factory=list)
     hide_fields: list = field(default_factory=list)
-
-    list_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
-    edit_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
-    create_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
-    delete_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
+    allow_delete: bool = True
 
     actions: dict[str, ClubAdminAction] = field(default_factory=dict)
 
@@ -86,16 +84,16 @@ class ClubAdminModel:
         return f"/godmode/{self.name}/" if self.name else None
 
     def has_list_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.list_roles or []))
+        return is_admin(user)
 
     def has_edit_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.edit_roles or []))
+        return is_admin(user)
 
     def has_create_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.create_roles or []))
+        return is_admin(user)
 
     def has_delete_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.delete_roles or []))
+        return self.allow_delete and is_admin(user)
 
     def actions_for(self, user: User) -> dict[str, ClubAdminAction]:
         return {
@@ -166,15 +164,13 @@ class ClubAdminPage:
     icon: str = None
     name: str = None
 
-    access_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
-
     view: Callable = None
 
     def get_absolute_url(self):
         return f"/godmode/page/{self.name}/" if self.name else None
 
     def has_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.access_roles or []))
+        return is_admin(user)
 
 
 @dataclass
@@ -189,8 +185,6 @@ class ClubAdmin:
     title: str = "Admin"
     groups: list[ClubAdminGroup] = field(default_factory=list)
     foreign_key_templates: dict = field(default_factory=dict)
-
-    access_roles: set[str] = field(default_factory=lambda: {User.ROLE_MODERATOR, User.ROLE_GOD})
 
     def get_model(self, model_name: str) -> ClubAdminModel | None:
         for group in self.groups:
@@ -207,4 +201,4 @@ class ClubAdmin:
         return None
 
     def has_access(self, user: User) -> bool:
-        return bool(set(user.roles or []) & set(self.access_roles or []))
+        return is_admin(user)

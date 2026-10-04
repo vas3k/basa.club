@@ -4,16 +4,15 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
+from authn.decorators import api_login_required
 from common.request import parse_ip_address, parse_useragent
 from complaints.models import Flag
 from items.models import Item
 
 
+@api_login_required
 @require_POST
 def flag_item(request, item_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Нужно войти"}, status=401)
-
     try:
         payload = json.loads(request.body or b"{}")
     except json.JSONDecodeError:

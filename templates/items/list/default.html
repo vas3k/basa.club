@@ -30,7 +30,7 @@
             {% include "items/widgets/badges.html" %}
 
             {% if item.description %}
-                <div class="item-card-description">{{ item.description|markdown_summary|truncatechars:240 }}</div>
+                <div class="item-card-description">{{ item.description|public_preview }}</div>
             {% endif %}
 
             {% include "items/widgets/promo_code.html" %}

@@ -25,10 +25,7 @@ ADMIN = ClubAdmin(
                     icon="👤",
                     name="users",
                     title_field="full_name",
-                    list_roles={User.ROLE_MODERATOR, User.ROLE_GOD},
-                    edit_roles={User.ROLE_GOD},
-                    create_roles=set(),
-                    delete_roles={User.ROLE_GOD},
+                    allow_delete=False,
                     list_fields=[
                         ClubAdminField(
                             name="avatar",
@@ -40,6 +37,8 @@ ADMIN = ClubAdmin(
                         "email",
                         "city",
                         "country",
+                        "is_staff",
+                        "is_superuser",
                         "roles",
                         "upvotes",
                         "created_at",
@@ -134,7 +133,6 @@ ADMIN = ClubAdmin(
                         "created_at",
                         "updated_at",
                     ],
-                    create_roles=set(),
                 ),
             ],
         ),

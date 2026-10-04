@@ -1,4 +1,4 @@
-{% if show_owner_actions %}
+{% if show_owner_actions or show_admin_actions %}
     {% if item.visibility == "draft" or item.visibility == "link_only" or item.is_expired %}
         <div class="item-badges">
             {% if item.visibility == "draft" %}<span class="item-badge">Черновик</span>{% endif %}

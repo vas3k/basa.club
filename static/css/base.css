@@ -219,6 +219,124 @@
 }
 
 
+/* Inline chips: no border, a short raised shadow. */
+
+.inline-block {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    max-width: 100%;
+    box-sizing: border-box;
+    padding: 13px 16px;
+    border: none;
+    border-radius: var(--block-border-radius);
+    --inline-block-shade: oklch(from var(--inline-block-bg) calc(l - 0.34) calc(c * 2.4) h);
+    background-color: var(--inline-block-bg);
+    box-shadow:
+        0 1px 1px color-mix(in srgb, var(--inline-block-shade) 30%, transparent),
+        0 2px 4px -1px color-mix(in srgb, var(--inline-block-shade) 55%, transparent),
+        0 0 0 1px color-mix(in srgb, var(--inline-block-shade) 24%, transparent);
+    color: var(--text-color);
+    font-family: inherit;
+    font-size: inherit;
+    font-weight: 600;
+    line-height: 1.4;
+    text-align: left;
+    text-decoration: none;
+    vertical-align: middle;
+    cursor: default;
+}
+
+button.inline-block {
+    appearance: none;
+    -webkit-appearance: none;
+}
+
+a.inline-block,
+button.inline-block {
+    cursor: pointer;
+}
+
+a.inline-block,
+a.inline-block:hover,
+a.inline-block:visited {
+    color: var(--text-color);
+    text-decoration: none;
+}
+
+.inline-block-small {
+    gap: 6px;
+    padding: 10px 13px;
+    font-size: 95%;
+}
+
+.inline-block-green {
+    --inline-block-bg: var(--location-bg);
+}
+
+.inline-block-blue {
+    --inline-block-bg: var(--contacts-bg);
+}
+
+.inline-block-orange {
+    --inline-block-bg: var(--promo-bg);
+}
+
+.inline-block-icon {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    width: 1.7em;
+    height: 1.7em;
+    border-radius: 50%;
+    background-color: oklch(from var(--inline-block-bg) calc(l - 0.12) calc(c * 1.7) h);
+    font-size: 0.92em;
+    line-height: 1;
+}
+
+/* Guest stand-in for a private inline-block. The text node is a decoy, not the real value. */
+
+.inline-block-secure {
+    position: relative;
+    user-select: none;
+    -webkit-user-select: none;
+}
+
+.inline-block-secure-source {
+    pointer-events: none;
+    user-select: none;
+    white-space: nowrap;
+}
+
+.inline-block-secure:has([data-island-mounted]) .inline-block-secure-source {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    border: 0;
+}
+
+.inline-block-secure [data-island] {
+    display: flex;
+    align-items: center;
+    max-width: 16em;
+    overflow: hidden;
+    line-height: 0;
+    pointer-events: none;
+}
+
+.inline-block-secure-pixels {
+    display: block;
+    flex: 0 0 auto;
+    image-rendering: pixelated;
+    image-rendering: crisp-edges;
+}
+
+
 /* Avatars and icons */
 
 .avatar {

@@ -2,7 +2,7 @@
 
 {% block item %}
     <div class="item-page">
-        <article class="block item-show{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+        <article class="block item-show{% if show_owner_actions or show_admin_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
             <div class="item-header">
                 {% include "items/widgets/tags.html" %}
             </div>
@@ -18,17 +18,29 @@
                 {% include "items/widgets/gallery.html" %}
 
                 {% if item.description %}
-                    <div class="item-show-description markdown-text">{{ item.description|markdown }}</div>
+                    {% if request.user.is_authenticated %}
+                        <div class="item-show-description markdown-text">{{ item.description|markdown }}</div>
+                    {% else %}
+                        <div class="item-show-description">{{ item.description|public_preview }}</div>
+                        {% if item.description|public_preview_cut %}
+                            <a class="item-description-more" href="{% url "login" %}">Читать дальше</a>
+                        {% endif %}
+                    {% endif %}
+                {% endif %}
+
+                {% if item.location %}
+                    {% if request.user.is_authenticated %}
+                        <div class="inline-block inline-block-green item-location">
+                            <span class="inline-block-icon item-location-icon" aria-hidden="true">📍</span>
+                            <div class="item-location-text markdown-text">{{ item.location|markdown }}</div>
+                        </div>
+                    {% else %}
+                        {% anon_teaser item.id "location" as teaser %}
+                        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon="📍" icon_class="item-location-icon" css_class="inline-block-green item-location" %}
+                    {% endif %}
                 {% endif %}
 
                 {% include "items/widgets/contacts.html" %}
-
-                {% if item.location %}
-                    <div class="item-location">
-                        <span class="item-location-icon">🌍</span>
-                        <div class="item-location-text markdown-text">{{ item.location|markdown }}</div>
-                    </div>
-                {% endif %}
 
                 {% include "items/widgets/promo_code.html" %}
 
@@ -52,8 +64,15 @@
             </div>
         </article>
 
-        {% if show_owner_actions %}
-            {% include "items/widgets/manage.html" %}
+        {% if show_owner_actions or show_admin_actions %}
+            <div class="item-side">
+                {% if show_owner_actions %}
+                    {% include "items/widgets/manage.html" %}
+                {% endif %}
+                {% if show_admin_actions %}
+                    {% include "items/widgets/admin.html" %}
+                {% endif %}
+            </div>
         {% endif %}
     </div>
 {% endblock %}

@@ -5,6 +5,7 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from godmode.config import ADMIN, ITEMS_PER_PAGE
 from godmode.filters import FILTER_OPERATORS, apply_filters, get_filterable_fields
+from users.models import User
 from vas3k_base.exceptions import AccessDenied
 
 
@@ -18,7 +19,7 @@ def ensure_access(request):
     if not ADMIN.has_access(request.user):
         raise AccessDenied(
             title="Вам сюда нельзя",
-            message="Админка доступна только богам и модераторам",
+            message="Админка доступна только администраторам",
         )
 
 
@@ -42,7 +43,7 @@ def godmode_list_model(request, model_name):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Раздел «{admin_model.title}» доступен только ролям: {', '.join(admin_model.list_roles)}.",
+            "message": f"Раздел «{admin_model.title}» доступен только администраторам.",
         })
 
     page = request.GET.get("page", 1)
@@ -104,7 +105,7 @@ def godmode_edit_model(request, model_name, item_id):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Редактировать «{admin_model.title}» могут только роли: {', '.join(admin_model.edit_roles)}.",
+            "message": f"Редактировать «{admin_model.title}» могут только администраторы.",
         })
 
     primary_key_field = admin_model.model._meta.pk.name
@@ -116,7 +117,7 @@ def godmode_edit_model(request, model_name, item_id):
             return render(request, "godmode/message.html", {
                 "admin": ADMIN,
                 "title": "Вам сюда нельзя",
-                "message": f"Редактировать «{admin_model.title}» могут только роли: {', '.join(admin_model.edit_roles)}.",
+                "message": f"Редактировать «{admin_model.title}» могут только администраторы.",
             })
         form = edit_form_class(request.POST, instance=item)
         if form.is_valid():
@@ -149,7 +150,7 @@ def godmode_delete_model(request, model_name, item_id):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Удалять из «{admin_model.title}» могут только роли: {', '.join(admin_model.delete_roles)}.",
+            "message": "Пользователей нельзя удалять из базы." if admin_model.model is User else f"Удалять из «{admin_model.title}» могут только администраторы.",
         })
 
     primary_key_field = admin_model.model._meta.pk.name
@@ -159,7 +160,7 @@ def godmode_delete_model(request, model_name, item_id):
         return render(request, "godmode/confirm.html", {
             "admin": ADMIN,
             "title": f"Удалить {admin_model.title}: {item_id}?",
-            "message": "Для записей, комментариев и пользователей это мягкое удаление",
+            "message": "Для записей и комментариев это мягкое удаление",
             "button": "Да, удаляем",
         })
 
@@ -179,7 +180,7 @@ def godmode_create_model(request, model_name):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Создавать записи в «{admin_model.title}» могут только роли: {', '.join(admin_model.create_roles)}.",
+            "message": f"Создавать записи в «{admin_model.title}» могут только администраторы.",
         })
 
     create_form_class = admin_model.get_form_class()
@@ -210,7 +211,7 @@ def godmode_show_page(request, page_name):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Страница «{admin_page.title}» доступна только ролям: {', '.join(admin_page.access_roles)}.",
+            "message": f"Страница «{admin_page.title}» доступна только администраторам.",
         })
 
     if not admin_page.view:
@@ -243,7 +244,7 @@ def godmode_action(request, model_name, item_id, action_code):
         return render(request, "godmode/message.html", {
             "admin": ADMIN,
             "title": "Вам сюда нельзя",
-            "message": f"Действие «{admin_action.title}» доступно только ролям: {', '.join(admin_action.access_roles)}.",
+            "message": f"Действие «{admin_action.title}» доступно только администраторам.",
         })
 
     primary_key_field = admin_model.model._meta.pk.name

@@ -33,7 +33,7 @@ class UserBanForm(forms.Form):
 
 
 def ban_user(user: User, days: int, reason: str) -> bool:
-    if days <= 0 or user.is_god:
+    if days <= 0 or user.is_superuser:
         return False
 
     metadata = dict(user.metadata or {})
@@ -70,10 +70,10 @@ def post_ban_action(request, user: User, **context):
         })
 
     data = form.cleaned_data
-    if user.is_god:
+    if user.is_superuser:
         return render(request, "godmode/message.html", {
             **context,
-            "title": "Богов банить нельзя",
+            "title": "Суперпользователей банить нельзя",
             "message": f"{user.full_name or user.slug} остаётся на свободе",
         })
 

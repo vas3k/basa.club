@@ -9,17 +9,15 @@ from users.models import User
 class Flag(models.Model):
     REASON_DUPLICATE = "duplicate"
     REASON_SPAM = "spam"
-    REASON_PROMOTION = "promotion"
     REASON_SCAMMER = "scammer"
     REASON_OTHER = "other"
     REASONS = (
         (REASON_DUPLICATE, "Дубликат"),
-        (REASON_SPAM, "Спам"),
-        (REASON_PROMOTION, "Навязчивая реклама"),
+        (REASON_SPAM, "Спамеры"),
         (REASON_SCAMMER, "Мошенники"),
         (REASON_OTHER, "Другое"),
     )
-    COMMENT_MAX_LENGTH = 2000
+    COMMENT_MAX_LENGTH = 1000
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
     user = models.ForeignKey(User, related_name="flags", on_delete=models.CASCADE)

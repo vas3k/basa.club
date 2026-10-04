@@ -195,7 +195,12 @@ export default function ImageList({ name, images }: Props) {
                     </div>
                 </SortableContext>
             </DndContext>
-            {!rows.length && <div className="image-list-hint">Перетащите фото сюда или нажмите, чтобы выбрать</div>}
+            {!rows.length && (
+                <div className="image-list-hint">
+                    <div>Перетащите картинки сюда</div>
+                    <div className="image-list-hint-note">или нажмите, чтобы выбрать</div>
+                </div>
+            )}
             {error && <div className="form-error">{error}</div>}
         </div>
     );

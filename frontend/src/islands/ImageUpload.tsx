@@ -40,7 +40,7 @@ export default function ImageUpload({ name, value = "" }: Props) {
     <div className="image-upload">
       <input type="hidden" name={name} value={url} />
       <span className="image-upload-preview">
-        {url ? <img src={url} alt="" /> : <span>Фото</span>}
+        {url ? <img src={url} alt="" /> : <span>Картинки</span>}
       </span>
       <label className="image-upload-file">
         <input

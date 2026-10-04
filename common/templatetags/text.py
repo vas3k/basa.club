@@ -1,12 +1,16 @@
 import html
 
 from django import template
+from django.template.defaultfilters import truncatechars
 from django.utils.html import strip_tags
 from django.utils.safestring import mark_safe
 
 from common.markdown.markdown import markdown_text
 
 register = template.Library()
+
+# Public pages and OG tags show this much of an item description. The rest stays behind login.
+PUBLIC_PREVIEW_LENGTH = 240
 
 
 @register.filter
@@ -19,6 +23,17 @@ def markdown_summary(text):
     """Plain text without markup, use with |truncatechars for previews"""
     plain = strip_tags(markdown_text(text or "", disable_mentions=True))
     return " ".join(html.unescape(plain).split())
+
+
+@register.filter
+def public_preview(text):
+    """First PUBLIC_PREVIEW_LENGTH characters of description text, markup stripped."""
+    return truncatechars(markdown_summary(text), PUBLIC_PREVIEW_LENGTH)
+
+
+@register.filter
+def public_preview_cut(text):
+    return len(markdown_summary(text)) > PUBLIC_PREVIEW_LENGTH
 
 
 @register.filter

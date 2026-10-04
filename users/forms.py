@@ -87,7 +87,6 @@ class WelcomeForm(forms.ModelForm):
         widget=forms.TextInput(),
         error_messages={"max_length": "Слишком длинное значение"},
     )
-    # Posted values are geo ids (or "everywhere"). save() stores the place names.
     country = forms.CharField(required=False, widget=forms.HiddenInput())
     city = forms.CharField(required=False, widget=forms.HiddenInput())
 

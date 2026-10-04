@@ -24,6 +24,15 @@ FEED_SORTS = {
 }
 
 
+def anonymous_search_redirect(request):
+    """Text search looks through private fields, so guests are sent to login."""
+    if request.user.is_authenticated:
+        return None
+    if (request.GET.get("query") or "").strip():
+        return redirect("login")
+    return None
+
+
 def listing_queryset(request, items):
     if request.city_id != "everywhere":
         items = items.filter(
@@ -35,7 +44,7 @@ def listing_queryset(request, items):
         items = items.filter(Q(country_id=request.country_id) | Q(country__isnull=True))
 
     query = (request.GET.get("query") or "").strip()
-    if query:
+    if query and request.user.is_authenticated:
         items = items.filter(
             Q(title__icontains=query)
             | Q(description__icontains=query)
@@ -61,6 +70,9 @@ def listing_feed_context(request, items):
 
 
 def index_page(request, country=None):
+    if response := anonymous_search_redirect(request):
+        return response
+
     if country:
         country = get_object_or_404(GeoCountry, pk=country)
         request.country_id = country.id
@@ -125,6 +137,9 @@ def index_page(request, country=None):
 
 
 def listing_page(request, country, city, category=None, subcategory=None):
+    if response := anonymous_search_redirect(request):
+        return response
+
     if "country" not in request.COOKIES:
         request.country_id = country
         request.city_id = city
@@ -143,31 +158,44 @@ def listing_page(request, country, city, category=None, subcategory=None):
     return render(request, "listing.html", listing_feed_context(request, items))
 
 
+def is_item_admin(user):
+    return user.is_authenticated and user.is_moderator
+
+
 def render_item_page(request, item, *, comment_form=None, reply_form=None, status=200):
     is_owner = request.user.is_authenticated and request.user.pk == item.author_id
+    is_admin = is_item_admin(request.user)
 
-    comments = Comment.objects_for_user(request.user).filter(item=item).order_by("created_at")
-    replies = {}
-    for comment in comments:
-        if comment.reply_to_id:
-            replies.setdefault(comment.reply_to_id, []).append(comment)
+    comments_tree = []
+    if request.user.is_authenticated:
+        comments = Comment.objects_for_user(request.user).filter(item=item).order_by("created_at")
+        replies = {}
+        for comment in comments:
+            if comment.reply_to_id:
+                replies.setdefault(comment.reply_to_id, []).append(comment)
 
-    comments_tree = [
-        {"comment": comment, "replies": replies.get(comment.id, [])}
-        for comment in comments
-        if not comment.reply_to_id
-    ]
+        comments_tree = [
+            {"comment": comment, "replies": replies.get(comment.id, [])}
+            for comment in comments
+            if not comment.reply_to_id
+        ]
+        comment_form = comment_form or CommentForm(item=item)
+        reply_form = reply_form or ReplyForm(item=item)
 
     return render(request, "items/show/default.html", {
         "item": item,
-        "show_owner_actions": is_owner,
+        "show_owner_actions": is_owner and not is_admin,
+        "show_admin_actions": is_admin,
         "comments_tree": comments_tree,
-        "comment_form": comment_form or CommentForm(item=item),
-        "reply_form": reply_form or ReplyForm(item=item),
+        "comment_form": comment_form,
+        "reply_form": reply_form,
     }, status=status)
 
 
 def item_page(request, country, city, category, item_id, subcategory=None):
+    if response := anonymous_search_redirect(request):
+        return response
+
     try:
         item = Item.fetch(
             user=request.user,
@@ -179,7 +207,7 @@ def item_page(request, country, city, category, item_id, subcategory=None):
         raise Http404()
     is_owner = request.user.is_authenticated and request.user.pk == item.author_id
     is_public = item.visibility in (Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY) and not item.is_expired
-    if not is_public and not is_owner:
+    if not is_public and not is_owner and not is_item_admin(request.user):
         raise Http404()
 
     Item.objects.filter(pk=item.pk).update(view_count=F("view_count") + 1)
@@ -236,10 +264,17 @@ def create_item(request):
     })
 
 
+def manageable_item(request, item_id):
+    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
+    if item.author_id != request.user.pk and not is_item_admin(request.user):
+        raise Http404()
+    return item
+
+
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_item(request, item_id):
-    item = get_object_or_404(Item, pk=item_id, author=request.user)
+    item = manageable_item(request, item_id)
     old = Item.objects.get(pk=item.pk)
     form = ItemForm(request.POST or None, instance=item)
 
@@ -286,7 +321,7 @@ def edit_item(request, item_id):
 @login_required
 @require_POST
 def hide_item(request, item_id):
-    item = get_object_or_404(Item, pk=item_id, author=request.user)
+    item = manageable_item(request, item_id)
     old = Item.objects.get(pk=item.pk)
     item.visibility = Item.VISIBILITY_DRAFT
     item.published_at = None
@@ -299,9 +334,12 @@ def hide_item(request, item_id):
 @login_required
 @require_POST
 def delete_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id, author=request.user)
+    item = manageable_item(request, item_id)
     was_listed = item.is_listed
+    is_owner = item.author_id == request.user.pk
     item.delete(by=request.user)
     if was_listed:
         counters.item_hidden(item)
-    return redirect("user_profile", slug="me")
+    if is_owner:
+        return redirect("user_profile", slug="me")
+    return redirect("godmode_list_model", model_name="items")

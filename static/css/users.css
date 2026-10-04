@@ -279,6 +279,13 @@
     background-position: center;
 }
 
+.user-tiny-name {
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
+}
+
 .rating {
     flex-shrink: 0;
     font-weight: 700;

@@ -43,7 +43,7 @@
         <aside class="block sidebar">
             {% block sidebar %}
                 {% for category in categories %}
-                    <a href="{% listing_url category=category.id %}" class="sidebar-item {% if current_category and current_category.id == category.id %}sidebar-item-active{% endif %}">
+                    <a href="{% listing_url category=category.id hide_global=0 %}" class="sidebar-item {% if current_category and current_category.id == category.id %}sidebar-item-active{% endif %}">
                         <span class="sidebar-item-icon">{{ category.icon|safe }}</span>
                         <span class="sidebar-item-name">{{ category.name }}</span>
                         {% if category.items_count %}

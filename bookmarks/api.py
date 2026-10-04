@@ -3,16 +3,15 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
+from authn.decorators import api_login_required
 from bookmarks.models import Bookmark
 from common import counters
 from items.models import Item
 
 
+@api_login_required
 @require_POST
 def toggle_item_bookmark(request, item_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Нужно войти"}, status=401)
-
     item = get_object_or_404(Item, pk=item_id)
     if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.pk:
         raise Http404()

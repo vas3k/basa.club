@@ -28,6 +28,8 @@
     --input-shadow-focus: 0 4px 12px -2px rgba(9, 30, 66, .45), 0 0 0 1px rgba(9, 30, 66, .32);
 
     --badge-color: rgba(255, 196, 85, 0.91);
+
+    --inline-block-bg: #f2f3f5;
 }
 
 html {
@@ -54,6 +56,15 @@ html {
     --input-color: #000;
     --input-bg-color: #fff;
     --input-border-color: #ddd;
+
+    --location-bg: #e4f6de;
+    --location-text: var(--text-color);
+    --contacts-bg: #e4f3fc;
+    --contacts-text: var(--text-color);
+    --promo-bg: #fff0d0;
+    --promo-text: var(--text-color);
+    --photos-bg: #4e5560;
+    --photos-text: #f4f5f7;
 }
 
 body {

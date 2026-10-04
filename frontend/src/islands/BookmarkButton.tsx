@@ -37,7 +37,7 @@ export default function BookmarkButton({ bookmarkCount, bookmarkUrl, loginUrl }:
     return (
         <button
             type="button"
-            className="item-action"
+            className="inline-block item-action"
             disabled={isPending}
             title="Закладка"
             aria-label="Закладка"

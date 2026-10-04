@@ -2,17 +2,16 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
+from authn.decorators import api_login_required
 from common import counters
 from common.request import parse_ip_address, parse_useragent
 from common.templatetags.text import rating as format_rating
 from items.models import Item, ItemVote
 
 
+@api_login_required
 @require_POST
 def upvote_item(request, item_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Нужно войти"}, status=401)
-
     item = get_object_or_404(
         Item.objects.select_related("author"),
         pk=item_id,
@@ -35,11 +34,9 @@ def upvote_item(request, item_id):
     return JsonResponse({"rating": format_rating(item.rating), "voted": True})
 
 
+@api_login_required
 @require_POST
 def retract_item_vote(request, item_id):
-    if not request.user.is_authenticated:
-        return JsonResponse({"error": "Нужно войти"}, status=401)
-
     item = get_object_or_404(
         Item.objects.select_related("author"),
         pk=item_id,

@@ -18,7 +18,7 @@
                 </span>
             </a>
             {% for subcategory in current_category.children.all %}
-                <a href="{% listing_url category=current_category.id subcategory=subcategory.id %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
+                <a href="{% listing_url category=current_category.id subcategory=subcategory.id hide_global=1 %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
                     <span class="content-subcategory-icon">
                         {{ subcategory.icon|safe }}
                     </span>
@@ -63,7 +63,7 @@
             <div class="block feed-empty">
                 <p>Тут пока ничего нет</p>
                 <p>Но вы можете добавить сюда что-то свое!</p>
-                <a href="{% url "item_create" %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
             </div>
         {% endfor %}
     </section>

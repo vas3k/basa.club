@@ -76,7 +76,7 @@ export default function FlagButton({
     <>
       <button
         type="button"
-        className="item-action item-action-icon"
+        className="inline-block item-action item-action-icon"
         title="Пожаловаться"
         aria-label="Пожаловаться"
         onClick={open}

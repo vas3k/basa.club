@@ -2,6 +2,12 @@
 
 {% block title %}{{ item.title }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
 {% block og_title %}{{ item.title }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
+{% block meta %}
+    {{ block.super }}
+    {% if item.description %}
+        <meta property="og:description" content="{{ item.description|public_preview|force_escape }}">
+    {% endif %}
+{% endblock %}
 
 {% block content %}
     {% block item %}{% endblock %}
@@ -13,21 +19,19 @@
     {% endif %}
 
     {% block comments %}
-        <section class="comments" id="comments">
-            <div class="comments-header">
-                Комментарии
-                <span class="item-badge">{{ item.comment_count|cool_number }}</span>
-            </div>
+        {% if request.user.is_authenticated %}
+            <section class="comments" id="comments">
+                <div class="comments-header">
+                    Комментарии
+                    <span class="item-badge">{{ item.comment_count|cool_number }}</span>
+                </div>
 
-            {% for node in comments_tree %}
-                {% include "comments/comment.html" with comment=node.comment replies=node.replies %}
-            {% endfor %}
+                {% for node in comments_tree %}
+                    {% include "comments/comment.html" with comment=node.comment replies=node.replies %}
+                {% endfor %}
 
-            {% if request.user.is_authenticated %}
                 {% include "comments/form.html" %}
-            {% else %}
-                <a href="{% url "login" %}" class="button comments-login">Войти, чтобы комментировать</a>
-            {% endif %}
-        </section>
+            </section>
+        {% endif %}
     {% endblock %}
 {% endblock %}

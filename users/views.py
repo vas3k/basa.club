@@ -17,6 +17,7 @@ from notifications.subscriptions import subscribe_to_geo
 def profile_page(request, slug):
     if (request.user.metadata or {}).get("welcome_completed") is False:
         return redirect("welcome")
+
     if not request.user.telegram_id:
         return redirect("bot")
 

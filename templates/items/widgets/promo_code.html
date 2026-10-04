@@ -1,5 +1,12 @@
 {% if item.promo_code %}
-    <button type="button" class="promo-code" data-behavior="copy" data-copy="{{ item.promo_code }}">
-        <span class="promo-code-value">{{ item.promo_code }}</span>
-    </button>
+    {% if request.user.is_authenticated %}
+        <button type="button" class="inline-block inline-block-orange item-promo" data-behavior="copy" data-copy="{{ item.promo_code }}" title="Скопировать промокод" aria-label="Скопировать промокод {{ item.promo_code }}">
+            <span class="inline-block-icon" aria-hidden="true">🎁</span>
+            <span class="item-promo-text">{{ item.promo_code }}</span>
+            <i class="far fa-copy" aria-hidden="true"></i>
+        </button>
+    {% else %}
+        {% anon_teaser item.id "promo" as teaser %}
+        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon="🎁" css_class="inline-block-orange item-promo" %}
+    {% endif %}
 {% endif %}

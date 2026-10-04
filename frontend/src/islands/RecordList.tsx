@@ -49,7 +49,7 @@ function coerce(field: Field, value: unknown): string {
     if (field.kind !== "select") return text;
     const options = field.options ?? [];
     if (options.some((option) => option.value === text)) return text;
-    return options.find((option) => option.value === "custom")?.value ?? options[0]?.value ?? "";
+    return options[0]?.value ?? "";
 }
 
 function blankValues(fields: Field[]): Record<string, string> {
@@ -59,7 +59,7 @@ function blankValues(fields: Field[]): Record<string, string> {
 }
 
 function toRows(fields: Field[], records: unknown): Row[] {
-    return parseRecords(records).map((record) => {
+    const rows = parseRecords(records).map((record) => {
         const values = blankValues(fields);
         if (record && typeof record === "object") {
             const source = record as Record<string, unknown>;
@@ -67,11 +67,17 @@ function toRows(fields: Field[], records: unknown): Row[] {
         }
         return { id: nextId++, values };
     });
+    if (!rows.length) rows.push({ id: nextId++, values: blankValues(fields) });
+    return rows;
+}
+
+function isFilled(fields: Field[], row: Row): boolean {
+    return fields.some((field) => field.kind !== "select" && (row.values[field.key] ?? "").trim() !== "");
 }
 
 export default function RecordList({ name, label, addLabel = "Добавить", fields, records }: Props) {
     const [rows, setRows] = useState(() => toRows(fields, records));
-    const payload = rows.map((row) => row.values);
+    const payload = rows.filter((row) => isFilled(fields, row)).map((row) => row.values);
 
     function update(id: number, key: string, value: string) {
         setRows((current) =>

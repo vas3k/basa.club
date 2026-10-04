@@ -15,7 +15,7 @@
                 <div class="block feed-empty">
                     <p>В Вастрик Базе {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }} еще нет ни одной записи</p>
                     <p>Вы можете быть первым и начать</p>
-                    <a href="{% url "item_create" %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                    <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                 </div>
             {% endif %}
         </section>
@@ -51,7 +51,7 @@
         <div class="block feed-empty">
             <p>Тут пока ничего нет</p>
             <p>Но вы можете добавить сюда что-то свое!</p>
-            <a href="{% url "item_create" %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+            <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
         </div>
     {% endif %}
 {% endblock %}
