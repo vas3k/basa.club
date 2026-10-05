@@ -5,11 +5,15 @@
 {% endblock %}
 
 {% block content %}
-    <div class="block error">
+    <div class="block error banned">
         <div class="block-icon">❌</div>
         <div class="block-header">Аккаунт заблокирован</div>
-        <div class="block-description block-description-center">
-            Доступ к Базе закрыт модераторами
+        <div class="banned-remaining">
+            {% if is_permanent %}
+                Навсегда
+            {% else %}
+                Осталось {{ days }} {{ days|pluralize:"день,дня,дней" }}, {{ hours }} {{ hours|pluralize:"час,часа,часов" }} и {{ minutes }} {{ minutes|pluralize:"минута,минуты,минут" }}
+            {% endif %}
         </div>
     </div>
 {% endblock %}

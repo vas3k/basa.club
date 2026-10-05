@@ -29,7 +29,9 @@
 
     --badge-color: rgba(255, 196, 85, 0.91);
 
-    --inline-block-bg: #f2f3f5;
+    --inline-block-bg-default: #f2f3f5;
+    --inline-block-bg: var(--inline-block-bg-default);
+    --inline-block-hover-bg: #e4e6ea;
 }
 
 html {
@@ -65,6 +67,18 @@ html {
     --promo-text: var(--text-color);
     --photos-bg: #4e5560;
     --photos-text: #f4f5f7;
+
+    --note-bg: #fffdf8;
+    --note-gradient: linear-gradient(180deg, rgba(255, 244, 220, 0.7), transparent 140px);
+    --note-border: 1px solid rgba(176, 142, 78, 0.22);
+    --note-accent: #9a5b16;
+
+    --block-gradient: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
+    --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f4e4c1 30%, #d4af37 100%);
+    --grey-gradient: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
+    --red-gradient: linear-gradient(135deg, #fecdd3 0%, #ffe4e6 50%, #fecdd3 100%);
+    --green-gradient: linear-gradient(135deg, #d9f99d 0%, #ecfccb 50%, #d9f99d 100%);
+    --purple-gradient: linear-gradient(135deg, #ddd6fe 0%, #ede9fe 50%, #ddd6fe 100%);
 }
 
 body {
@@ -185,23 +199,23 @@ pre>code {
 }
 
 .bg-gold {
-    background: linear-gradient(135deg, #d4af37 0%, #f4e4c1 30%, #d4af37 100%);
+    background: var(--gold-gradient);
 }
 
 .bg-grey {
-    background: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
+    background: var(--grey-gradient);
 }
 
 .bg-red {
-    background: linear-gradient(135deg, #fecdd3 0%, #ffe4e6 50%, #fecdd3 100%);
+    background: var(--red-gradient);
 }
 
 .bg-green {
-    background: linear-gradient(135deg, #d9f99d 0%, #ecfccb 50%, #d9f99d 100%);
+    background: var(--green-gradient);
 }
 
 .bg-purple {
-    background: linear-gradient(135deg, #ddd6fe 0%, #ede9fe 50%, #ddd6fe 100%);
+    background: var(--purple-gradient);
 }
 
 .label {

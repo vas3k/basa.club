@@ -5,7 +5,7 @@ from django.views.decorators.http import require_POST
 
 from authn.decorators import api_login_required
 from bookmarks.models import Bookmark
-from common import counters
+from counters import counters
 from items.models import Item
 
 
@@ -23,7 +23,7 @@ def toggle_item_bookmark(request, item_id):
         try:
             Bookmark.objects.create(user=request.user, item=item)
         except IntegrityError:
-            item.refresh_from_db(fields=["bookmark_count"])
+            pass
         else:
             counters.item_bookmarked(item)
 

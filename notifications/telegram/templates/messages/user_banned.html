@@ -1,0 +1,6 @@
+🚫 <b>Вас забанили в Вастрик Базе</b>
+
+Причина: {{ reason }}{% if comment %}
+Комментарий: {{ comment }}{% endif %}
+
+{% if is_permanent %}Срок: навсегда{% else %}Осталось {{ days }} {{ days|pluralize:"день,дня,дней" }}, {{ hours }} {{ hours|pluralize:"час,часа,часов" }} и {{ minutes }} {{ minutes|pluralize:"минута,минуты,минут" }}{% endif %}

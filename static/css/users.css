@@ -206,6 +206,60 @@
     font-variant-numeric: tabular-nums;
 }
 
+a.profile-stat-rating,
+a.profile-stat-rating:visited {
+    color: inherit;
+    text-decoration: none;
+}
+
+a.profile-stat-rating:hover {
+    color: inherit;
+    opacity: 0.75;
+}
+
+.rating-history {
+    display: flex;
+    flex-direction: column;
+    gap: 18px;
+}
+
+.rating-history-row {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    gap: 16px 24px;
+}
+
+.rating-history-change {
+    font-size: 140%;
+    font-weight: 700;
+    line-height: 1.2;
+    font-variant-numeric: tabular-nums;
+}
+
+.rating-history-reason {
+    flex: 1;
+    min-width: 0;
+    font-size: 120%;
+}
+
+.rating-history-date {
+    opacity: 0.55;
+    font-size: 90%;
+    white-space: nowrap;
+}
+
+.rating-history-empty {
+    margin: 0;
+    opacity: 0.7;
+}
+
+@media only screen and (max-width: 600px) {
+    .rating-history-row {
+        gap: 8px 16px;
+    }
+}
+
 .profile-stat {
     font-variant-numeric: tabular-nums;
 }

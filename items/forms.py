@@ -12,10 +12,11 @@ from items.models import Item
 
 EXPIRES_CHOICES = (
     ("never", "Никогда"),
-    ("week", "Через неделю"),
-    ("month", "Через месяц"),
-    ("quarter", "Через 3 месяца"),
-    ("year", "Через год"),
+    ("day", "1 день"),
+    ("week", "1 неделю"),
+    ("month", "1 месяц"),
+    ("quarter", "3 месяца"),
+    ("year", "1 год"),
 )
 
 
@@ -83,7 +84,7 @@ class ItemForm(forms.ModelForm):
         error_messages={"max_length": "Слишком длинный промокод"},
     )
     expires_in = forms.ChoiceField(
-        label="Срок актуальности",
+        label="Истекает через:",
         choices=EXPIRES_CHOICES,
         initial="never",
         required=False,
@@ -102,7 +103,7 @@ class ItemForm(forms.ModelForm):
             return
         shown = formats.date_format(self.instance.expires_at, "j E Y")
         self.fields["expires_in"].choices = (
-            ("keep", f"Оставить до {shown}"),
+            ("keep", shown),
             *EXPIRES_CHOICES,
         )
         if not self.is_bound:
@@ -170,16 +171,17 @@ class ItemForm(forms.ModelForm):
 
         return cleaned_data
 
-    def save(self, *, author=None, is_draft=False, commit=True):
+    def save(self, *, author=None, is_draft=False, keep_visibility=False, commit=True):
         item = super().save(commit=False)
         if author is not None:
             item.author = author
 
-        item.visibility = Item.VISIBILITY_DRAFT if is_draft else Item.VISIBILITY_VISIBLE
-        if is_draft:
-            item.published_at = None
-        elif not item.published_at:
-            item.published_at = timezone.now()
+        if not keep_visibility:
+            item.visibility = Item.VISIBILITY_DRAFT if is_draft else Item.VISIBILITY_VISIBLE
+            if is_draft:
+                item.published_at = None
+            elif not item.published_at:
+                item.published_at = timezone.now()
 
         self._apply_expiry(item)
 
@@ -196,6 +198,8 @@ class ItemForm(forms.ModelForm):
 
 def expires_at_for(choice):
     now = timezone.now()
+    if choice == "day":
+        return now + timedelta(days=1)
     if choice == "week":
         return now + timedelta(days=7)
     if choice == "month":

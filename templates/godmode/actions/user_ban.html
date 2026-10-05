@@ -6,13 +6,13 @@
 
 {% block godmode_action_form %}
     <p>
-        {% if item.is_banned %}
-            Сейчас забанен до {{ item.is_banned_until|date:"Y-m-d H:i" }}.
+        {% if ban_user.is_banned %}
+            Сейчас забанен{% if ban_user.is_permanently_banned %} навсегда{% else %} до {{ ban_user.is_banned_until|date:"Y-m-d H:i" }}{% endif %}.
         {% else %}
             Сейчас не забанен.
         {% endif %}
-        {% if item.metadata.last_ban %}
-            Прошлый бан: {{ item.metadata.last_ban.days }} дн., «{{ item.metadata.last_ban.reason }}».
+        {% if ban_user.metadata.last_ban %}
+            Прошлый бан: {{ ban_user.metadata.last_ban.reason }}{% if ban_user.metadata.last_ban.comment %} — {{ ban_user.metadata.last_ban.comment }}{% endif %}.
         {% endif %}
     </p>
 
@@ -20,12 +20,19 @@
         {% csrf_token %}
         <div class="godmode-form">
             <div class="godmode-form-row">
-                <div class="godmode-form-label">{{ form.days.label_tag }}</div>
-                <div class="godmode-form-input">{{ form.days }}</div>
-            </div>
-            <div class="godmode-form-row">
                 <div class="godmode-form-label">{{ form.reason.label_tag }}</div>
                 <div class="godmode-form-input">{{ form.reason }}</div>
+                {% if form.reason.errors %}<div class="godmode-form-errors">{{ form.reason.errors }}</div>{% endif %}
+            </div>
+            <div class="godmode-form-row">
+                <div class="godmode-form-label">{{ form.comment.label_tag }}</div>
+                <div class="godmode-form-input">{{ form.comment }}</div>
+                {% if form.comment.errors %}<div class="godmode-form-errors">{{ form.comment.errors }}</div>{% endif %}
+            </div>
+            <div class="godmode-form-row">
+                <div class="godmode-form-label">{{ form.days.label_tag }}</div>
+                <div class="godmode-form-input">{{ form.days }}</div>
+                {% if form.days.errors %}<div class="godmode-form-errors">{{ form.days.errors }}</div>{% endif %}
             </div>
             <div class="godmode-form-row">
                 <div class="godmode-form-label">{{ form.is_permanent.label_tag }}</div>
@@ -41,6 +48,7 @@
     <form action="." method="post">
         {% csrf_token %}
         <input type="hidden" name="is_unbanned" value="on">
+        <input type="hidden" name="reason" value="other">
         <div class="godmode-form">
             <div class="godmode-form-actions">
                 <span></span>

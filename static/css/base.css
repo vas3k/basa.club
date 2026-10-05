@@ -6,8 +6,15 @@
     box-sizing: border-box;
     box-shadow: var(--block-shadow);
     background-color: var(--block-bg-color);
+    border: var(--block-border);
     border-radius: var(--block-border-radius);
     transition: 0.1s ease-out;
+}
+
+.block-note {
+    background-color: var(--note-bg);
+    background-image: var(--note-gradient);
+    border: var(--note-border);
 }
 
 .block-icon {
@@ -595,8 +602,12 @@ img.emoji {
     padding-left: 1em;
 }
 
-.markdown-text a {
-    text-decoration: underline;
+.markdown-text a,
+.inline-block a:not(.inline-block) {
+    font-weight: 900;
+    text-decoration-line: underline;
+    text-decoration-thickness: 1.5px;
+    text-underline-offset: 0.16em;
 }
 
 .link-favicon {
@@ -613,7 +624,8 @@ img.emoji {
     font-size: 140%;
 }
 
-.markdown-text .link-favicon {
+.markdown-text .link-favicon,
+.inline-block .link-favicon {
     display: inline-block;
 }
 

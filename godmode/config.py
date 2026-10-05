@@ -92,6 +92,11 @@ ADMIN = ClubAdmin(
                             title="📝 Открыть",
                             get=view_item_action,
                         ),
+                        "ban": ClubAdminAction(
+                            title="💣 Забанить автора",
+                            get=get_ban_action,
+                            post=post_ban_action,
+                        ),
                     },
                 ),
                 ClubAdminModel(

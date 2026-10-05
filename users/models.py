@@ -131,6 +131,10 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
         return bool(self.is_banned_until and self.is_banned_until > timezone.now())
 
     @property
+    def is_permanently_banned(self):
+        return self.is_banned and (self.is_banned_until - timezone.now()).days > 365 * 1000
+
+    @property
     def is_active_membership(self):
         now = timezone.now()
         if not self.membership_expires_at or self.membership_expires_at < now:

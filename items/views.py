@@ -9,12 +9,13 @@ from categories.models import Category
 from common.pagination import paginate
 from comments.forms import CommentForm, ReplyForm
 from comments.models import Comment
-from common import counters
+from counters import counters
 from common.contacts import CONTACT_EDITOR_FIELDS
 from geo.models import GeoCountry
 from items.forms import ItemForm
 from items.models import Item
 from notifications.models import Subscription
+from users.flags import has_user_flag
 import notifications
 
 FEED_SORTS = {
@@ -128,12 +129,19 @@ def index_page(request, country=None):
         "country_items": country_items,
         "all_items": all_items,
         "subscriptions": subscriptions,
+        "show_welcome": show_welcome_block(request),
     })
     if country:
         max_age = 365 * 24 * 60 * 60
         response.set_cookie("country", request.country_id, max_age=max_age, samesite="Lax", path="/")
         response.set_cookie("city", "everywhere", max_age=max_age, samesite="Lax", path="/")
     return response
+
+
+def show_welcome_block(request):
+    if request.COOKIES.get("is_welcome_read"):
+        return False
+    return not has_user_flag(request.user, "is_welcome_read")
 
 
 def listing_page(request, country, city, category=None, subcategory=None):
@@ -162,6 +170,20 @@ def is_item_admin(user):
     return user.is_authenticated and user.is_moderator
 
 
+def moderator_item_activity(item, limit=7):
+    upvotes = item.votes.filter(user__isnull=False)
+    bookmarks = item.bookmarks.all()
+    flags = list(item.flags.select_related("user").order_by("-created_at"))
+    return {
+        "upvoters": [vote.user for vote in upvotes.select_related("user").order_by("-created_at")[:limit]],
+        "upvote_count": upvotes.count(),
+        "bookmarkers": [bookmark.user for bookmark in bookmarks.select_related("user").order_by("-created_at")[:limit]],
+        "bookmark_count": bookmarks.count(),
+        "flags": flags,
+        "flag_count": len(flags),
+    }
+
+
 def render_item_page(request, item, *, comment_form=None, reply_form=None, status=200):
     is_owner = request.user.is_authenticated and request.user.pk == item.author_id
     is_admin = is_item_admin(request.user)
@@ -186,6 +208,7 @@ def render_item_page(request, item, *, comment_form=None, reply_form=None, statu
         "item": item,
         "show_owner_actions": is_owner and not is_admin,
         "show_admin_actions": is_admin,
+        "moderation": moderator_item_activity(item) if is_admin else None,
         "comments_tree": comments_tree,
         "comment_form": comment_form,
         "reply_form": reply_form,
@@ -224,15 +247,18 @@ def create_item(request):
     })
 
     if request.method == "POST" and form.is_valid():
+        action = request.POST.get("action") or "publish"
         item = form.save(
             author=request.user,
-            is_draft=request.POST.get("action") == "draft",
+            is_draft=action in {"draft", "preview"},
             commit=False,
         )
         item.save()
         if item.is_listed:
             counters.item_created(item)
             notifications.item_created(item)
+        if action == "draft":
+            return redirect("user_profile", slug=request.user.slug)
         return redirect(item.get_absolute_url())
 
     countries = [
@@ -258,6 +284,7 @@ def create_item(request):
         "form": form,
         "form_title": "Добавить новое в Базу",
         "form_url": reverse("item_create"),
+        "is_new": True,
         "countries_options": countries,
         "categories_options": categories,
         "contact_fields": CONTACT_EDITOR_FIELDS,
@@ -279,7 +306,15 @@ def edit_item(request, item_id):
     form = ItemForm(request.POST or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
-        item = form.save(is_draft=request.POST.get("action") == "draft", commit=False)
+        action = request.POST.get("action") or "save"
+        if action == "hide":
+            item = form.save(is_draft=True, commit=False)
+        elif action == "publish":
+            item = form.save(is_draft=False, commit=False)
+        elif action in {"draft", "preview"}:
+            item = form.save(is_draft=True, commit=False)
+        else:
+            item = form.save(keep_visibility=True, commit=False)
         item.save()
         if old.is_listed and item.is_listed:
             counters.item_updated(item, old)
@@ -288,6 +323,8 @@ def edit_item(request, item_id):
         elif item.is_listed:
             counters.item_created(item)
             notifications.item_created(item)
+        if action == "draft":
+            return redirect("user_profile", slug=request.user.slug)
         return redirect(item.get_absolute_url())
 
     countries = [
@@ -312,6 +349,7 @@ def edit_item(request, item_id):
         "form": form,
         "form_title": "Редактируем",
         "form_url": reverse("item_edit", args=[item.id]),
+        "is_new": False,
         "countries_options": countries,
         "categories_options": categories,
         "contact_fields": CONTACT_EDITOR_FIELDS,
@@ -341,5 +379,5 @@ def delete_item(request, item_id):
     if was_listed:
         counters.item_hidden(item)
     if is_owner:
-        return redirect("user_profile", slug="me")
+        return redirect("user_profile", slug=request.user.slug)
     return redirect("godmode_list_model", model_name="items")

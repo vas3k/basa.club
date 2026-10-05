@@ -1,4 +1,4 @@
-from categories.counters import counts
+from counters.categories import counts
 from categories.models import Category
 
 

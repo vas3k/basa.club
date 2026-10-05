@@ -40,10 +40,6 @@
     margin-bottom: 0;
 }
 
-.item-manage-admin {
-    background: #fff1e0;
-}
-
 .item-admin-meta {
     display: flex;
     flex-direction: column;
@@ -60,12 +56,44 @@
 
 .item-admin-meta dt {
     flex: none;
-    color: #9a5b16;
+    color: var(--note-accent);
 }
 
 .item-admin-meta dd {
     margin: 0;
     text-align: right;
+    overflow-wrap: anywhere;
+}
+
+.item-admin-section {
+    margin-top: 16px;
+}
+
+.item-admin-heading {
+    font-weight: 700;
+    color: var(--note-accent);
+}
+
+.item-admin-people {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 6px;
+    margin-top: 8px;
+}
+
+.item-admin-people .user-tiny {
+    max-width: 100%;
+}
+
+.item-admin-flag {
+    margin-top: 10px;
+}
+
+.item-admin-flag-reason,
+.item-admin-flag-comment {
+    margin-top: 2px;
+    font-size: 90%;
     overflow-wrap: anywhere;
 }
 
@@ -472,13 +500,13 @@
 
 .item-action:hover,
 .item-action[data-copied] {
-    --inline-block-bg: #e4e6ea;
+    --inline-block-bg: var(--inline-block-hover-bg);
     color: var(--text-color);
 }
 
 .item-action-static,
 .item-action-static:hover {
-    --inline-block-bg: #f2f3f5;
+    --inline-block-bg: var(--inline-block-bg-default);
     cursor: default;
 }
 
@@ -649,6 +677,22 @@
     margin-top: 30px;
 }
 
+.item-form .form-section .item-form-expires {
+    flex-direction: row;
+    align-items: center;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.item-form .item-form-expires label {
+    white-space: nowrap;
+}
+
+.item-form .item-form-expires select {
+    width: auto;
+    min-width: 10rem;
+}
+
 .item-form .form-optionals .block {
     margin-bottom: 0;
 }
@@ -659,13 +703,41 @@
     border-top: none;
 }
 
+.item-form .form-actions {
+    align-items: center;
+    justify-content: space-between;
+}
+
+.item-form .form-actions-end {
+    display: flex;
+    gap: 15px;
+    margin-left: auto;
+}
+
+.item-form .form-actions .button-big {
+    margin: 0;
+}
+
+@media only screen and (max-width: 600px) {
+    .item-form .form-actions-end {
+        flex-direction: column;
+        width: 100%;
+        margin-left: 0;
+    }
+
+    .item-form .form-actions > .button,
+    .item-form .form-actions-end > .button {
+        width: 100%;
+    }
+}
+
 .form-reveal {
     display: block;
     width: 100%;
     padding: 16px 20px;
     border: none;
     background-color: var(--block-bg-color);
-    background-image: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
+    background-image: var(--block-gradient);
     color: inherit;
     font-family: inherit;
     font-size: 132%;
@@ -835,7 +907,7 @@ a.item-contact:hover {
     width: 100%;
     min-height: 140px;
     padding: 12px;
-    border: 2px dashed #333;
+    border: 2px dashed var(--text-color);
     border-radius: var(--block-border-radius);
     background: rgba(0, 0, 0, 0.02);
     cursor: pointer;
@@ -959,6 +1031,11 @@ a.item-contact:hover {
 .item-promo-text {
     font-weight: 700;
     overflow-wrap: anywhere;
+}
+
+.item-promo-expired .item-promo-text,
+.item-promo-expired .inline-block-secure-source {
+    text-decoration: line-through;
 }
 
 .item-promo .fa-copy {

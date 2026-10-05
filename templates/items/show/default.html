@@ -32,7 +32,7 @@
                     {% if request.user.is_authenticated %}
                         <div class="inline-block inline-block-green item-location">
                             <span class="inline-block-icon item-location-icon" aria-hidden="true">📍</span>
-                            <div class="item-location-text markdown-text">{{ item.location|markdown }}</div>
+                            <div class="item-location-text">{{ item.location|urlize }}</div>
                         </div>
                     {% else %}
                         {% anon_teaser item.id "location" as teaser %}

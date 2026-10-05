@@ -6,6 +6,12 @@ from django.utils import timezone
 
 from users.models import User
 
+PUBLIC_PREFIXES = (
+    "/banned/",
+    "/logout/",
+    "/static/",
+)
+
 
 class AuthSessionMiddleware:
     def __init__(self, get_response):
@@ -13,7 +19,8 @@ class AuthSessionMiddleware:
 
     def __call__(self, request):
         if request.user.is_authenticated and request.user.is_banned:
-            return redirect("banned")
+            if not request.path.startswith(PUBLIC_PREFIXES):
+                return redirect("banned")
 
         if request.user.is_authenticated:
             now = timezone.now()

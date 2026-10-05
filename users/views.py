@@ -22,7 +22,6 @@ def profile_page(request, slug):
         return redirect("bot")
 
     profile_user = get_user_or_404(request, slug)
-    is_owner = request.user.pk == profile_user.pk
     active_items = paginate(
         request,
         Item.objects_for_user(request.user).filter(author=profile_user),
@@ -30,7 +29,7 @@ def profile_page(request, slug):
     )
     inactive_items = paginate(
         request,
-        Item.objects_for_user(request.user, Item.for_author(profile_user).exclude(pk__in=Item.visible_objects().filter(author=profile_user).values("pk"))) if is_owner else Item.objects.none(),
+        Item.objects_for_user(request.user, Item.for_author(profile_user).exclude(pk__in=Item.visible_objects().filter(author=profile_user).values("pk"))) if request.user.pk == profile_user.pk else Item.objects.none(),
         settings.PROFILE_POSTS_PAGE_SIZE,
         "inactive_page",
     )
@@ -46,7 +45,6 @@ def profile_page(request, slug):
 
     return render(request, "users/profile.html", {
         "profile_user": profile_user,
-        "is_owner": is_owner,
         "active_items": active_items,
         "inactive_items": inactive_items,
         "comments": comments,
@@ -74,11 +72,11 @@ def edit_profile(request, slug):
         user.country = form.cleaned_data["country"]
         user.bio = form.cleaned_data["bio"]
         user.save()
-        return redirect("user_profile", slug=slug)
+        return redirect("user_profile", slug=user.slug)
 
     return render(request, "users/edit.html", {
         "form": form,
-        "slug": slug,
+        "slug": user.slug,
     })
 
 
@@ -86,7 +84,7 @@ def edit_profile(request, slug):
 @require_http_methods(["GET", "POST"])
 def welcome(request):
     if (request.user.metadata or {}).get("welcome_completed") is not False:
-        return redirect("user_profile", slug="me")
+        return redirect("user_profile", slug=request.user.slug)
 
     user = request.user
     country_id, city_id = _geo_selection(user)
@@ -104,7 +102,7 @@ def welcome(request):
 
         subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
         
-        return redirect("user_profile", slug="me")
+        return redirect("user_profile", slug=user.slug)
 
     country_id = form["country"].value() or ""
     city_id = form["city"].value() or ""

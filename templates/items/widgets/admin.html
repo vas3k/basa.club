@@ -1,4 +1,4 @@
-<aside class="block item-manage item-manage-admin">
+<aside class="block block-note item-manage item-manage-admin">
     <div class="item-manage-title">Админить</div>
 
     <div class="item-manage-actions">
@@ -25,55 +25,48 @@
         <a href="{% url "godmode_edit_model" "items" item.id %}" class="button item-manage-button">
             <i class="fas fa-bomb"></i> Открыть в админке
         </a>
+
+        {% if item.author_id %}
+            <a href="{% url "godmode_action" "users" item.author_id "ban" %}" class="button item-manage-button">
+                <i class="fas fa-gavel"></i> Забанить автора
+            </a>
+        {% endif %}
     </div>
 
-    <dl class="item-admin-meta">
-        <div>
-            <dt>Статус</dt>
-            <dd>
-                {% if item.visibility == "draft" %}Черновик
-                {% elif item.visibility == "link_only" %}По ссылке
-                {% elif item.visibility == "visible" %}Видно всем
-                {% else %}{{ item.visibility }}{% endif %}
-                {% if item.is_expired %} · истекло{% endif %}
-                {% if item.deleted_at %} · удалено{% endif %}
-            </dd>
-        </div>
-        {% if item.expires_at %}
-            <div>
-                <dt>Истекает</dt>
-                <dd>{{ item.expires_at|date:"j E Y, H:i" }}</dd>
+    {% if moderation.upvote_count %}
+        <div class="item-admin-section">
+            <div class="item-admin-heading">Плюсы ({{ moderation.upvote_count }})</div>
+            <div class="item-admin-people">
+                {% for user in moderation.upvoters %}
+                    {% include "users/widgets/user_tiny.html" with user=user %}
+                {% endfor %}
             </div>
-        {% endif %}
-        {% if item.deleted_at %}
-            <div>
-                <dt>Удалено</dt>
-                <dd>{{ item.deleted_at|date:"j E Y, H:i" }}</dd>
+        </div>
+    {% endif %}
+
+    {% if moderation.bookmark_count %}
+        <div class="item-admin-section">
+            <div class="item-admin-heading">Закладки ({{ moderation.bookmark_count }})</div>
+            <div class="item-admin-people">
+                {% for user in moderation.bookmarkers %}
+                    {% include "users/widgets/user_tiny.html" with user=user %}
+                {% endfor %}
             </div>
-        {% endif %}
-        <div>
-            <dt>Просмотры</dt>
-            <dd>{{ item.view_count }}</dd>
         </div>
-        <div>
-            <dt>Плюсы</dt>
-            <dd>{{ item.upvotes }}</dd>
+    {% endif %}
+
+    {% if moderation.flags %}
+        <div class="item-admin-section">
+            <div class="item-admin-heading">Жалобы ({{ moderation.flag_count }})</div>
+            {% for flag in moderation.flags %}
+                <div class="item-admin-flag">
+                    {% include "users/widgets/user_tiny.html" with user=flag.user %}
+                    <div class="item-admin-flag-reason">{{ flag.get_reason_display }}</div>
+                    {% if flag.comment %}
+                        <div class="item-admin-flag-comment">{{ flag.comment }}</div>
+                    {% endif %}
+                </div>
+            {% endfor %}
         </div>
-        <div>
-            <dt>Рейтинг</dt>
-            <dd>{{ item.rating }}</dd>
-        </div>
-        <div>
-            <dt>Комментарии</dt>
-            <dd>{{ item.comment_count }}</dd>
-        </div>
-        <div>
-            <dt>Закладки</dt>
-            <dd>{{ item.bookmark_count }}</dd>
-        </div>
-        <div>
-            <dt>Жалобы</dt>
-            <dd>{{ item.flags.count }}</dd>
-        </div>
-    </dl>
+    {% endif %}
 </aside>

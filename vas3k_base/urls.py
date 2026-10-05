@@ -27,25 +27,33 @@ from items.views import (
     item_page,
     listing_page,
 )
+from counters.views import user_ratings
 from notifications.views import remove_subscription, toggle_listing_subscription
+from users.api import update_user_flag
 from users.views import edit_profile, profile_page, welcome
 
 urlpatterns = [
     path("", index_page, name="index"),
+
     path("login/", log_in, name="login"),
-    path("banned/", banned, name="banned"),
     path("logout/", log_out, name="logout"),
     path("welcome/", welcome, name="welcome"),
     path("bot/", bot_page, name="bot"),
+    path("banned/", banned, name="banned"),
+
     path("auth/login/club/", login_club, name="login_club"),
     path("auth/club_callback/", club_callback, name="club_callback"),
     path("auth/login/telegram/", login_telegram, name="login_telegram"),
     path("auth/telegram/", telegram_continue, name="telegram_continue"),
+
     path("user/<slug:slug>/edit/", edit_profile, name="user_profile_edit"),
+    path("user/<slug:slug>/ratings/", user_ratings, name="user_ratings"),
     path("user/<slug:slug>/", profile_page, name="user_profile"),
+ 
     path("bookmarks/", bookmarks_page, name="bookmarks"),
     path("bookmarks/subscriptions/<uuid:subscription_id>/remove/", remove_subscription, name="subscription_remove"),
     path("bookmarks/<uuid:item_id>/remove/", remove_bookmark, name="bookmark_remove"),
+ 
     path("items/new/", create_item, name="item_create"),
     path("items/<uuid:item_id>/edit/", edit_item, name="item_edit"),
     path("items/<uuid:item_id>/hide/", hide_item, name="item_hide"),
@@ -59,7 +67,10 @@ urlpatterns = [
     path("api/items/<uuid:item_id>/bookmark/", toggle_item_bookmark, name="item_bookmark"),
     path("api/items/<uuid:item_id>/flag/", flag_item, name="item_flag"),
     path("api/items/<uuid:item_id>/retract_vote/", retract_item_vote, name="item_retract_vote"),
+    path("api/comments/<uuid:comment_id>/upvote/", upvote_comment, name="comment_upvote"),
+    path("api/comments/<uuid:comment_id>/retract_vote/", retract_comment_vote, name="comment_retract_vote"),
     path("api/images/", upload_image, name="image_upload"),
+    path("api/me/flags/", update_user_flag, name="user_flag"),
 
     path("godmode/", godmode, name="godmode"),
     path("godmode/page/<slug:page_name>/", godmode_show_page, name="godmode_show_page"),
@@ -68,9 +79,6 @@ urlpatterns = [
     path("godmode/<slug:model_name>/<str:item_id>/edit/", godmode_edit_model, name="godmode_edit_model"),
     path("godmode/<slug:model_name>/<str:item_id>/delete/", godmode_delete_model, name="godmode_delete_model"),
     path("godmode/<slug:model_name>/<str:item_id>/action/<str:action_code>/", godmode_action, name="godmode_action"),
-
-    path("api/comments/<uuid:comment_id>/upvote/", upvote_comment, name="comment_upvote"),
-    path("api/comments/<uuid:comment_id>/retract_vote/", retract_comment_vote, name="comment_retract_vote"),
 
     path("<str:country>/", index_page, name="country_index"),
     path("<str:country>/<str:city>/", listing_page, name="listing"),

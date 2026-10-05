@@ -1,0 +1,42 @@
+<div class="profile">
+    <div class="block profile-block">
+        <div class="profile-person">
+            <img class="profile-avatar" src="{{ profile_user.default_avatar }}" alt="">
+            <div class="profile-info">
+                <div class="profile-name">
+                    {% if profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %}
+                    {% if profile_user.club_slug %}
+                        <a class="profile-club" href="{{ settings.CLUB_BASE_URL }}/user/{{ profile_user.club_slug }}/" target="_blank" rel="noopener noreferrer" title="Профиль в Вастрик Клубе" aria-label="Профиль в Вастрик Клубе">✖︎</a>
+                    {% endif %}
+                    {% if request.user.pk == profile_user.pk %}
+                        <a href="{% url "user_profile_edit" profile_user.slug %}" class="profile-edit" title="Редактировать" aria-label="Редактировать">
+                            <i class="fas fa-edit"></i>
+                        </a>
+                    {% endif %}
+                </div>
+
+                {% if profile_user.city or profile_user.country %}
+                    <div class="profile-place">
+                        🌍 {% if profile_user.city %}{{ profile_user.city }}{% endif %}{% if profile_user.city and profile_user.country %}, {% endif %}{% if profile_user.country %}{{ profile_user.country }}{% endif %}
+                    </div>
+                {% endif %}
+
+                {% if profile_user.bio %}
+                    <div class="profile-bio markdown-text">{{ profile_user.bio|markdown }}</div>
+                {% endif %}
+            </div>
+        </div>
+
+        <div class="profile-stats">
+            {% if request.user.pk == profile_user.pk or request.user.is_moderator %}
+                <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="История рейтинга">{{ profile_user.rating|rating }}</a>
+            {% else %}
+                <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
+            {% endif %}
+            <div class="profile-stat">Зарегистрирован: {{ profile_user.created_at|date:"F Y" }}</div>
+            <div class="profile-stat">Активность: {{ profile_user.last_activity_at|timesince }} назад</div>
+            <div class="profile-stat"><b>{{ profile_user.items_count }}</b> {{ profile_user.items_count|pluralize:"запись,записи,записей" }}</div>
+            <div class="profile-stat"><b>{{ profile_user.comments_count }}</b> {{ profile_user.comments_count|pluralize:"комментарий,комментария,комментариев" }}</div>
+        </div>
+    </div>
+</div>

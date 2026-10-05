@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "geo.apps.GeoConfig",
     "items.apps.ItemsConfig",
     "comments.apps.CommentsConfig",
+    "counters.apps.CountersConfig",
     "bookmarks.apps.BookmarksConfig",
     "complaints.apps.ComplaintsConfig",
     "notifications.apps.NotificationsConfig",
@@ -208,7 +209,7 @@ LOGGING = {
 
 # App
 
-APP_TITLE = "Вастрик 💽 База"
+APP_TITLE = "Вастрик База"
 APP_HOST = os.environ.get("APP_HOST") or "http://127.0.0.1:8000"
 if not TELEGRAM_BOT_WEBHOOK_URL:
     TELEGRAM_BOT_WEBHOOK_URL = f"{APP_HOST}/telegram/webhook/"

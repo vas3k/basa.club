@@ -104,14 +104,6 @@
             font-size: 16px;
         }
 
-        .header-logo a {
-            display: block;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-        }
-
         .header-menu-button {
             width: 36px;
             height: 36px;

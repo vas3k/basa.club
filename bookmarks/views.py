@@ -4,7 +4,7 @@ from django.urls import reverse
 from django.views.decorators.http import require_POST
 
 from bookmarks.models import Bookmark
-from common import counters
+from counters import counters
 from common.pagination import paginate
 from items.models import Item
 from notifications.models import Subscription

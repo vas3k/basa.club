@@ -1,6 +1,10 @@
 {% extends "layout_with_sidebar.html" %}
 
 {% block content %}
+    {% if show_welcome %}
+        {% include "index/welcome.html" %}
+    {% endif %}
+
     {% if current_country %}
         <section class="index-section">
             <h2 class="index-section-title">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</h2>

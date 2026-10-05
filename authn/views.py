@@ -30,18 +30,26 @@ def start_session(request, user, *, new_user=False):
     request.session.set_expiry(settings.SESSION_COOKIE_AGE)
     user.last_activity_at = timezone.now()
     user.save(update_fields=["last_activity_at", "metadata"])
-    return redirect("user_profile", slug="me")
+    return redirect("user_profile", slug=user.slug)
 
 
 def log_in(request):
     if request.user.is_authenticated:
-        return redirect("user_profile", slug="me")
+        return redirect("user_profile", slug=request.user.slug)
 
     return render(request, "users/login.html")
 
 
 def banned(request):
-    return render(request, "banned.html", status=403)
+    if not request.user.is_authenticated or not request.user.is_banned:
+        return redirect("index")
+    left = request.user.is_banned_until - timezone.now()
+    return render(request, "banned.html", {
+        "is_permanent": request.user.is_permanently_banned,
+        "days": left.days,
+        "hours": left.seconds // 3600,
+        "minutes": (left.seconds % 3600) // 60,
+    }, status=403)
 
 
 @require_POST
@@ -133,7 +141,7 @@ def login_telegram(request):
 @login_required
 def bot_page(request):
     if request.user.telegram_id:
-        return redirect("user_profile", slug="me")
+        return redirect("user_profile", slug=request.user.slug)
 
     try:
         url = telegram.bot_url(request, user=request.user)

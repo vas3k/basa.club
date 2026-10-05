@@ -5,7 +5,7 @@ from django.views.decorators.http import require_http_methods, require_POST
 
 from comments.forms import CommentForm, ReplyForm
 from comments.models import Comment
-from common import counters
+from counters import counters
 from items.models import Item
 from items.views import render_item_page
 

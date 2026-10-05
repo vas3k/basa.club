@@ -70,7 +70,7 @@ templates/users/widgets/user_small.html   # avatar + name + reputation, reuse ev
 
 Rating is not the same as upvotes. Upvotes are a plain counter of clicks, while rating is calculated from votes and comment vibes. Users, items and comments each have their own rating.
 
-All rules live in `common/counters.py`. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Models and forms never touch ratings or counters.
+All rules live in the `counters` app. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Models and forms never touch ratings or counters. User rating changes are stored in the `ratings` table and shown at `/user/<slug>/ratings/`.
 
 | Action | Comment author | Item | Comment | Item author |
 |--------|----------------|------|---------|-------------|
@@ -87,7 +87,7 @@ Comments on your own item (and upvotes on those comments) do not change anyone's
 
 Ratings are stored as integers and displayed divided by 10 with the `rating` template filter (`{{ user.rating|rating }}` shows 15 as +1.5 and -7 as -0.7). Items and top-level comments show their rating under the upvote button via `templates/common/widgets/rating.html`: green if positive, red if negative, hidden if zero.
 
-To rebuild ratings and counters from scratch (after changing the rules, or if they drift):
+To rebuild live ratings and counters from scratch (after changing the rules, or if they drift). This never touches the `ratings` history table:
 
 ```bash
 uv run python manage.py recalculate_counters

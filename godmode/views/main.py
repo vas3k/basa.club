@@ -253,6 +253,7 @@ def godmode_action(request, model_name, item_id, action_code):
         admin=ADMIN,
         admin_model=admin_model,
         admin_action=admin_action,
+        item=item,
     )
     if request.method == "GET" and admin_action.get:
         return admin_action.get(request, item, **context)

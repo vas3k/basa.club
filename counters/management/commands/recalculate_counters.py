@@ -4,18 +4,23 @@ from django.core.management.base import BaseCommand
 from django.db.models import Count, F
 
 from bookmarks.models import Bookmark
-from categories.counters import refresh_all
 from comments.models import Comment, CommentVote
-from common.counters import VIBE_POINTS, VIBE_SIGNS, vibe_sign
+from counters import counters
+from counters.categories import refresh_all
 from geo.models import GeoCity, GeoCountry
 from items.models import Item, ItemVote
 from users.models import User
 
 
 class Command(BaseCommand):
-    help = "Recalculate ratings, upvotes and listing counters from votes, comments and items"
+    help = (
+        "Recalculate live ratings, upvotes and listing counters from votes, comments and items. "
+        "Does not read or write the ratings history table."
+    )
 
     def handle(self, *args, **options):
+        # Rebuilds User/Item/Comment.rating and listing counters from current votes
+        # and vibes. The ratings history table is an append-only log and is left alone.
         users, items, comments = Counter(), Counter(), Counter()
         user_upvotes = Counter()
 
@@ -26,12 +31,12 @@ class Command(BaseCommand):
                 user_upvotes[row["item__author_id"]] += row["n"]
 
         for row in Comment.objects.filter(
-            vibe__in=list(VIBE_SIGNS),
+            vibe__in=list(counters.VIBE_SIGNS),
             item__deleted_at__isnull=True,
         ).exclude(
             author_id=F("item__author_id"),
         ).values("author_id", "item_id", "vibe").annotate(n=Count("pk")).order_by():
-            points = row["n"] * vibe_sign(row["vibe"]) * VIBE_POINTS
+            points = row["n"] * counters.vibe_sign(row["vibe"]) * counters.VIBE_POINTS
             users[row["author_id"]] += points
             items[row["item_id"]] += points
 
@@ -45,7 +50,7 @@ class Command(BaseCommand):
         ).annotate(n=Count("pk")).order_by():
             users[row["comment__author_id"]] += row["n"]
             comments[row["comment_id"]] += row["n"]
-            items[row["comment__item_id"]] += row["n"] * vibe_sign(row["comment__vibe"])
+            items[row["comment__item_id"]] += row["n"] * counters.vibe_sign(row["comment__vibe"])
             if row["comment__author_id"]:
                 user_upvotes[row["comment__author_id"]] += row["n"]
 
@@ -147,4 +152,4 @@ class Command(BaseCommand):
         category_totals = refresh_all()
         self.stdout.write("Categories: " + ", ".join(f"{root_id} {total}" for root_id, total in category_totals.items()))
         self.stdout.write(f"Geo: {worldwide} worldwide ignored, {len(countries)} countries, {len(cities)} cities")
-        self.stdout.write(self.style.SUCCESS("Ratings and counters recalculated"))
+        self.stdout.write(self.style.SUCCESS("Live ratings and counters recalculated"))

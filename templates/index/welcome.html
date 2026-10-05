@@ -1,0 +1,20 @@
+{% load static %}
+<section class="block block-note welcome" aria-label="О базе">
+    <button
+        type="button"
+        class="welcome-close"
+        data-behavior="welcome-close"
+        {% if request.user.is_authenticated %}data-flag-url="{% url "user_flag" %}"{% endif %}
+        aria-label="Закрыть"
+    >
+        <i class="fas fa-times"></i>
+    </button>
+
+    <h2>Привет!</h2>
+    <p>Это Вастрик База — доска объявлений для членов Вастрик Клуба. Сюда приносят то, чем уже пользуются сами: скидку, врача, ментора, работу, услугу или просто человека рядом.</p>
+    <p>Сверху выбирается страна и город, слева — тема. Читать можно без аккаунта. Чтобы оставить своё объявление, комментарий или получать новое в телеграме — нужно войти.</p>
+    <p class="welcome-sign">
+        <img src="{% static 'images/logo.svg' %}" alt="" width="18" height="18">
+        Вастрик База
+    </p>
+</section>

@@ -4,7 +4,7 @@ from django.views.decorators.http import require_POST
 
 from authn.decorators import api_login_required
 from comments.models import Comment, CommentVote
-from common import counters
+from counters import counters
 from common.request import parse_ip_address, parse_useragent
 
 
