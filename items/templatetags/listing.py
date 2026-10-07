@@ -51,14 +51,16 @@ def feed_querystring(request):
     sort = request.GET.get("sort")
     if sort in {"date", "rating"}:
         params["sort"] = sort
-    hide = (request.GET.get("hide_global") or "").lower()
-    if hide in {"1", "true", "on", "yes"}:
-        params["hide_global"] = "1"
+    show = (request.GET.get("show_global") or "").lower()
+    if show in {"1", "true", "on", "yes"}:
+        params["show_global"] = "1"
+    elif show in {"0", "false", "off", "no"}:
+        params["show_global"] = "0"
     return urlencode(params)
 
 
 @register.simple_tag(takes_context=True)
-def listing_url(context, country="", city="", category="", subcategory="", hide_global=None):
+def listing_url(context, country="", city="", category="", subcategory=""):
     request = context["request"]
     country = country or request.country_id
     city = city or request.city_id
@@ -73,11 +75,6 @@ def listing_url(context, country="", city="", category="", subcategory="", hide_
                 path += f"{subcategory}/"
 
     query = feed_querystring(request)
-    if hide_global is not None:
-        parts = [part for part in query.split("&") if part and not part.startswith("hide_global=")]
-        if str(hide_global) not in {"0", "false", "False"}:
-            parts.append("hide_global=1")
-        query = "&".join(parts)
     return f"{path}?{query}" if query else path
 
 

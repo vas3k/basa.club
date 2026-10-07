@@ -1,6 +1,6 @@
 from notifications.subscriptions import is_subscribed, listing_target
 
-LISTING_VIEWS = {"index", "listing", "listing_category", "listing_subcategory"}
+LISTING_VIEWS = {"index", "country_index", "listing", "listing_category", "listing_subcategory"}
 
 
 def listing_subscription(request):

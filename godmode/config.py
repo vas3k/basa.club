@@ -155,6 +155,7 @@ ADMIN = ClubAdmin(
                         "name",
                         "id",
                         "parent",
+                        "is_global",
                         "sort_order",
                     ],
                 ),

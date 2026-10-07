@@ -11,6 +11,7 @@
     - id: psychologists
       name: Психологи
       icon: '<i class="fas fa-brain"></i>'
+      is_global: true
     - id: lawyers
       name: Юристы
       icon: '<i class="fas fa-balance-scale"></i>'
@@ -51,6 +52,7 @@
 - id: coupons
   name: Купоны и скидки
   icon: 🎟️
+  is_global: true
   children:
     - id: food
       name: Еда и рестораны

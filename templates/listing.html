@@ -18,7 +18,7 @@
                 </span>
             </a>
             {% for subcategory in current_category.children.all %}
-                <a href="{% listing_url category=current_category.id subcategory=subcategory.id hide_global=1 %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
+                <a href="{% listing_url category=current_category.id subcategory=subcategory.id %}" class="content-subcategory {% if current_subcategory and current_subcategory.id == subcategory.id %}content-subcategory-active{% endif %}">
                     <span class="content-subcategory-icon">
                         {{ subcategory.icon|safe }}
                     </span>
@@ -47,8 +47,9 @@
                 </select>
             </label>
             <label class="content-feed-setting">
-                <input type="checkbox" name="hide_global" value="1" {% if hide_global %}checked{% endif %}>
-                Скрыть глобальные
+                <input type="hidden" name="show_global" value="0">
+                <input type="checkbox" name="show_global" value="1" {% if show_global %}checked{% endif %}>
+                Показывать глобальные
             </label>
         </form>
         {% if show_listing_subscribe and items.paginator.count %}

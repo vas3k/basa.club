@@ -28,8 +28,8 @@
             {% if feed_sort and feed_sort != "standard" %}
                 <input type="hidden" name="sort" value="{{ feed_sort }}">
             {% endif %}
-            {% if hide_global %}
-                <input type="hidden" name="hide_global" value="1">
+            {% if show_global_param %}
+                <input type="hidden" name="show_global" value="{{ show_global_param }}">
             {% endif %}
             <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" value="{{ request.GET.query }}">
 
@@ -43,7 +43,7 @@
         <aside class="block sidebar">
             {% block sidebar %}
                 {% for category in categories %}
-                    <a href="{% listing_url category=category.id hide_global=0 %}" class="sidebar-item {% if current_category and current_category.id == category.id %}sidebar-item-active{% endif %}">
+                    <a href="{% listing_url category=category.id %}" class="sidebar-item {% if current_category and current_category.id == category.id %}sidebar-item-active{% endif %}">
                         <span class="sidebar-item-icon">{{ category.icon|safe }}</span>
                         <span class="sidebar-item-name">{{ category.name }}</span>
                         {% if category.items_count %}

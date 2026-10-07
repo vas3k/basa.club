@@ -35,7 +35,23 @@ def anonymous_search_redirect(request):
     return None
 
 
-def listing_queryset(request, items):
+def show_global_param(request):
+    raw = (request.GET.get("show_global") or "").lower()
+    if raw in {"1", "true", "on", "yes"}:
+        return "1"
+    if raw in {"0", "false", "off", "no"}:
+        return "0"
+    return None
+
+
+def show_global_enabled(request, category):
+    explicit = show_global_param(request)
+    if explicit is not None:
+        return explicit == "1"
+    return bool(category and category.is_global)
+
+
+def listing_queryset(request, items, category=None):
     if request.city_id != "everywhere":
         items = items.filter(
             Q(city_id=request.city_id)
@@ -54,20 +70,21 @@ def listing_queryset(request, items):
             | Q(promo_code__icontains=query)
         )
 
-    if request.GET.get("hide_global"):
+    if not show_global_enabled(request, category):
         items = items.exclude(country__isnull=True)
 
     sort = request.GET.get("sort")
     return items.order_by(*FEED_SORTS.get(sort, FEED_SORTS["standard"]))
 
 
-def listing_feed_context(request, items):
-    items = paginate(request, listing_queryset(request, items))
+def listing_feed_context(request, items, category=None):
+    items = paginate(request, listing_queryset(request, items, category))
     sort = request.GET.get("sort")
     return {
         "items": items,
         "feed_sort": sort if sort in FEED_SORTS else "standard",
-        "hide_global": request.GET.get("hide_global"),
+        "show_global": show_global_enabled(request, category),
+        "show_global_param": show_global_param(request),
         "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
     }
 
@@ -155,10 +172,11 @@ def listing_page(request, country, city, category=None, subcategory=None):
         request.country_id = country
         request.city_id = city
 
+    current_category = None
     if subcategory:
-        get_object_or_404(Category, pk=subcategory, root_id=category)
+        current_category = get_object_or_404(Category, pk=subcategory, root_id=category)
     elif category:
-        get_object_or_404(Category, pk=category, parent__isnull=True)
+        current_category = get_object_or_404(Category, pk=category, parent__isnull=True)
 
     items = Item.objects_for_user(request.user)
     if subcategory:
@@ -166,7 +184,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         items = items.filter(category_id=category)
 
-    return render(request, "listing.html", listing_feed_context(request, items))
+    return render(request, "listing.html", listing_feed_context(request, items, current_category))
 
 
 def is_item_admin(user):

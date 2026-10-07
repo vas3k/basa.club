@@ -13,16 +13,23 @@ def load_yaml(filename):
 def seed_categories(Category):
     def create_tree(nodes, parent=None, root=None):
         for index, node in enumerate(nodes):
+            if "is_global" in node:
+                is_global = bool(node["is_global"])
+            else:
+                is_global = bool(parent and getattr(parent, "is_global", False))
+            defaults = {
+                "name": node["name"],
+                "icon": node.get("icon") or "",
+                "description": node.get("description") or "",
+                "parent": parent,
+                "root": root,
+                "sort_order": node.get("sort_order", index),
+            }
+            if any(field.name == "is_global" for field in Category._meta.fields):
+                defaults["is_global"] = is_global
             category, _ = Category.objects.update_or_create(
                 id=node["id"],
-                defaults={
-                    "name": node["name"],
-                    "icon": node.get("icon") or "",
-                    "description": node.get("description") or "",
-                    "parent": parent,
-                    "root": root,
-                    "sort_order": node.get("sort_order", index),
-                },
+                defaults=defaults,
             )
             create_tree(node.get("children") or [], parent=category, root=root or category)
 
