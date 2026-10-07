@@ -8,6 +8,7 @@ from django.utils import timezone
 from categories.models import Category
 from geo.models import GeoCity, GeoCountry
 from notifications.models import Subscription
+from search import search
 
 log = logging.getLogger(__name__)
 
@@ -233,13 +234,4 @@ def _candidates(item):
 
 
 def _query_matches(subscription, item):
-    needle = (subscription.query or "").strip().lower()
-    if not needle:
-        return True
-    haystack = "\n".join((
-        item.title or "",
-        item.description or "",
-        item.location or "",
-        item.promo_code or "",
-    )).lower()
-    return needle in haystack
+    return search.item_matches(item, subscription.query)

@@ -1,0 +1,7 @@
+# Times are the container clock (TZ=UTC).
+# Sunday 04:00 — rebuild the item search index.
+0 4 * * 0 python manage.py update_search_index
+# Every day 04:20 — login codes past expires_at.
+20 4 * * * python manage.py delete_expired_codes
+# Every day 04:40 — django.contrib.sessions expired rows.
+40 4 * * * python manage.py clearsessions

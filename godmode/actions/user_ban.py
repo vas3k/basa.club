@@ -6,6 +6,7 @@ from django.utils import timezone
 
 from items.models import Item
 from notifications import notification
+from search import search
 from users.models import User
 
 REASONS = (
@@ -118,6 +119,8 @@ def post_ban_action(request, obj, **context):
 
     if data["is_unbanned"]:
         unban_user(user)
+        for item in Item.objects.filter(author=user):
+            search.update_item_index(item)
         return render(request, "godmode/message.html", {
             **context,
             "title": f"{name} разбанен",
@@ -127,7 +130,8 @@ def post_ban_action(request, obj, **context):
     now = timezone.now()
     permanent = bool(data["is_permanent"])
     until = datetime(9999, 12, 31, 23, 59, tzinfo=now.tzinfo) if permanent else now + timedelta(days=data["days"])
-    ban_user(user, until=until, reason=data["reason"], comment=data["comment"], permanent=permanent)
+    if ban_user(user, until=until, reason=data["reason"], comment=data["comment"], permanent=permanent):
+        search.delete_author_index(user)
     return render(request, "godmode/message.html", {
         **context,
         "title": f"{name} забанен",

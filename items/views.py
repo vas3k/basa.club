@@ -15,6 +15,7 @@ from geo.models import GeoCountry
 from items.forms import ItemForm
 from items.models import Item
 from notifications import notification
+from search import search
 from notifications.models import Subscription
 from notifications.subscriptions import subscribers
 from users.flags import has_user_flag
@@ -63,18 +64,16 @@ def listing_queryset(request, items, category=None):
 
     query = (request.GET.get("query") or "").strip()
     if query and request.user.is_authenticated:
-        items = items.filter(
-            Q(title__icontains=query)
-            | Q(description__icontains=query)
-            | Q(location__icontains=query)
-            | Q(promo_code__icontains=query)
-        )
+        items = search.filter_items(items, query)
 
     if not show_global_enabled(request, category):
         items = items.exclude(country__isnull=True)
 
     sort = request.GET.get("sort")
-    return items.order_by(*FEED_SORTS.get(sort, FEED_SORTS["standard"]))
+    ordering = list(FEED_SORTS.get(sort, FEED_SORTS["standard"]))
+    if query and request.user.is_authenticated and sort not in {"date", "rating"}:
+        ordering = ["-search_rank", *ordering]
+    return items.order_by(*ordering)
 
 
 def listing_feed_context(request, items, category=None):
@@ -98,13 +97,19 @@ def index_page(request, country=None):
         request.country_id = country.id
         request.city_id = "everywhere"
 
+    page_query = (request.GET.get("query") or "").strip()
+
     country_items = []
     if request.country_id != "everywhere":
-        country_items = list(Item.objects_for_user(request.user).filter(
-            country_id=request.country_id,
-        ).order_by("-created_at")[:20])
+        country_items = Item.objects_for_user(request.user).filter(country_id=request.country_id)
+        country_items = _order_search(search.filter_items(country_items, page_query), page_query)
+        country_items = list(country_items[:20])
 
-    all_items = list(Item.objects_for_user(request.user).order_by("-created_at")[:10])
+    all_items = _order_search(
+        search.filter_items(Item.objects_for_user(request.user), page_query),
+        page_query,
+    )
+    all_items = list(all_items[:10])
 
     subscriptions = []
     if request.user.is_authenticated:
@@ -136,13 +141,10 @@ def index_page(request, country=None):
             elif subscription.category_id:
                 items = items.filter(category_id=subscription.category_id)
             if subscription.query:
-                items = items.filter(
-                    Q(title__icontains=subscription.query)
-                    | Q(description__icontains=subscription.query)
-                    | Q(location__icontains=subscription.query)
-                    | Q(promo_code__icontains=subscription.query)
-                )
-            subscription.index_items = items.order_by("-created_at")[:10]
+                items = search.filter_items(items, subscription.query)
+            if page_query:
+                items = search.filter_items(items, page_query)
+            subscription.index_items = list(_order_search(items, page_query)[:10])
 
     response = render(request, "index.html", {
         "country_items": country_items,
@@ -156,6 +158,12 @@ def index_page(request, country=None):
         response.set_cookie("country", request.country_id, max_age=max_age, samesite="Lax", path="/")
         response.set_cookie("city", "everywhere", max_age=max_age, samesite="Lax", path="/")
     return response
+
+
+def _order_search(items, query):
+    if (query or "").strip():
+        return items.order_by("-search_rank", "-created_at")
+    return items.order_by("-created_at")
 
 
 def show_welcome_block(request):
@@ -275,6 +283,7 @@ def create_item(request):
             commit=False,
         )
         item.save()
+        search.update_item_index(item)
         if item.is_listed:
             counters.item_created(item)
             notification.item_created(item)
@@ -337,6 +346,7 @@ def edit_item(request, item_id):
         else:
             item = form.save(keep_visibility=True, commit=False)
         item.save()
+        search.update_item_index(item)
         if old.is_listed and item.is_listed:
             counters.item_updated(item, old)
         elif old.is_listed:
@@ -385,6 +395,7 @@ def hide_item(request, item_id):
     item.visibility = Item.VISIBILITY_DRAFT
     item.published_at = None
     item.save(update_fields=["visibility", "published_at", "updated_at"])
+    search.update_item_index(item)
     if old.is_listed:
         counters.item_hidden(old)
     return redirect(item.get_absolute_url())
@@ -397,6 +408,7 @@ def delete_item(request, item_id):
     was_listed = item.is_listed
     is_owner = item.author_id == request.user.pk
     item.delete(by=request.user)
+    search.delete_item_index(item)
     if was_listed:
         counters.item_hidden(item)
     if is_owner:

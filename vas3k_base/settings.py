@@ -43,6 +43,7 @@ INSTALLED_APPS = [
     "categories.apps.CategoriesConfig",
     "geo.apps.GeoConfig",
     "items.apps.ItemsConfig",
+    "search.apps.SearchConfig",
     "comments.apps.CommentsConfig",
     "counters.apps.CountersConfig",
     "bookmarks.apps.BookmarksConfig",

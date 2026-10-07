@@ -19,8 +19,15 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -yq libpq5 \
+    && apt-get install --no-install-recommends -yq libpq5 curl ca-certificates \
     && rm -rf /var/lib/apt/lists/*
+
+# supercronic runs etc/crontab in the cron container. Binary matches the image arch.
+ARG TARGETARCH=amd64
+ARG SUPERCRONIC_VERSION=0.2.33
+RUN curl -fsSL "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH}" \
+        -o /usr/local/bin/supercronic \
+    && chmod +x /usr/local/bin/supercronic
 
 WORKDIR /app
 

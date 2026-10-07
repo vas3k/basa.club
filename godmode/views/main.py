@@ -5,6 +5,8 @@ from django.shortcuts import get_object_or_404, redirect, render
 
 from godmode.config import ADMIN, ITEMS_PER_PAGE
 from godmode.filters import FILTER_OPERATORS, apply_filters, get_filterable_fields
+from items.models import Item
+from search import search
 from users.models import User
 from vas3k_base.exceptions import AccessDenied
 
@@ -121,7 +123,9 @@ def godmode_edit_model(request, model_name, item_id):
             })
         form = edit_form_class(request.POST, instance=item)
         if form.is_valid():
-            form.save()
+            saved = form.save()
+            if admin_model.model is Item:
+                search.update_item_index(saved)
             return redirect("godmode_list_model", model_name=model_name)
     else:
         form = edit_form_class(instance=item)
@@ -165,6 +169,8 @@ def godmode_delete_model(request, model_name, item_id):
         })
 
     item.delete()
+    if admin_model.model is Item:
+        search.delete_item_index(item)
     return redirect("godmode_list_model", model_name=model_name)
 
 
@@ -187,7 +193,9 @@ def godmode_create_model(request, model_name):
     if request.method == "POST":
         form = create_form_class(request.POST)
         if form.is_valid():
-            form.save()
+            saved = form.save()
+            if admin_model.model is Item:
+                search.update_item_index(saved)
             return redirect("godmode_list_model", model_name=model_name)
     else:
         form = create_form_class()
