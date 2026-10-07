@@ -16,6 +16,7 @@ from items.forms import ItemForm
 from items.models import Item
 from notifications import notification
 from notifications.models import Subscription
+from notifications.subscriptions import subscribers
 from users.flags import has_user_flag
 
 FEED_SORTS = {
@@ -67,6 +68,7 @@ def listing_feed_context(request, items):
         "items": items,
         "feed_sort": sort if sort in FEED_SORTS else "standard",
         "hide_global": request.GET.get("hide_global"),
+        "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
     }
 
 
@@ -81,11 +83,11 @@ def index_page(request, country=None):
 
     country_items = []
     if request.country_id != "everywhere":
-        country_items = Item.objects_for_user(request.user).filter(
+        country_items = list(Item.objects_for_user(request.user).filter(
             country_id=request.country_id,
-        ).order_by("-created_at")[:20]
+        ).order_by("-created_at")[:20])
 
-    all_items = Item.objects_for_user(request.user).order_by("-created_at")[:10]
+    all_items = list(Item.objects_for_user(request.user).order_by("-created_at")[:10])
 
     subscriptions = []
     if request.user.is_authenticated:
@@ -130,6 +132,7 @@ def index_page(request, country=None):
         "all_items": all_items,
         "subscriptions": subscriptions,
         "show_welcome": show_welcome_block(request),
+        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not all_items and not subscriptions else [],
     })
     if country:
         max_age = 365 * 24 * 60 * 60

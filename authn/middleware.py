@@ -27,15 +27,15 @@ class AuthSessionMiddleware:
         self.get_response = get_response
 
     def __call__(self, request):
-        if request.user.is_authenticated and request.user.is_banned:
-            if not request.path.startswith(PUBLIC_PREFIXES):
-                return redirect("banned")
-
-        if request.user.is_authenticated and (request.user.metadata or {}).get("welcome_completed") is False:
-            if not request.path.startswith(WELCOME_PREFIXES):
-                return redirect("welcome")
-
         if request.user.is_authenticated:
+            if request.user.is_banned:
+                if not request.path.startswith(PUBLIC_PREFIXES):
+                    return redirect("banned")
+
+            if (request.user.metadata or {}).get("welcome_completed") is False:
+                if not request.path.startswith(WELCOME_PREFIXES):
+                    return redirect("welcome")
+
             now = timezone.now()
             if not request.user.last_activity_at or request.user.last_activity_at < now - timedelta(minutes=5):
                 User.objects.filter(pk=request.user.pk).update(last_activity_at=now)

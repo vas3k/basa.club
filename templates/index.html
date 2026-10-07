@@ -59,6 +59,14 @@
                 <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                 {% include "notifications/widgets/subscribe_button.html" %}
             </div>
+            {% if subscribers %}
+                <p class="feed-empty-subscribers">
+                    Новых постов в эту категорию {% if subscribers|length == 1 %}ждет{% else %}ждут{% endif %} еще {{ subscribers|length }} {{ subscribers|length|pluralize:"человек,человека,человек" }}:
+                    {% for user in subscribers %}
+                        <a href="{{ user.get_absolute_url }}">{% firstof user.full_name user.slug %}</a>{% if not forloop.last %}, {% endif %}
+                    {% endfor %}
+                </p>
+            {% endif %}
         </div>
     {% endif %}
 {% endblock %}

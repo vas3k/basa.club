@@ -92,6 +92,26 @@ def unsubscribe(subscription_id, telegram_id):
     return "removed"
 
 
+def subscribers(request):
+    """Users with a subscription to this exact category, place, and query.
+
+    Parent categories, child categories, and broader places do not match.
+    """
+    country_id, city_id, category_id, query = listing_target(request)
+    country_id, city_id = _geo_ids(country_id, city_id)
+    category_id = (category_id or "").strip() or None
+    query = _query(query)
+    found = Subscription.objects.filter(
+        country_id=country_id,
+        city_id=city_id,
+        category_id=category_id,
+        query=query,
+    ).select_related("user")
+    if request.user.is_authenticated:
+        found = found.exclude(user=request.user)
+    return [subscription.user for subscription in found.order_by("user__full_name", "user__slug")]
+
+
 def is_subscribed(user, country_id, city_id, category_id, query):
     if not user.is_authenticated:
         return False

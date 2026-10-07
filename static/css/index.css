@@ -468,3 +468,21 @@
     letter-spacing: 0;
     opacity: 0.62;
 }
+
+.feed-empty .feed-empty-subscribers {
+    margin: 40px auto 0;
+    max-width: 40em;
+    font-size: 150%;
+    font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0;
+    color: #8a8a8a;
+    opacity: 1;
+}
+
+.feed-empty .feed-empty-subscribers a {
+    color: inherit;
+    font-weight: 650;
+    text-decoration: underline;
+    text-underline-offset: 0.15em;
+}
