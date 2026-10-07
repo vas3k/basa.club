@@ -1,6 +1,5 @@
 from django import forms
 
-from common.images import is_hosted_image
 from geo.models import GeoCity, GeoCountry
 from users.models import User
 
@@ -76,8 +75,6 @@ class ProfileForm(forms.ModelForm):
 
     def clean_avatar(self):
         avatar = (self.cleaned_data.get("avatar") or "").strip()
-        if avatar and not is_hosted_image(avatar):
-            raise forms.ValidationError("Картинка должна быть загружена")
         return avatar or None
 
     def clean(self):

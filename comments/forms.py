@@ -1,4 +1,5 @@
 from django import forms
+from django.core.validators import MaxLengthValidator
 
 from comments.models import Comment
 from common.request import parse_ip_address, parse_useragent
@@ -33,6 +34,7 @@ class CommentForm(forms.ModelForm):
         self.fields["vibe"].required = True
         self.fields["vibe"].choices = Comment.VIBES  # ModelForm adds a blank option because the model field is nullable
         self.fields["text"].max_length = 3000
+        self.fields["text"].validators.append(MaxLengthValidator(3000))
 
     def save(self, *, author, request, commit=True):
         comment = super().save(commit=False)
@@ -69,6 +71,7 @@ class ReplyForm(forms.ModelForm):
         self.item = item
         super().__init__(*args, **kwargs)
         self.fields["text"].max_length = 3000
+        self.fields["text"].validators.append(MaxLengthValidator(3000))
         self.fields["reply_to"].queryset = Comment.objects.filter(
             item=item,
             reply_to__isnull=True,

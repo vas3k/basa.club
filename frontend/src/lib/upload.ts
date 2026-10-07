@@ -1,12 +1,5 @@
 import { csrfToken } from "./http";
 
-const ACCEPT = ["image/jpeg", "image/png", "image/bmp", "image/webp", "image/jpg"];
-
-export function isImageFile(file: File): boolean {
-    if (ACCEPT.includes(file.type)) return true;
-    return /\.(jpe?g|png|bmp|webp)$/i.test(file.name);
-}
-
 export async function uploadImage(file: File): Promise<string> {
     const body = new FormData();
     body.append("media", file);

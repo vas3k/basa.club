@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { isImageFile, uploadImage } from "../lib/upload";
+import { uploadImage } from "../lib/upload";
 
 type Props = {
   name: string;
@@ -16,10 +16,6 @@ export default function ImageUpload({ name, value = "" }: Props) {
   async function onChange() {
     const file = input.current?.files?.[0];
     if (!file) return;
-    if (!isImageFile(file)) {
-      setError("Можно загружать только картинки");
-      return;
-    }
     setBusy(true);
     setError("");
     try {
@@ -46,7 +42,6 @@ export default function ImageUpload({ name, value = "" }: Props) {
         <input
           ref={input}
           type="file"
-          accept="image/jpeg,image/png,image/bmp,image/webp"
           onChange={onChange}
         />
         {busy ? "Загружаю…" : null}

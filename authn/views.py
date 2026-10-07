@@ -8,6 +8,7 @@ from django.db.models import Q
 from django.shortcuts import redirect, render
 from django.urls import reverse
 from django.utils import timezone
+from django.utils.html import format_html
 from django.views.decorators.http import require_http_methods, require_POST
 from requests import HTTPError
 
@@ -64,10 +65,10 @@ def club_callback(request):
             "title": "Ошибка OAuth",
             "message": f"Что-то проебалось при авторизации: {ex}"
         })
-    except HTTPError as ex:
+    except HTTPError:
         return render(request, "error.html", {
             "title": "Ошибка Клуба",
-            "message": f"Что-то сломалось или сайт упал, попробуйте еще раз: {ex}"
+            "message": "Что-то сломалось или сайт упал, попробуйте еще раз."
         })
 
     userinfo = token.get("userinfo")
@@ -91,15 +92,15 @@ def club_callback(request):
     member = club_profile.get("user") if isinstance(club_profile, dict) else None
     if not isinstance(member, dict):
         return render(request, "error.html", {
-            "message": f"Член Клуба с именем {user_slug} не найден. "
+            "message": format_html("Член Клуба с именем {} не найден. "
                        "<a href=\"https://vas3k.club\">Попробуйте</a> войти в свой "
-                       "аккаунт и потом авторизоваться здесь снова."
+                       "аккаунт и потом авторизоваться здесь снова.", user_slug)
         })
 
     if member.get("payment_status") != "active":
         return render(request, "error.html", {
-            "message": "Ваша подписка на Клуб истекла. "
-                       "<a href=\"https://vas3k.club\">Продлите</a> её здесь."
+            "message": format_html("{} <a href=\"https://vas3k.club\">Продлите</a> её здесь.",
+                                   "Ваша подписка на Клуб истекла.")
         })
 
     created = False

@@ -7,10 +7,12 @@ Django app with server-rendered templates. Dynamic widgets are small React compo
 Requirements: Python 3.14 + [uv](https://docs.astral.sh/uv/), Node 24+, PostgreSQL, Redis.
 
 ```bash
-uv sync
-cd frontend && npm install && cd ..
+uv sync --frozen
+cd frontend && npm ci && cd ..
 uv run python manage.py migrate
 ```
+
+Settings read the process environment directly; no `.env` loader is configured. Export the database, Redis and integration variables before running these commands.
 
 Then run Django, the queue worker, and Vite:
 
@@ -52,7 +54,7 @@ docker compose up
 
 This starts `postgres`, `redis`, `app` (Django on :8000), `queue` (django-q2 worker), `bot`, and `frontend` (Vite dev server on :5173 with hot reload). The `frontend/` folder is mounted into the container, so editing files locally updates the page in the browser.
 
-The production image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/dist`. Run it with `DEBUG=false` (or `VITE_DEV_MODE=false`).
+The application image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/dist`. Set `DEBUG=false` and `VITE_DEV_MODE=false` in production. The image requires an explicit process command and static-file serving configuration; Compose runs development servers.
 
 ## Templates
 
@@ -75,7 +77,7 @@ templates/users/widgets/user_small.html   # avatar + name + reputation, reuse ev
 
 Rating is not the same as upvotes. Upvotes are a plain counter of clicks, while rating is calculated from votes and comment vibes. Users, items and comments each have their own rating.
 
-All rules live in the `counters` app. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Models and forms never touch ratings or counters. User rating changes are stored in the `ratings` table and shown at `/user/<slug>/ratings/`.
+All rules live in the `counters` app. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Counter updates belong in this module rather than models or forms. Counters currently run synchronously; asynchronous updates are planned. Vote/bookmark responses return the loaded counter values without a database refresh, so those values may lag behind the action. User rating changes are stored in the `ratings` table and shown at `/user/<slug>/ratings/`.
 
 | Action | Comment author | Item | Comment | Item author |
 |--------|----------------|------|---------|-------------|
@@ -159,3 +161,30 @@ Environment variables:
 
 - `VITE_DEV_MODE` (`true`/`false`, defaults to the `DEBUG` value): load JS from the Vite dev server instead of `frontend/dist`
 - `VITE_DEV_SERVER_HOST`, `VITE_DEV_SERVER_PORT` (defaults `localhost`, `5173`): where the browser finds the Vite dev server
+
+## Authentication and uploads
+
+Image uploads require an authenticated, unbanned user and CSRF. Original files
+are forwarded to `settings.MEDIA_UPLOAD_URL`, backed by
+[Pepic](https://github.com/vas3k/pepic), which owns media validation and processing.
+The app trusts its returned URLs, including avatars, and imposes no local image
+size, pixel, format, animation, count or hostname restrictions.
+
+No new migration or webhook configuration is required by these fixes.
+
+User creation and editing in Godmode require a superuser. Staff retain their
+existing permissions for other models and moderation actions. This prevents
+staff from granting privileges or changing a superuser's login identity.
+`createsuperuser` accepts the model's email/slug fields, and manager-created
+passwords are hashed before saving.
+
+## Production checklist
+
+- Set `DEBUG=false` exactly and `VITE_DEV_MODE=false`. Provide a strong, private `SECRET_KEY` and set `APP_HOST=https://base.vas3k.club`. The source still has development defaults; do not rely on them in production.
+- Supply PostgreSQL, Redis, Club OAuth, media upload, Telegram and SMTP configuration through the runtime environment. Use the names in `vas3k_base/settings.py`; optional Sentry uses `SENTRY_DSN`. Keep secrets out of Git, the image and frontend props. Local `.env*`, private settings and key files are excluded from Git and Docker build contexts. Example environment files must contain placeholders only.
+- Build with the locked dependencies: `uv sync --frozen`, then `npm ci` and `npm run build` in `frontend/`. Serve `/static/` and `/static/dist/` through the production static-file setup, and keep `frontend/dist/.vite/manifest.json` available to Django in the application filesystem. `STATIC_ROOT` is not configured in this repository.
+- Run a production WSGI/ASGI server, the `qcluster` worker and the Telegram bot as separate managed processes. The image has no default command or bundled production web server. Do not use the development Compose deployment unchanged.
+- Configure HTTPS and trusted proxy headers, private database/Redis access and persistent PostgreSQL storage. Take a recoverable database backup, review pending migrations, then apply migrations once before starting the new processes.
+- Run `uv run python manage.py check --deploy` with the actual production environment and resolve its applicable warnings. Confirm Club OAuth callbacks and Telegram webhook routing match the deployed host; identity merging and webhook changes remain deferred.
+- Manually check login/logout, banned-account handling, staff/superuser permissions, posting, comments, votes, bookmarks, uploads and notification delivery. Counters may be stale in immediate API responses. Tests have been removed; do not create or run them unless explicitly requested.
+- Review the release diff and history for credentials. Keep credentials, auth codes, session cookies and user tokens out of logs; review application logs, proxy logs and external error reporting for sensitive values. Rotate any genuinely exposed credential before deploying.

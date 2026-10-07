@@ -4,7 +4,7 @@ from django.conf import settings
 from django.contrib.auth import login
 
 from django.http import JsonResponse
-from django.shortcuts import redirect
+from django.shortcuts import redirect, render
 from django.utils import timezone
 
 
@@ -15,12 +15,18 @@ def api_login_required(view):
     def wrapper(request, *args, **kwargs):
         if not request.user.is_authenticated:
             return JsonResponse({"error": "Нужно войти"}, status=401)
+        if request.user.is_banned:
+            return JsonResponse({"error": "Аккаунт заблокирован"}, status=403)
         return view(request, *args, **kwargs)
 
     return wrapper
 
 
 def start_session(request, user, *, new_user=False):
+    if user.is_banned:
+        return render(request, "error.html", {
+            "title": "Вам сюда нельзя", "message": "Аккаунт заблокирован",
+        }, status=403)
     login(request, user)
     if new_user:
         # False sends the user through /welcome/. A missing key is an older account.

@@ -87,9 +87,13 @@ class ClubAdminModel:
         return is_admin(user)
 
     def has_edit_access(self, user: User) -> bool:
+        if self.model is User:
+            return bool(user.is_superuser)
         return is_admin(user)
 
     def has_create_access(self, user: User) -> bool:
+        if self.model is User:
+            return bool(user.is_superuser)
         return is_admin(user)
 
     def has_delete_access(self, user: User) -> bool:

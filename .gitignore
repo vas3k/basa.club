@@ -43,13 +43,10 @@ webpack-stats.json
 
 # Python
 .mypy_cache
-private_settings.py
-local_settings.py
+.ruff_cache/
 media/images
 media/i
 
-club/.env
-.env
 db.sqlite3
 *.session
 .venv/
@@ -57,3 +54,13 @@ venv/
 
 gdpr/downloads/*.zip
 .history
+
+# Local credentials and deployment secrets
+.env
+.env.*
+!.env.example
+!.env.sample
+private_settings.py
+local_settings.py
+*.pem
+*.key

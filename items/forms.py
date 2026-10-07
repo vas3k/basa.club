@@ -6,7 +6,6 @@ from django.utils import formats, timezone
 
 from categories.models import Category
 from common.contacts import CONTACT_MAX_COUNT, CONTACT_MAX_LENGTH, CONTACT_TYPES
-from common.images import IMAGE_MAX_COUNT, is_hosted_image
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
 
@@ -143,16 +142,14 @@ class ItemForm(forms.ModelForm):
         raw = self.cleaned_data.get("images") or []
         if not isinstance(raw, list):
             raise forms.ValidationError("Неверный список картинок")
-        if len(raw) > IMAGE_MAX_COUNT:
-            raise forms.ValidationError("Слишком много картинок")
 
         cleaned = []
         for row in raw:
             if not isinstance(row, dict):
                 raise forms.ValidationError("Неверная картинка")
             url = row.get("image")
-            if not isinstance(url, str) or not is_hosted_image(url):
-                raise forms.ValidationError("Картинка должна быть загружена")
+            if not isinstance(url, str):
+                raise forms.ValidationError("Неверная картинка")
             cleaned.append({"image": url.strip()})
         return cleaned
 

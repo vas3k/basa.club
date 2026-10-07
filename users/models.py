@@ -7,7 +7,6 @@ from django.contrib.postgres.fields import ArrayField
 from django.db import models
 from django.urls import reverse
 from django.utils import timezone
-from django.utils.text import slugify
 
 from common.models import SoftDeleteMixin, SoftDeleteQuerySet
 
@@ -16,43 +15,22 @@ class UserAccountManager(BaseUserManager):
     def get_queryset(self):
         return SoftDeleteQuerySet(self.model, using=self._db).filter(deleted_at__isnull=True)
 
-    def create_superuser(self, username, email, password, **other_fields):
+    def create_superuser(self, email, password=None, **other_fields):
         other_fields.setdefault("is_staff", True)
         other_fields.setdefault("is_superuser", True)
-        user = self.create_user(
-            slug=slugify(username),
-            full_name=username,
-            email=email,
-            password=password,
-            **other_fields
-        )
-        user.set_password(password)
-        user.save()
-        return user
+        if other_fields["is_staff"] is not True or other_fields["is_superuser"] is not True:
+            raise ValueError("Superusers must have is_staff=True and is_superuser=True")
+        return self.create_user(email=email, password=password, **other_fields)
 
-    def create_user(self, username, email, password=None, **other_fields):
+    def create_user(self, username=None, email=None, password=None, **other_fields):
         if not email:
             raise ValueError("Email address is required!")
-
-        email = self.normalize_email(email)
-        if password is not None:
-            user = self.model(
-                slug=username,
-                email=email,
-                password=password,
-                **other_fields
-            )
-            user.save()
-        else:
-            user = self.model(
-                slug=username,
-                email=email,
-                password=password,
-                **other_fields
-            )
-            user.set_unusable_password()
-            user.save()
-
+        slug = other_fields.pop("slug", None) or username
+        if not slug:
+            raise ValueError("A slug is required!")
+        user = self.model(slug=slug, email=self.normalize_email(email), **other_fields)
+        user.set_password(password)
+        user.save(using=self._db)
         return user
 
 

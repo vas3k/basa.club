@@ -15,9 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { isImageFile, uploadImage } from "../lib/upload";
-
-const MAX_IMAGES = 10;
+import { uploadImage } from "../lib/upload";
 
 type ImageRow = {
     id: string;
@@ -111,20 +109,10 @@ export default function ImageList({ name, images }: Props) {
     }
 
     async function addFiles(files: File[]) {
-        const imagesOnly = files.filter(isImageFile);
-        if (imagesOnly.length !== files.length) {
-            setError("Можно загрузить jpeg, png, bmp или webp");
-        } else {
-            setError("");
-        }
-        const room = MAX_IMAGES - rowsRef.current.filter((row) => !row.uploading).length;
-        const accepted = imagesOnly.slice(0, Math.max(room, 0));
-        if (accepted.length < imagesOnly.length) {
-            setError("Слишком много картинок");
-        }
-        if (!accepted.length) return;
+        setError("");
+        if (!files.length) return;
 
-        const pending = accepted.map((file) => ({
+        const pending = files.map((file) => ({
             id: rowId(),
             image: URL.createObjectURL(file),
             uploading: true,
@@ -174,7 +162,6 @@ export default function ImageList({ name, images }: Props) {
             <input
                 ref={input}
                 type="file"
-                accept="image/jpeg,image/png,image/bmp,image/webp"
                 multiple
                 onChange={() => {
                     const files = [...(input.current?.files ?? [])];

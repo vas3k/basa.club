@@ -1,14 +1,13 @@
-from authn.models import Code
 from bookmarks.models import Bookmark
 from complaints.models import Flag
 from categories.models import Category
-from comments.models import Comment, CommentVote
+from comments.models import Comment
 from geo.models import GeoCity, GeoCountry
 from godmode.actions.item_view import view_item_action
 from godmode.actions.user_ban import get_ban_action, post_ban_action
 from godmode.actions.user_profile import view_profile_action
 from godmode.admin import ClubAdmin, ClubAdminAction, ClubAdminField, ClubAdminGroup, ClubAdminModel
-from items.models import Item, ItemVote
+from items.models import Item
 from notifications.models import Subscription
 from users.models import User
 
