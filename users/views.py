@@ -58,25 +58,21 @@ def edit_profile(request, slug):
     if user.pk != request.user.pk:
         raise Http404()
 
-    form = ProfileForm(request.POST or None, initial={
-        "full_name": user.full_name,
-        "avatar": user.avatar,
-        "city": user.city,
-        "country": user.country,
-        "bio": user.bio,
+    country_id, city_id = _geo_selection(user)
+    form = ProfileForm(request.POST or None, instance=user, initial={
+        "country": country_id,
+        "city": city_id,
     })
     if request.method == "POST" and form.is_valid():
-        user.full_name = form.cleaned_data["full_name"]
-        user.avatar = form.cleaned_data["avatar"] or None
-        user.city = form.cleaned_data["city"]
-        user.country = form.cleaned_data["country"]
-        user.bio = form.cleaned_data["bio"]
-        user.save()
+        form.save()
         return redirect("user_profile", slug=user.slug)
 
     return render(request, "users/edit.html", {
         "form": form,
         "slug": user.slug,
+        "country_id": form["country"].value() or "",
+        "city_id": form["city"].value() or "",
+        "countries_options": _country_options(),
     })
 
 

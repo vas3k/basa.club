@@ -29,7 +29,7 @@
 }
 
 .welcome h2 {
-    margin: 0 0 18px;
+    margin: 0 0 22px;
     padding-right: 28px;
     font-size: 240%;
     font-weight: 500;
@@ -38,7 +38,7 @@
 
 .welcome p {
     max-width: 40em;
-    margin: 0 0 0.95em;
+    margin: 0 0 1.2em;
     font-size: 118%;
     line-height: 1.55;
 }
@@ -323,6 +323,28 @@
     margin: 0 0 0 auto;
 }
 
+.feed-empty-actions {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+}
+
+.feed-empty .feed-subscribe {
+    margin: 0;
+    width: auto;
+}
+
+.feed-empty .feed-subscribe-button {
+    width: auto;
+    padding: 15px 18px;
+    font-size: 100%;
+    justify-content: center;
+    white-space: nowrap;
+    text-align: center;
+}
+
 .feed-subscribe-button {
     gap: 8px;
     background-color: #fff;
@@ -430,7 +452,7 @@
 }
 
 .feed-empty p {
-    max-width: 36em;
+    max-width: 56em;
     margin: 0 auto 8px;
     font-size: 120%;
     font-weight: 650;

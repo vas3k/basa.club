@@ -3,7 +3,7 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from authn.decorators import api_login_required
+from authn.helpers import api_login_required
 from bookmarks.models import Bookmark
 from counters import counters
 from items.models import Item

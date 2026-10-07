@@ -29,13 +29,13 @@
 
         <div class="profile-stats">
             {% if request.user.pk == profile_user.pk or request.user.is_moderator %}
-                <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="История рейтинга">{{ profile_user.rating|rating }}</a>
+                <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="История изменений рейтинга">{{ profile_user.rating|rating }}</a>
             {% else %}
                 <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
             {% endif %}
-            <div class="profile-stat">Зарегистрирован: {{ profile_user.created_at|date:"F Y" }}</div>
+            <div class="profile-stat">Регистрация: {{ profile_user.created_at|date:"F Y" }}</div>
             <div class="profile-stat">Активность: {{ profile_user.last_activity_at|timesince }} назад</div>
-            <div class="profile-stat"><b>{{ profile_user.items_count }}</b> {{ profile_user.items_count|pluralize:"запись,записи,записей" }}</div>
+            <div class="profile-stat"><b>{{ profile_user.items_count }}</b> {{ profile_user.items_count|pluralize:"пост,поста,постов" }}</div>
             <div class="profile-stat"><b>{{ profile_user.comments_count }}</b> {{ profile_user.comments_count|pluralize:"комментарий,комментария,комментариев" }}</div>
         </div>
     </div>

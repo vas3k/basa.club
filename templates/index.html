@@ -17,8 +17,8 @@
                 </div>
             {% else %}
                 <div class="block feed-empty">
-                    <p>В Вастрик Базе {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }} еще нет ни одной записи</p>
-                    <p>Вы можете быть первым и начать</p>
+                    <p>В Вастрик Базе {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }} еще нет ни одного поста</p>
+                    <p>Вы можете стать первым и начать: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то еще!</p>
                     <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                 </div>
             {% endif %}
@@ -54,8 +54,11 @@
     {% if not country_items and not all_items and not subscriptions %}
         <div class="block feed-empty">
             <p>Тут пока ничего нет</p>
-            <p>Но вы можете добавить сюда что-то свое!</p>
-            <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+            <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>
+            <div class="feed-empty-actions">
+                <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                {% include "notifications/widgets/subscribe_button.html" %}
+            </div>
         </div>
     {% endif %}
 {% endblock %}

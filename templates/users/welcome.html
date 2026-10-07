@@ -5,46 +5,38 @@
 {% endblock %}
 
 {% block content %}
-    <div class="block">
-        <div class="block-header">Добро пожаловать</div>
-        <div class="block-description">
-            Коротко о себе. Страну и город можно поменять потом.
+    <div class="block profile-form-page">
+        <div class="block-header block-header-big">👋 Добро пожаловать в Базу</div>
+        <div class="block-description block-description-center">
+            Давайте начнем с заполнения профиля. Нам приятно видеть живых настоящих людей!
         </div>
 
-        <form method="post" action="{% url "welcome" %}">
+        <form class="profile-form" method="post" action="{% url "welcome" %}">
             {% csrf_token %}
+            {% include "users/widgets/profile_fields.html" %}
 
-            <div class="form-group">
-                <label>{{ form.avatar.label }}</label>
-                {% island "ImageUpload" name="avatar" value=form.avatar.value|default:"" %}
-                {% if form.avatar.errors %}<div class="form-error">{{ form.avatar.errors }}</div>{% endif %}
-            </div>
+            <div class="welcome-agreements">
+                <label class="welcome-agreement">
+                    {{ form.agree_data }}
+                    <span>я соглашаюсь на <a href="{% url "data_policy" %}" target="_blank" rel="noopener noreferrer">обработку персональных данных</a>, куки и прочую фигню, без которой ничо не будет работать</span>
+                </label>
+                {% if form.agree_data.errors %}<div class="form-error">{{ form.agree_data.errors }}</div>{% endif %}
 
-            <div class="form-group">
-                <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}</label>
-                {{ form.full_name }}
-                {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors }}</div>{% endif %}
-            </div>
+                <label class="welcome-agreement">
+                    {{ form.agree_rules }}
+                    <span>я прочитал <a href="{% url "rules" %}" target="_blank" rel="noopener noreferrer">правила сообщества</a> и буду их соблюдать, не буду требовать с админов компенсаций если меня заскамят</span>
+                </label>
+                {% if form.agree_rules.errors %}<div class="form-error">{{ form.agree_rules.errors }}</div>{% endif %}
 
-            {% island "MarkdownEditor" name="bio" label=form.bio.label value=form.bio.value|default:"" placeholder="Коротко о себе. Можно использовать Markdown" %}
-            {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors }}</div>{% endif %}
-
-            <div class="form-group">
-                <label for="{{ form.contact.id_for_label }}">{{ form.contact.label }}</label>
-                {{ form.contact }}
-                {% if form.contact.errors %}<div class="form-error">{{ form.contact.errors }}</div>{% endif %}
-            </div>
-
-            <div class="welcome-place">
-                {% island "LocationPicker" countries=countries_options country=country_id city=city_id allow_everywhere=True %}
-                <p class="form-help">Если вашей страны или города нет в списке, мы их пока не поддерживаем. Можно выбрать «Весь мир» или «Везде». Новые объявления для выбранного места будут приходить в телеграм.</p>
-                {% if form.country.errors or form.city.errors %}
-                    <div class="form-error">{{ form.country.errors }}{{ form.city.errors }}</div>
-                {% endif %}
+                <label class="welcome-agreement">
+                    {{ form.agree_conduct }}
+                    <span>если я буду вести себя как долбоеб — меня забанят! мне нравится!</span>
+                </label>
+                {% if form.agree_conduct.errors %}<div class="form-error">{{ form.agree_conduct.errors }}</div>{% endif %}
             </div>
 
             <div class="form-actions">
-                <button type="submit" class="button">Сохранить</button>
+                <button type="submit" class="button button-big">Войти в Базу</button>
             </div>
         </form>
     </div>

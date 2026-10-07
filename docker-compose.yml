@@ -13,13 +13,17 @@ services:
       - POSTGRES_PASSWORD=postgres
       - POSTGRES_HOST=postgres
       - APP_HOST=http://127.0.0.1:8000
+      - REDIS_HOST=redis
       - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-000000000:MOCK_TOKEN_REPLACE_ME}
       - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-vas3k_base_bot}
+      - TELEGRAM_ADMIN_CHAT_ID=${TELEGRAM_ADMIN_CHAT_ID:-}
     restart: always
     volumes:
       - .:/app
     depends_on:
       postgres:
+        condition: service_healthy
+      redis:
         condition: service_healthy
     ports:
       - "8000:8000"
@@ -47,6 +51,33 @@ services:
       postgres:
         condition: service_healthy
 
+  queue:
+    build:
+      dockerfile: Dockerfile
+      context: .
+    command: python manage.py migrate && python manage.py qcluster
+    container_name: base_queue
+    environment:
+      - DEBUG=true
+      - PYTHONUNBUFFERED=1
+      - POSTGRES_DB=vas3k_base
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+      - POSTGRES_HOST=postgres
+      - APP_HOST=http://127.0.0.1:8000
+      - REDIS_HOST=redis
+      - TELEGRAM_TOKEN=${TELEGRAM_TOKEN:-000000000:MOCK_TOKEN_REPLACE_ME}
+      - TELEGRAM_BOT_USERNAME=${TELEGRAM_BOT_USERNAME:-vas3k_base_bot}
+      - TELEGRAM_ADMIN_CHAT_ID=${TELEGRAM_ADMIN_CHAT_ID:-}
+    restart: always
+    volumes:
+      - .:/app
+    depends_on:
+      postgres:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+
   frontend:
     image: node:24-slim
     command: sh -c "npm install && npm run dev"
@@ -68,6 +99,17 @@ services:
       - POSTGRES_DB=vas3k_base
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  redis:
+    image: redis:7-alpine
+    container_name: base_redis
+    ports:
+      - "6379:6379"
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
       interval: 5s
       timeout: 3s
       retries: 5

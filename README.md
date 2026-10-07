@@ -4,7 +4,7 @@ Django app with server-rendered templates. Dynamic widgets are small React compo
 
 ## Running locally without Docker
 
-Requirements: Python 3.14 + [uv](https://docs.astral.sh/uv/), Node 24+, PostgreSQL.
+Requirements: Python 3.14 + [uv](https://docs.astral.sh/uv/), Node 24+, PostgreSQL, Redis.
 
 ```bash
 uv sync
@@ -12,7 +12,7 @@ cd frontend && npm install && cd ..
 uv run python manage.py migrate
 ```
 
-Then run Django and Vite in two terminals:
+Then run Django, the queue worker, and Vite:
 
 ```bash
 # terminal 1
@@ -21,6 +21,11 @@ uv run python manage.py runserver
 
 ```bash
 # terminal 2
+uv run python manage.py qcluster
+```
+
+```bash
+# terminal 3
 cd frontend && npm run dev
 ```
 
@@ -45,7 +50,7 @@ VITE_DEV_MODE=false uv run python manage.py runserver
 docker compose up
 ```
 
-This starts `postgres`, `app` (Django on :8000), `bot`, and `frontend` (Vite dev server on :5173 with hot reload). The `frontend/` folder is mounted into the container, so editing files locally updates the page in the browser.
+This starts `postgres`, `redis`, `app` (Django on :8000), `queue` (django-q2 worker), `bot`, and `frontend` (Vite dev server on :5173 with hot reload). The `frontend/` folder is mounted into the container, so editing files locally updates the page in the browser.
 
 The production image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/dist`. Run it with `DEBUG=false` (or `VITE_DEV_MODE=false`).
 

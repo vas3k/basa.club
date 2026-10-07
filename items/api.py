@@ -2,7 +2,7 @@ from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from authn.decorators import api_login_required
+from authn.helpers import api_login_required
 from counters import counters
 from common.request import parse_ip_address, parse_useragent
 from common.templatetags.text import rating as format_rating

@@ -8,7 +8,7 @@
     {% include "users/widgets/profile_header.html" %}
 
     <div class="profile-feed">
-        <div class="block-header block-header-with-button">Объявления</div>
+        <div class="block-header block-header-with-button">Посты</div>
         <section class="content-items">
             {% for item in active_items %}
                 {% if request.user.pk == profile_user.pk %}
@@ -18,11 +18,7 @@
                 {% endif %}
             {% empty %}
                 <div class="block">
-                    {% if request.user.pk == profile_user.pk %}
-                        Активных объявлений пока нет.
-                    {% else %}
-                        У этого человека пока нет объявлений.
-                    {% endif %}
+                    Пока ничего нет.
                 </div>
             {% endfor %}
         </section>

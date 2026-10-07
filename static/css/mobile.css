@@ -207,6 +207,11 @@
         text-align: left;
     }
 
+    .feed-empty .feed-subscribe-button {
+        padding: 10px;
+        font-size: 90%;
+    }
+
     .footer-top {
         flex-direction: column;
         align-items: flex-start;

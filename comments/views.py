@@ -8,6 +8,7 @@ from comments.models import Comment
 from counters import counters
 from items.models import Item
 from items.views import render_item_page
+from notifications import notification
 
 
 @login_required
@@ -21,6 +22,7 @@ def create_comment(request, item_id):
         comment = form.save(author=request.user, request=request, commit=False)
         comment.save()
         counters.comment_created(comment)
+        notification.comment_created(comment)
         return redirect(f"{item.get_absolute_url()}#comment-{comment.id}")
 
     return render_item_page(

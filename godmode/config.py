@@ -62,12 +62,12 @@ ADMIN = ClubAdmin(
             ],
         ),
         ClubAdminGroup(
-            title="Записи",
+            title="Посты",
             icon="✏️",
             models=[
                 ClubAdminModel(
                     model=Item,
-                    title="Записи",
+                    title="Посты",
                     icon="📝",
                     name="items",
                     title_field="title",

@@ -3,7 +3,7 @@ import json
 from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
-from authn.decorators import api_login_required
+from authn.helpers import api_login_required
 from users.flags import ALLOWED_USER_FLAGS, set_user_flag
 
 

@@ -27,16 +27,125 @@
         margin-bottom: 40px;
     }
 
-.welcome-place {
+.profile-form-page {
+    max-width: 720px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: center;
+}
+
+.profile-form {
+    margin-top: 12px;
+}
+
+.profile-form-name {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    margin: 8px auto 36px;
+}
+
+.profile-form-name label {
+    font-size: 180%;
+    font-weight: 700;
+    white-space: nowrap;
+}
+
+.profile-form-name-field {
+    flex: 0 1 420px;
+    width: 420px;
+    min-width: 0;
+    text-align: left;
+}
+
+.profile-form-name input[type="text"] {
+    font-size: 160%;
+    font-weight: 600;
+    padding: 12px 16px;
+}
+
+.profile-form .form-group label,
+.profile-form-place .form-group label {
+    text-align: center;
+}
+
+.profile-form-avatar .image-upload {
+    flex-direction: column;
+    align-items: center;
+    width: fit-content;
+    margin-left: auto;
+    margin-right: auto;
+}
+
+.profile-form-avatar .image-upload-file input[type="file"] {
+    width: auto;
+}
+
+.profile-form-place {
     margin-bottom: 24px;
 }
 
-.welcome-place .form-group {
+.profile-form-place .form-group {
     margin-bottom: 0;
 }
 
-.welcome-place .form-help {
+.profile-form-place .form-help {
     margin-top: 8px;
+    text-align: center;
+}
+
+.profile-form-bio textarea {
+    min-height: 4.5em;
+}
+
+.profile-form .form-actions {
+    justify-content: center;
+    border-top: none;
+    padding-top: 8px;
+}
+
+.welcome-agreements {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-top: 80px;
+    text-align: left;
+    font-size: 120%;
+    line-height: 1.4;
+}
+
+.welcome-agreement {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.welcome-agreement input[type="checkbox"] {
+    width: calc(1.15em * 1.5);
+    height: calc(1.15em * 1.5);
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.welcome-agreement a {
+    font-weight: 700;
+    text-decoration: underline;
+    text-underline-offset: 0.16em;
+}
+
+@media only screen and (max-width: 600px) {
+    .profile-form-name {
+        flex-direction: column;
+        align-items: stretch;
+        width: 100%;
+        gap: 10px;
+    }
+
+    .profile-form-name-field {
+        width: 100%;
+    }
 }
 
 .login-options {

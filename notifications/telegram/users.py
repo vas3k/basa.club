@@ -1,18 +1,16 @@
-import logging
-
 from django.utils import timezone
 
 from notifications.telegram.common import render_html_message, send_telegram_message
+from users.models import User
 
-log = logging.getLogger(__name__)
 
-
-def user_banned(user, *, reason, comment, until, is_permanent):
-    if not user.telegram_id:
+def send_telegram_user_banned(user_id, reason, comment, until, is_permanent):
+    user = User.objects.filter(pk=user_id).first()
+    if not user or not user.telegram_id:
         return
     left = until - timezone.now()
     send_telegram_message(user.telegram_id, render_html_message(
-        "user_banned.html",
+        "messages/user_banned.html",
         reason=reason,
         comment=comment,
         is_permanent=is_permanent,

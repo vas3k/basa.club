@@ -4,10 +4,11 @@ from django.http import Http404, JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
-from authn.decorators import api_login_required
+from authn.helpers import api_login_required
 from common.request import parse_ip_address, parse_useragent
 from complaints.models import Flag
 from items.models import Item
+from notifications import notification
 
 
 @api_login_required
@@ -31,7 +32,7 @@ def flag_item(request, item_id):
     if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.pk:
         raise Http404()
 
-    Flag.objects.create(
+    flag = Flag.objects.create(
         user=request.user,
         item=item,
         reason=reason,
@@ -39,4 +40,5 @@ def flag_item(request, item_id):
         ipaddress=parse_ip_address(request),
         useragent=parse_useragent(request),
     )
+    notification.flag_created(flag)
     return JsonResponse({"ok": True})

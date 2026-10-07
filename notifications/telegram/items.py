@@ -1,13 +1,8 @@
-import logging
-import threading
-
 from django.conf import settings
-from django.db import connections, transaction
-from telegram import InlineKeyboardButton, InlineKeyboardMarkup
 
 from items.models import Item
-from notifications.subscriptions import subscribers_for_item, subscription_kind
-from notifications.telegram.bot import telegram_configured
+from notifications.models import Subscription
+from notifications.subscriptions import subscription_kind
 from notifications.telegram.common import (
     CAPTION_LIMIT,
     render_html_message,
@@ -15,81 +10,43 @@ from notifications.telegram.common import (
     send_telegram_photo,
 )
 
-log = logging.getLogger(__name__)
 
-TEMPLATES = {
-    "global": "new_item_global.html",
-    "country": "new_item_country.html",
-    "city": "new_item_city.html",
-    "category": "new_item_category.html",
-    "query": "new_item_query.html",
-}
-
-
-def item_created(item):
-    """Tell subscribers that an item just entered the feed.
-
-    Called when an item is published, including a draft that is published later.
-    Editing an item that is already listed does not call this.
-    """
-    if not item.is_listed:
+def send_telegram_user_new_item(item_id, subscription_ids):
+    item = Item.objects.select_related(
+        "category", "subcategory", "country", "city", "author",
+    ).filter(pk=item_id).first()
+    if not item or not item.is_listed or not subscription_ids:
         return
-    item_id = item.pk
 
-    def start():
-        thread = threading.Thread(target=_deliver, args=(item_id,), name="notify-item", daemon=True)
-        thread.start()
+    subscriptions = Subscription.objects.select_related(
+        "user", "country", "city", "category",
+    ).filter(pk__in=subscription_ids)
 
-    transaction.on_commit(start)
-
-
-def _deliver(item_id):
-    try:
-        item = Item.objects.select_related(
-            "category", "subcategory", "country", "city", "author",
-        ).filter(pk=item_id).first()
-        if not item or not item.is_listed:
-            return
-
-        subscriptions = subscribers_for_item(item)
-        if not telegram_configured():
-            log.info("telegram is not configured, %s subscribers for item %s", len(subscriptions), item_id)
-            return
-
-        for subscription in subscriptions:
-            _send(subscription, item)
-        log.info("notified %s subscribers about item %s", len(subscriptions), item_id)
-    except Exception:
-        log.exception("failed to notify about item %s", item_id)
-    finally:
-        connections.close_all()
-
-
-def _send(subscription, item):
-    kind = subscription_kind(subscription)
-    text = render_html_message(TEMPLATES[kind], item=item, subscription=subscription)
-    markup = _markup(item, subscription)
-    image = _image(item)
-    if image and len(text) <= CAPTION_LIMIT:
-        send_telegram_photo(subscription.user.telegram_id, image, text, reply_markup=markup)
-        return
-    send_telegram_message(subscription.user.telegram_id, text, reply_markup=markup)
-
-
-def _markup(item, subscription):
-    row = []
     url = settings.APP_HOST.rstrip("/") + item.get_absolute_url()
-    if url.startswith("https://"):
-        row.append(InlineKeyboardButton("Открыть", url=url))
-    row.append(InlineKeyboardButton("Отписаться от таких", callback_data=f"unsub:{subscription.id}"))
-    return InlineKeyboardMarkup([row])
-
-
-def _image(item):
     images = item.images or []
-    if not images or not isinstance(images[0], dict):
-        return None
-    url = images[0].get("image") or ""
-    if url.startswith("http://") or url.startswith("https://"):
-        return url
-    return None
+    image = None
+    if images and isinstance(images[0], dict):
+        candidate = images[0].get("image") or ""
+        if candidate.startswith("http://") or candidate.startswith("https://"):
+            image = candidate
+
+    for subscription in subscriptions:
+        if not subscription.user.telegram_id:
+            continue
+
+        text = render_html_message(
+            f"messages/new_item_{subscription_kind(subscription)}.html",
+            item=item,
+            subscription=subscription,
+        )
+        buttons = []
+        if url.startswith("https://"):
+            buttons.append({"text": "Открыть", "url": url})
+        buttons.append({"text": "Отписаться от таких", "callback_data": f"unsub:{subscription.id}"})
+        markup = {"inline_keyboard": [buttons]}
+
+        chat_id = subscription.user.telegram_id
+        if image and len(text) <= CAPTION_LIMIT:
+            if send_telegram_photo(chat_id, image, text, reply_markup=markup):
+                continue
+        send_telegram_message(chat_id, text, reply_markup=markup)

@@ -1,5 +1,6 @@
 from django.conf import settings
 from django.urls import include, path
+from django.views.generic import TemplateView
 
 from authn.views import banned, bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
 from bookmarks.api import toggle_item_bookmark
@@ -38,6 +39,9 @@ urlpatterns = [
     path("login/", log_in, name="login"),
     path("logout/", log_out, name="logout"),
     path("welcome/", welcome, name="welcome"),
+    path("about/", TemplateView.as_view(template_name="docs/about.html"), name="about"),
+    path("data_policy/", TemplateView.as_view(template_name="docs/data_policy.html"), name="data_policy"),
+    path("rules/", TemplateView.as_view(template_name="docs/rules.html"), name="rules"),
     path("bot/", bot_page, name="bot"),
     path("banned/", banned, name="banned"),
 

@@ -5,7 +5,7 @@ from django.shortcuts import render
 from django.utils import timezone
 
 from items.models import Item
-from notifications.telegram.users import user_banned
+from notifications import notification
 from users.models import User
 
 REASONS = (
@@ -58,7 +58,13 @@ def ban_user(user, *, until, reason, comment, permanent):
     user.metadata = metadata
     user.is_banned_until = until
     user.save(update_fields=["metadata", "is_banned_until"])
-    user_banned(user, reason=metadata["last_ban"]["reason"], comment=comment, until=until, is_permanent=permanent)
+    notification.user_banned(
+        user,
+        reason=metadata["last_ban"]["reason"],
+        comment=comment,
+        until=until,
+        is_permanent=permanent,
+    )
     return True
 
 
@@ -73,7 +79,7 @@ def get_ban_action(request, obj, **context):
         return render(request, "godmode/message.html", {
             **context,
             "title": "Автора нет",
-            "message": "У этой записи нет автора, банить некого",
+            "message": "У этого поста нет автора, банить некого",
         })
     return render(request, "godmode/actions/user_ban.html", {
         **context,
@@ -89,7 +95,7 @@ def post_ban_action(request, obj, **context):
         return render(request, "godmode/message.html", {
             **context,
             "title": "Автора нет",
-            "message": "У этой записи нет автора, банить некого",
+            "message": "У этого поста нет автора, банить некого",
         })
 
     form = UserBanForm(request.POST)

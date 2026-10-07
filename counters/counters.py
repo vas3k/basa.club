@@ -161,13 +161,13 @@ def bump_user_comments(user_id, delta):
 
 
 def _item_title(item):
-    return (getattr(item, "title", None) or "объявление").strip()
+    return (getattr(item, "title", None) or "пост").strip()
 
 
 def _vibe_reason(comment):
     labels = {
-        Comment.VIBE_GOOD: "пробовал, доволен",
-        Comment.VIBE_BAD: "пробовал, не доволен",
+        Comment.VIBE_GOOD: "Положительный отзыв",
+        Comment.VIBE_BAD: "Отрицательный отзыв",
     }
-    vibe = labels.get(comment.vibe, "отзыв")
-    return f"Отзыв «{vibe}» к «{_item_title(comment.item)}»"
+    vibe = labels.get(comment.vibe, "Комментарий")
+    return f"{vibe} к «{_item_title(comment.item)}»"

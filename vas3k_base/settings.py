@@ -37,6 +37,7 @@ INSTALLED_APPS = [
     "django.contrib.staticfiles",
     "django.contrib.postgres",
     "django_vite",
+    "django_q",
     "authn.apps.AuthnConfig",
     "users.apps.UsersConfig",
     "categories.apps.CategoriesConfig",
@@ -139,6 +140,23 @@ else:
     DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 
+# Queue (django-q2)
+
+Q_CLUSTER = {
+    "name": "vas3k_base",
+    "workers": 2,
+    "timeout": 60,
+    "retry": 90,
+    "max_attempts": 3,
+    "queue_limit": 200,
+    "save_limit": 50,
+    "redis": {
+        "host": os.getenv("REDIS_HOST") or "127.0.0.1",
+        "port": int(os.getenv("REDIS_PORT") or 6379),
+    },
+}
+
+
 # Internationalization
 # https://docs.djangoproject.com/en/6.0/topics/i18n/
 
@@ -182,6 +200,8 @@ DEFAULT_FROM_EMAIL = os.getenv("DEFAULT_FROM_EMAIL", "Вастрик Ивент�
 
 # Telegram
 
+TELEGRAM_PUBLIC_CHAT_URL = os.getenv("TELEGRAM_PUBLIC_CHAT_URL") or "https://t.me/vas3k_base"
+TELEGRAM_ADMIN_CHAT_ID = os.getenv("TELEGRAM_ADMIN_CHAT_ID") or None
 TELEGRAM_TOKEN = os.getenv("TELEGRAM_TOKEN") or "000000000:MOCK_TOKEN_REPLACE_ME"
 TELEGRAM_BOT_USERNAME = os.getenv("TELEGRAM_BOT_USERNAME") or "vas3k_base_bot"
 TELEGRAM_BOT_URL = os.getenv("TELEGRAM_BOT_URL") or f"https://t.me/{TELEGRAM_BOT_USERNAME}"

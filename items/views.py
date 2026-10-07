@@ -14,9 +14,9 @@ from common.contacts import CONTACT_EDITOR_FIELDS
 from geo.models import GeoCountry
 from items.forms import ItemForm
 from items.models import Item
+from notifications import notification
 from notifications.models import Subscription
 from users.flags import has_user_flag
-import notifications
 
 FEED_SORTS = {
     "standard": ("-created_at",),
@@ -256,7 +256,7 @@ def create_item(request):
         item.save()
         if item.is_listed:
             counters.item_created(item)
-            notifications.item_created(item)
+            notification.item_created(item)
         if action == "draft":
             return redirect("user_profile", slug=request.user.slug)
         return redirect(item.get_absolute_url())
@@ -282,7 +282,7 @@ def create_item(request):
 
     return render(request, "items/compose/default.html", {
         "form": form,
-        "form_title": "Добавить новое в Базу",
+        "form_title": "Добавить пост в Базу",
         "form_url": reverse("item_create"),
         "is_new": True,
         "countries_options": countries,
@@ -322,7 +322,7 @@ def edit_item(request, item_id):
             counters.item_hidden(old)
         elif item.is_listed:
             counters.item_created(item)
-            notifications.item_created(item)
+            notification.item_created(item)
         if action == "draft":
             return redirect("user_profile", slug=request.user.slug)
         return redirect(item.get_absolute_url())

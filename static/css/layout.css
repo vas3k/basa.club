@@ -154,6 +154,47 @@
     flex: 0 1 1100px;
 }
 
+.doc {
+    max-width: 760px;
+    margin-left: auto;
+    margin-right: auto;
+    text-align: left;
+}
+
+.doc .markdown-text {
+    font-size: 120%;
+    line-height: 1.55;
+}
+
+.doc .markdown-text p,
+.doc .markdown-text ul,
+.doc .markdown-text ol {
+    margin: 0 0 1.15em;
+}
+
+.doc .markdown-text h1,
+.doc .markdown-text h2,
+.doc .markdown-text h3,
+.doc .markdown-text h4,
+.doc .markdown-text h5,
+.doc .markdown-text h6 {
+    margin-top: 1.8em;
+    margin-bottom: 0.6em;
+}
+
+.doc .markdown-text > :first-child {
+    margin-top: 0;
+}
+
+.doc .markdown-text li {
+    margin: 0.45em 0;
+}
+
+.doc .markdown-text ul,
+.doc .markdown-text ol {
+    padding-left: 1.4em;
+}
+
 .sidebar-overlay {
     display: none;
 }

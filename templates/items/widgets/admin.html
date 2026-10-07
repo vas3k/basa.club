@@ -15,7 +15,7 @@
             </form>
         {% endif %}
 
-        <form method="post" action="{% url "item_delete" item.id %}" data-behavior="confirm" data-confirm="Удалить объявление? Это нельзя отменить.">
+        <form method="post" action="{% url "item_delete" item.id %}" data-behavior="confirm" data-confirm="Удалить? Это нельзя отменить.">
             {% csrf_token %}
             <button type="submit" class="button item-manage-button">
                 <i class="fas fa-trash-alt"></i> Удалить

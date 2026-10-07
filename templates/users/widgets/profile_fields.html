@@ -1,0 +1,27 @@
+<div class="profile-form-name">
+    <label for="{{ form.full_name.id_for_label }}">{{ form.full_name.label }}:</label>
+    <div class="profile-form-name-field">
+        {{ form.full_name }}
+        {% if form.full_name.errors %}<div class="form-error">{{ form.full_name.errors }}</div>{% endif %}
+    </div>
+</div>
+
+<div class="form-group profile-form-avatar">
+    <label>{{ form.avatar.label }}</label>
+    {% island "ImageUpload" name="avatar" value=form.avatar.value|default:"" %}
+    {% if form.avatar.errors %}<div class="form-error">{{ form.avatar.errors }}</div>{% endif %}
+</div>
+
+<div class="profile-form-place">
+    {% island "LocationPicker" countries=countries_options country=country_id city=city_id allow_everywhere=True %}
+    <p class="form-help">Если вашей страны или города нет в списке, значит мы их пока не поддерживаем. Выберите пока «Везде», а потом мы возможно добавим и ваш город тоже :)</p>
+    {% if form.country.errors or form.city.errors %}
+        <div class="form-error">{{ form.country.errors }}{{ form.city.errors }}</div>
+    {% endif %}
+</div>
+
+<div class="form-group profile-form-bio">
+    <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
+    {{ form.bio }}
+    {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors }}</div>{% endif %}
+</div>

@@ -8,7 +8,7 @@
     {% include "users/widgets/profile_header.html" %}
 
     <div class="profile-feed">
-        <div class="block-header">История рейтинга</div>
+        <div class="block-header">История изменений рейтинга</div>
         <section class="block rating-history">
             {% for row in ratings %}
                 <div class="rating-history-row">
@@ -17,7 +17,7 @@
                     <time class="rating-history-date" datetime="{{ row.created_at|date:'c' }}">{{ row.created_at|date:"j E Y, H:i" }}</time>
                 </div>
             {% empty %}
-                <p class="rating-history-empty">Пока нет изменений рейтинга.</p>
+                <p class="rating-history-empty">Пока нет событий, влияющих на рейтинг.</p>
             {% endfor %}
         </section>
     </div>

@@ -12,6 +12,15 @@ PUBLIC_PREFIXES = (
     "/static/",
 )
 
+WELCOME_PREFIXES = (
+    "/welcome/",
+    "/about/",
+    "/rules/",
+    "/data_policy/",
+    "/api/images/",
+    *PUBLIC_PREFIXES,
+)
+
 
 class AuthSessionMiddleware:
     def __init__(self, get_response):
@@ -21,6 +30,10 @@ class AuthSessionMiddleware:
         if request.user.is_authenticated and request.user.is_banned:
             if not request.path.startswith(PUBLIC_PREFIXES):
                 return redirect("banned")
+
+        if request.user.is_authenticated and (request.user.metadata or {}).get("welcome_completed") is False:
+            if not request.path.startswith(WELCOME_PREFIXES):
+                return redirect("welcome")
 
         if request.user.is_authenticated:
             now = timezone.now()

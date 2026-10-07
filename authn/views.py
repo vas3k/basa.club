@@ -2,8 +2,7 @@ import logging
 
 import requests
 from authlib.integrations.base_client import OAuthError
-from django.conf import settings
-from django.contrib.auth import login, logout
+from django.contrib.auth import logout
 from django.contrib.auth.decorators import login_required
 from django.db.models import Q
 from django.shortcuts import redirect, render
@@ -12,25 +11,13 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 from requests import HTTPError
 
+from authn.helpers import start_session
 from authn.providers import club, telegram
 from authn.providers.club import oauth
 from users.models import User
 from vas3k_base.exceptions import RateLimitException
 
 log = logging.getLogger(__name__)
-
-
-def start_session(request, user, *, new_user=False):
-    login(request, user)
-    if new_user:
-        # False sends the user through /welcome/. A missing key is an older account.
-        metadata = dict(user.metadata or {})
-        metadata["welcome_completed"] = False
-        user.metadata = metadata
-    request.session.set_expiry(settings.SESSION_COOKIE_AGE)
-    user.last_activity_at = timezone.now()
-    user.save(update_fields=["last_activity_at", "metadata"])
-    return redirect("user_profile", slug=user.slug)
 
 
 def log_in(request):
