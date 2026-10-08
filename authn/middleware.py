@@ -7,6 +7,7 @@ from django.utils import timezone
 from users.models import User
 
 PUBLIC_PREFIXES = (
+    "/data_policy/",
     "/banned/",
     "/logout/",
     "/static/",
@@ -16,7 +17,6 @@ WELCOME_PREFIXES = (
     "/welcome/",
     "/about/",
     "/rules/",
-    "/data_policy/",
     "/api/images/",
     *PUBLIC_PREFIXES,
 )
