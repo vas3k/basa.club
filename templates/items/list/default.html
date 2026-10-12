@@ -20,9 +20,9 @@
         <div class="item-main">
             <div class="item-title-row">
                 {% if url %}
-                    <a class="item-card-title" href="{{ url }}">{{ item.title }}</a>
+                    <a class="item-card-title" href="{{ url }}">{% include "items/widgets/title.html" %}</a>
                 {% else %}
-                    <div class="item-card-title">{{ item.title }}</div>
+                    <div class="item-card-title">{% include "items/widgets/title.html" %}</div>
                 {% endif %}
                 {% item_upvote item %}
             </div>

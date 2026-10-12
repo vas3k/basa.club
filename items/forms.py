@@ -41,11 +41,19 @@ class ItemForm(forms.ModelForm):
         queryset=Category.objects.filter(parent__isnull=False),
         error_messages={"required": "Выберите подкатегорию", "invalid_choice": "Нет такой подкатегории"},
     )
+    prefix = forms.ChoiceField(
+        required=False,
+        choices=(
+            ("", ""),
+            *Item.PREFIXES,
+        ),
+        widget=forms.Select(attrs={"aria-label": "Префикс"}),
+    )
     title = forms.CharField(
         label="Заголовок",
         max_length=Item._meta.get_field("title").max_length,
         strip=True,
-        widget=forms.TextInput(attrs={"placeholder": "Что предлагаете?"}),
+        widget=forms.TextInput(attrs={"placeholder": "Заголовок, краткое описание"}),
         error_messages={"required": "Нужен заголовок", "max_length": "Слишком длинный заголовок"},
     )
     description = forms.CharField(
@@ -93,7 +101,7 @@ class ItemForm(forms.ModelForm):
         model = Item
         fields = (
             "country", "city", "category", "subcategory",
-            "title", "description", "images", "location", "contacts", "promo_code",
+            "prefix", "title", "description", "images", "location", "contacts", "promo_code",
         )
 
     def __init__(self, *args, **kwargs):
@@ -107,6 +115,9 @@ class ItemForm(forms.ModelForm):
         )
         if not self.is_bound:
             self.initial["expires_in"] = "keep"
+
+    def clean_prefix(self):
+        return self.cleaned_data.get("prefix") or None
 
     def clean_contacts(self):
         raw = self.cleaned_data.get("contacts") or []

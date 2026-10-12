@@ -41,7 +41,6 @@ urlpatterns = [
     path("welcome/", welcome, name="welcome"),
     path("about/", TemplateView.as_view(template_name="docs/about.html"), name="about"),
     path("data_policy/", TemplateView.as_view(template_name="docs/data_policy.html"), name="data_policy"),
-    path("rules/", TemplateView.as_view(template_name="docs/rules.html"), name="rules"),
     path("bot/", bot_page, name="bot"),
     path("banned/", banned, name="banned"),
 

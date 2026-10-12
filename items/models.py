@@ -20,7 +20,19 @@ class Item(SoftDeleteMixin, models.Model):
         (VISIBILITY_LINK_ONLY, VISIBILITY_LINK_ONLY),
     )
 
+    PREFIX_ASK = "ask"
+    PREFIXES = (
+        (PREFIX_ASK, "#ищу"),
+    )
+
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
+    prefix = models.CharField(
+        max_length=16,
+        choices=PREFIXES,
+        null=True,
+        blank=True,
+        verbose_name="Префикс",
+    )
     title = models.CharField(max_length=200)
     description = models.TextField(blank=True, default="")
     location = models.CharField(max_length=4000, blank=True, default="")
@@ -76,6 +88,12 @@ class Item(SoftDeleteMixin, models.Model):
 
     def __str__(self):
         return self.title
+
+    @property
+    def title_with_prefix(self):
+        if not self.prefix:
+            return self.title
+        return f"{self.get_prefix_display()} {self.title}"
 
     @classmethod
     def visible_objects(cls):

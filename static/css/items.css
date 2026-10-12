@@ -313,6 +313,10 @@
     opacity: 0.7;
 }
 
+.item-title-prefix {
+    opacity: 0.7;
+}
+
 .item-card-title {
     display: block;
     margin: 0;
@@ -644,10 +648,60 @@
     white-space: nowrap;
 }
 
-.item-form-title input[type=text] {
+.item-title-input {
+    display: flex;
+    align-items: stretch;
+    overflow: hidden;
+    background: var(--input-bg-color);
+    box-shadow: var(--input-shadow);
+    border-radius: var(--input-border-radius);
+}
+
+.item-title-input:focus-within {
+    box-shadow: var(--input-shadow-focus);
+}
+
+.item-title-input select,
+.item-title-input input[type=text] {
+    box-shadow: none;
+    background-color: transparent;
+    border-radius: 0;
+}
+
+.item-title-input select:focus,
+.item-title-input input[type=text]:focus {
+    box-shadow: none;
+}
+
+.item-title-input select {
+    flex: 0 0 auto;
+    width: 2.6rem;
+    padding: 14px 1.7rem 14px 0.55rem;
+    background-position: right 0.65rem center;
+    color: transparent;
     font-size: 200%;
     font-weight: 700;
-    padding: 14px 20px;
+}
+
+.item-title-input select option {
+    color: var(--select-color);
+    font-size: 16px;
+    font-weight: 500;
+}
+
+.item-title-input:has(option[value="ask"]:checked) select {
+    width: auto;
+    padding-left: 18px;
+    padding-right: 2.2rem;
+    color: var(--input-color);
+}
+
+.item-form-title input[type=text] {
+    flex: 1;
+    min-width: 0;
+    font-size: 200%;
+    font-weight: 700;
+    padding: 14px 20px 14px 8px;
 }
 
 .item-form .form-section {

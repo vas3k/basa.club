@@ -39,26 +39,27 @@ export default function CategoryPicker({ categories, category = "", subcategory 
                 </select>
             </div>
 
-            <div className="form-group">
-                <label htmlFor="id_subcategory">Подкатегория</label>
-                <select
-                    id="id_subcategory"
-                    name="subcategory"
-                    required
-                    value={subcategoryId}
-                    disabled={!categoryId}
-                    onChange={(event) => setSubcategoryId(event.target.value)}
-                >
-                    <option value="" disabled>
-                        Выберите подкатегорию
-                    </option>
-                    {subcategories.map((c) => (
-                        <option key={c.id} value={c.id}>
-                            {c.name}
+            {categoryId && (
+                <div className="form-group">
+                    <label htmlFor="id_subcategory">Подкатегория</label>
+                    <select
+                        id="id_subcategory"
+                        name="subcategory"
+                        required
+                        value={subcategoryId}
+                        onChange={(event) => setSubcategoryId(event.target.value)}
+                    >
+                        <option value="" disabled>
+                            Выберите подкатегорию
                         </option>
-                    ))}
-                </select>
-            </div>
+                        {subcategories.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
         </div>
     );
 }

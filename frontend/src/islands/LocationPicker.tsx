@@ -47,28 +47,30 @@ export default function LocationPicker({ countries, country = "", city = "", all
                 </select>
             </div>
 
-            <div className="form-group">
-                <label htmlFor="id_city">Город</label>
-                {wholeWorld && <input type="hidden" name="city" value={everywhere} />}
-                <select
-                    id="id_city"
-                    name={wholeWorld ? undefined : "city"}
-                    value={wholeWorld ? everywhere : cityId}
-                    disabled={!countryId || wholeWorld}
-                    onChange={(event) => setCityId(event.target.value)}
-                >
-                    {allowEverywhere ? (
-                        <option value={everywhere}>Везде</option>
-                    ) : (
-                        <option value="">Вся страна</option>
-                    )}
-                    {cities.map((c) => (
-                        <option key={c.id} value={c.id}>
-                            {c.icon} {c.name}
-                        </option>
-                    ))}
-                </select>
-            </div>
+            {countryId && (
+                <div className="form-group">
+                    <label htmlFor="id_city">Город</label>
+                    {wholeWorld && <input type="hidden" name="city" value={everywhere} />}
+                    <select
+                        id="id_city"
+                        name={wholeWorld ? undefined : "city"}
+                        value={wholeWorld ? everywhere : cityId}
+                        disabled={wholeWorld}
+                        onChange={(event) => setCityId(event.target.value)}
+                    >
+                        {allowEverywhere ? (
+                            <option value={everywhere}>Везде</option>
+                        ) : (
+                            <option value="">Вся страна</option>
+                        )}
+                        {cities.map((c) => (
+                            <option key={c.id} value={c.id}>
+                                {c.icon} {c.name}
+                            </option>
+                        ))}
+                    </select>
+                </div>
+            )}
         </div>
     );
 }

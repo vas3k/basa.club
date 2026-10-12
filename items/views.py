@@ -18,7 +18,6 @@ from notifications import notification
 from search import search
 from notifications.models import Subscription
 from notifications.subscriptions import subscribers
-from users.flags import has_user_flag
 
 FEED_SORTS = {
     "standard": ("-created_at",),
@@ -105,11 +104,16 @@ def index_page(request, country=None):
         country_items = _order_search(search.filter_items(country_items, page_query), page_query)
         country_items = list(country_items[:20])
 
-    all_items = _order_search(
+    world_items = []
+    all_items = []
+    feed = _order_search(
         search.filter_items(Item.objects_for_user(request.user), page_query),
         page_query,
-    )
-    all_items = list(all_items[:10])
+    )[:10]
+    if request.country_id == "everywhere":
+        world_items = list(feed)
+    else:
+        all_items = list(feed)
 
     subscriptions = []
     if request.user.is_authenticated:
@@ -148,10 +152,10 @@ def index_page(request, country=None):
 
     response = render(request, "index.html", {
         "country_items": country_items,
+        "world_items": world_items,
         "all_items": all_items,
         "subscriptions": subscriptions,
-        "show_welcome": show_welcome_block(request),
-        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not all_items and not subscriptions else [],
+        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not world_items and not all_items and not subscriptions else [],
     })
     if country:
         max_age = 365 * 24 * 60 * 60
@@ -164,12 +168,6 @@ def _order_search(items, query):
     if (query or "").strip():
         return items.order_by("-search_rank", "-created_at")
     return items.order_by("-created_at")
-
-
-def show_welcome_block(request):
-    if request.COOKIES.get("is_welcome_read"):
-        return False
-    return not has_user_flag(request.user, "is_welcome_read")
 
 
 def listing_page(request, country, city, category=None, subcategory=None):
@@ -321,17 +319,12 @@ def create_item(request):
     })
 
 
-def manageable_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not is_item_admin(request.user):
-        raise Http404()
-    return item
-
-
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_item(request, item_id):
-    item = manageable_item(request, item_id)
+    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
+    if item.author_id != request.user.pk and not is_item_admin(request.user):
+        raise Http404()
     old = Item.objects.get(pk=item.pk)
     form = ItemForm(request.POST or None, instance=item)
 
@@ -390,7 +383,9 @@ def edit_item(request, item_id):
 @login_required
 @require_POST
 def hide_item(request, item_id):
-    item = manageable_item(request, item_id)
+    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
+    if item.author_id != request.user.pk and not is_item_admin(request.user):
+        raise Http404()
     old = Item.objects.get(pk=item.pk)
     item.visibility = Item.VISIBILITY_DRAFT
     item.published_at = None
@@ -404,7 +399,9 @@ def hide_item(request, item_id):
 @login_required
 @require_POST
 def delete_item(request, item_id):
-    item = manageable_item(request, item_id)
+    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
+    if item.author_id != request.user.pk and not is_item_admin(request.user):
+        raise Http404()
     was_listed = item.is_listed
     is_owner = item.author_id == request.user.pk
     item.delete(by=request.user)

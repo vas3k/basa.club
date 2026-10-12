@@ -1,8 +1,20 @@
 {% extends "layout_with_sidebar.html" %}
 
 {% block content %}
-    {% if show_welcome %}
+    {% if not request.COOKIES.is_welcome_read and not request.user.metadata.is_welcome_read %}
         {% include "index/welcome.html" %}
+    {% endif %}
+
+    {% if world_items %}
+        <section class="index-section">
+            <h2 class="index-section-title">Новое 🌍 во всём мире</h2>
+            <div class="index-cards">
+                {% for item in world_items %}
+                    {% include "items/list/card.html" with show_city=True %}
+                {% endfor %}
+                <a class="index-card-more" href="/everywhere/everywhere/" data-behavior="geo-link" data-country="everywhere" data-city="everywhere">Все ▶︎</a>
+            </div>
+        </section>
     {% endif %}
 
     {% if current_country %}
@@ -54,7 +66,7 @@
         </section>
     {% endif %}
 
-    {% if not country_items and not all_items and not subscriptions %}
+    {% if not country_items and not world_items and not all_items and not subscriptions %}
         <div class="block feed-empty">
             <p>Тут пока ничего нет</p>
             <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>

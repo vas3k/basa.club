@@ -1,5 +1,7 @@
 .welcome {
     position: relative;
+    width: fit-content;
+    max-width: 100%;
     font-family: var(--serif-font);
     font-weight: 400;
 }
@@ -14,13 +16,13 @@
     width: 32px;
     height: 32px;
     padding: 0;
-    border: 0;
+    border: 2px solid var(--text-color);
     border-radius: 50%;
     background: transparent;
     color: var(--text-color);
     font-size: 15px;
     cursor: pointer;
-    opacity: 0.45;
+    opacity: 0.7;
 }
 
 .welcome-close:hover {
@@ -45,6 +47,11 @@
 
 .welcome p:last-child {
     margin-bottom: 0;
+}
+
+.welcome a {
+    text-decoration: underline;
+    font-weight: bold;
 }
 
 .welcome-sign {

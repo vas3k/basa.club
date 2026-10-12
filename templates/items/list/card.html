@@ -1,6 +1,6 @@
 {% item_url item as url %}
 <article class="index-card block block-clickable">
-    <a class="index-card-cover" href="{{ url }}" aria-label="{{ item.title }}"></a>
+    <a class="index-card-cover" href="{{ url }}" aria-label="{{ item.title_with_prefix }}"></a>
     <div class="index-card-category">
         {% if show_city and item.city %}
             <span>{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}</span>
@@ -9,7 +9,7 @@
         <span>{% if item.category.icon %}{{ item.category.icon|safe }} {% endif %}{{ item.category.name }}</span>
     </div>
     <div class="index-card-title-row">
-        <div class="index-card-title">{{ item.title }}</div>
+        <div class="index-card-title">{% include "items/widgets/title.html" %}</div>
         {% if item.images and item.images.0.image %}
             <span class="index-card-thumb">
                 <img src="{{ item.images.0.image }}" alt="">

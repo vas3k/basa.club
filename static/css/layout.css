@@ -162,14 +162,49 @@
 }
 
 .doc .markdown-text {
-    font-size: 120%;
-    line-height: 1.55;
+    max-width: 66ch;
+    font-size: 118%;
+    line-height: 1.65;
+    overflow-wrap: break-word;
 }
 
 .doc .markdown-text p,
 .doc .markdown-text ul,
-.doc .markdown-text ol {
-    margin: 0 0 1.15em;
+.doc .markdown-text ol,
+.doc .markdown-text .doc-rules {
+    margin: 0 0 1.05em;
+}
+
+.doc .doc-rule {
+    display: grid;
+    grid-template-columns: 1.7em 1fr;
+    column-gap: 0.45em;
+    align-items: baseline;
+    margin: 0;
+    padding: 0.35em 0.45em 0.35em 0.2em;
+    border-radius: 10px;
+}
+
+.doc .doc-rule:target {
+    background: var(--highlight-bg-active);
+}
+
+.doc .doc-rule dt {
+    margin: 0;
+    font-weight: 700;
+    font-variant-numeric: tabular-nums;
+    line-height: inherit;
+    text-align: right;
+}
+
+.doc .doc-rule dt a {
+    font-weight: 700;
+    text-decoration: none;
+    color: inherit;
+}
+
+.doc .doc-rule dd {
+    margin: 0;
 }
 
 .doc .markdown-text h1,
@@ -178,8 +213,9 @@
 .doc .markdown-text h4,
 .doc .markdown-text h5,
 .doc .markdown-text h6 {
-    margin-top: 1.8em;
-    margin-bottom: 0.6em;
+    margin-top: 1.75em;
+    margin-bottom: 0.5em;
+    line-height: 1.25;
 }
 
 .doc .markdown-text > :first-child {

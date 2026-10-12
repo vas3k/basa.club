@@ -110,9 +110,8 @@
         <footer class="footer">
             <div class="footer-top">
                 <nav class="footer-links">
-                    <a href="{% url "about" %}">Что такое База?</a>
-                    <a href="{% url "rules" %}">Правила и условия</a>
-                    <a href="{% url "data_policy" %}">Данные и куки</a>
+                    <a href="{% url "about" %}">О Базе</a>
+                    <a href="{% url "data_policy" %}">Дата полиси</a>
                     <a href="{{ settings.TELEGRAM_PUBLIC_CHAT_URL }}" target="_blank" rel="noopener noreferrer">Телеграм-чатик</a>
                 </nav>
                 {% if request.user.is_authenticated %}
@@ -123,10 +122,7 @@
                 {% endif %}
             </div>
             <p class="footer-about">
-                Вастрик База наполняется добровольцами. Администрация не несёт ответственности за содержание.
-            </p>
-            <p class="footer-about">
-                Проект <a href="https://vas3k.club" target="_blank" rel="noopener noreferrer">Вастрик ✖︎ Клуба</a>
+                Проект ❤️ <a href="https://vas3k.club" target="_blank" rel="noopener noreferrer">Вастрик ✖︎ Клуба</a>
             </p>
         </footer>
     {% endblock %}

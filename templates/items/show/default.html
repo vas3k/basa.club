@@ -9,7 +9,7 @@
 
             <div class="item-main">
                 <div class="item-title-row">
-                    <h1 class="item-show-title">{{ item.title }}</h1>
+                    <h1 class="item-show-title">{% include "items/widgets/title.html" %}</h1>
                     {% item_upvote item %}
                 </div>
 
