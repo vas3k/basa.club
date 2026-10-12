@@ -72,7 +72,6 @@ TEMPLATES = [
         "BACKEND": "django.template.backends.django.DjangoTemplates",
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
-            os.path.join(BASE_DIR, "notifications", "telegram", "templates"),
         ],
         "APP_DIRS": False,
         "OPTIONS": {
@@ -171,12 +170,11 @@ USE_TZ = False
 
 STATIC_URL = "/static/"
 STATICFILES_DIRS = [
-    os.path.join(BASE_DIR, "static"),
-    ("dist", os.path.join(BASE_DIR, "frontend", "dist")),
+    os.path.join(BASE_DIR, "frontend", "static"),
 ]
 
 # Frontend (Vite)
-# dev mode loads JS from `npm run dev` server, otherwise from `npm run build` output in frontend/dist
+# dev mode loads JS from `npm run dev` server, otherwise from `npm run build` output in frontend/static/dist
 
 DJANGO_VITE = {
     "default": {
@@ -184,7 +182,7 @@ DJANGO_VITE = {
         "dev_server_host": os.getenv("VITE_DEV_SERVER_HOST") or "localhost",
         "dev_server_port": int(os.getenv("VITE_DEV_SERVER_PORT") or 5173),
         "static_url_prefix": "dist",
-        "manifest_path": os.path.join(BASE_DIR, "frontend", "dist", ".vite", "manifest.json"),
+        "manifest_path": os.path.join(BASE_DIR, "frontend", "static", "dist", ".vite", "manifest.json"),
     }
 }
 

@@ -14,7 +14,7 @@ def send_telegram_admin_new_item(item_id):
     ).filter(pk=item_id).first()
     if not item:
         return
-    send_telegram_message(chat_id, render_html_message("moderation/new_item.html", item=item))
+    send_telegram_message(chat_id, render_html_message("notifications/telegram/moderation/new_item.html", item=item))
 
 
 def send_telegram_admin_new_flag(flag_id):
@@ -24,4 +24,4 @@ def send_telegram_admin_new_flag(flag_id):
     flag = Flag.objects.select_related("user", "item").filter(pk=flag_id).first()
     if not flag:
         return
-    send_telegram_message(chat_id, render_html_message("moderation/new_flag.html", flag=flag))
+    send_telegram_message(chat_id, render_html_message("notifications/telegram/moderation/new_flag.html", flag=flag))

@@ -35,7 +35,7 @@ def send_telegram_user_new_item(item_id, subscription_ids):
             continue
 
         text = render_html_message(
-            f"messages/new_item_{subscription_kind(subscription)}.html",
+            f"notifications/telegram/messages/new_item_{subscription_kind(subscription)}.html",
             item=item,
             subscription=subscription,
         )

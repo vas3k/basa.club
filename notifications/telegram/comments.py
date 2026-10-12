@@ -17,7 +17,7 @@ def send_telegram_user_new_comment(comment_id):
 
     vibe = comment.reply_to if comment.reply_to_id and comment.reply_to else comment
     text = render_html_message(
-        "messages/new_comment.html",
+        "notifications/telegram/messages/new_comment.html",
         comment=comment,
         vibe_label=vibe.get_vibe_display() or "",
         is_reply=bool(comment.reply_to_id),

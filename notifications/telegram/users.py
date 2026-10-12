@@ -10,7 +10,7 @@ def send_telegram_user_banned(user_id, reason, comment, until, is_permanent):
         return
     left = until - timezone.now()
     send_telegram_message(user.telegram_id, render_html_message(
-        "messages/user_banned.html",
+        "notifications/telegram/messages/user_banned.html",
         reason=reason,
         comment=comment,
         is_permanent=is_permanent,

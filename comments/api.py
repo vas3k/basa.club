@@ -30,7 +30,7 @@ def upvote_comment(request, comment_id):
     if created:
         counters.comment_upvoted(comment)
 
-    return JsonResponse({"upvotes": comment.upvotes, "voted": True})
+    return JsonResponse({"upvotes": comment.upvotes + (1 if created else 0), "voted": True})
 
 
 @api_login_required
@@ -44,4 +44,4 @@ def retract_comment_vote(request, comment_id):
     if deleted:
         counters.comment_unvoted(comment)
 
-    return JsonResponse({"upvotes": comment.upvotes, "voted": False})
+    return JsonResponse({"upvotes": comment.upvotes - (1 if deleted else 0), "voted": False})

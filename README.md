@@ -44,7 +44,7 @@ cd frontend && npm run build && cd ..
 VITE_DEV_MODE=false uv run python manage.py runserver
 ```
 
-`npm run build` writes the bundle and `manifest.json` to `frontend/dist/`, which Django serves as `/static/dist/`. Without `npm run dev`, nothing watches for changes, so rebuild after every edit.
+`npm run build` writes the bundle and `manifest.json` to `frontend/static/dist/`, which Django serves as `/static/dist/`. Without `npm run dev`, nothing watches for changes, so rebuild after every edit.
 
 ## Running locally with Docker
 
@@ -54,7 +54,7 @@ docker compose up
 
 This starts `postgres`, `redis`, `app` (Django on :8000), `queue` (django-q2 worker), `bot`, and `frontend` (Vite dev server on :5173 with hot reload). The `frontend/` folder is mounted into the container, so editing files locally updates the page in the browser.
 
-The application image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/dist`. Set `DEBUG=false` and `VITE_DEV_MODE=false` in production. The image requires an explicit process command and static-file serving configuration; Compose runs development servers.
+The application image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/static/dist`. Set `DEBUG=false` and `VITE_DEV_MODE=false` in production. The image requires an explicit process command and static-file serving configuration; Compose runs development servers.
 
 ## Templates
 
@@ -152,14 +152,14 @@ To add a new widget, create `frontend/src/islands/MyWidget.tsx` with a default e
 Useful commands (run in `frontend/`):
 
 - `npm run dev`: dev server with hot reload
-- `npm run build`: type-check and build the production bundle into `frontend/dist/`
+- `npm run build`: type-check and build the production bundle into `frontend/static/dist/`
 - `npm run typecheck`: TypeScript check only
 
 ### Settings
 
 Environment variables:
 
-- `VITE_DEV_MODE` (`true`/`false`, defaults to the `DEBUG` value): load JS from the Vite dev server instead of `frontend/dist`
+- `VITE_DEV_MODE` (`true`/`false`, defaults to the `DEBUG` value): load JS from the Vite dev server instead of `frontend/static/dist`
 - `VITE_DEV_SERVER_HOST`, `VITE_DEV_SERVER_PORT` (defaults `localhost`, `5173`): where the browser finds the Vite dev server
 
 ## Authentication and uploads
@@ -182,7 +182,7 @@ passwords are hashed before saving.
 
 - Set `DEBUG=false` exactly and `VITE_DEV_MODE=false`. Provide a strong, private `SECRET_KEY` and set `APP_HOST=https://base.vas3k.club`. The source still has development defaults; do not rely on them in production.
 - Supply PostgreSQL, Redis, Club OAuth, media upload, Telegram and SMTP configuration through the runtime environment. Use the names in `vas3k_base/settings.py`; optional Sentry uses `SENTRY_DSN`. Keep secrets out of Git, the image and frontend props. Local `.env*`, private settings and key files are excluded from Git and Docker build contexts. Example environment files must contain placeholders only.
-- Build with the locked dependencies: `uv sync --frozen`, then `npm ci` and `npm run build` in `frontend/`. Serve `/static/` and `/static/dist/` through the production static-file setup, and keep `frontend/dist/.vite/manifest.json` available to Django in the application filesystem. `STATIC_ROOT` is not configured in this repository.
+- Build with the locked dependencies: `uv sync --frozen`, then `npm ci` and `npm run build` in `frontend/`. Serve `frontend/static/` as `/static/` (that directory holds `css/`, `images/`, `fonts/`, and the built `dist/`). Keep `frontend/static/dist/.vite/manifest.json` available to Django in the application filesystem. `STATIC_ROOT` is not configured in this repository.
 - Run a production WSGI/ASGI server, the `qcluster` worker and the Telegram bot as separate managed processes. The image has no default command or bundled production web server. Do not use the development Compose deployment unchanged.
 - Configure HTTPS and trusted proxy headers, private database/Redis access and persistent PostgreSQL storage. Take a recoverable database backup, review pending migrations, then apply migrations once before starting the new processes.
 - Run `uv run python manage.py check --deploy` with the actual production environment and resolve its applicable warnings. Confirm Club OAuth callbacks and Telegram webhook routing match the deployed host; identity merging and webhook changes remain deferred.
