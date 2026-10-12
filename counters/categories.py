@@ -14,25 +14,15 @@ TIMEOUT = 60 * 60 * 24
 VERSION_PATH = Path(tempfile.gettempdir()) / "vas3k-base-category-counts"
 
 
-def version():
-    try:
-        return VERSION_PATH.read_text().strip() or "0"
-    except OSError:
-        return "0"
-
-
-def bump_version():
-    VERSION_PATH.write_text(str(time.time()))
-
-
-def cache_key(root_id, country_id, city_id):
-    return f"category-counts:{version()}:{country_id or 'everywhere'}:{city_id or 'everywhere'}:{root_id}"
-
-
 def counts(root_id, country_id="everywhere", city_id="everywhere"):
     country_id = country_id or "everywhere"
     city_id = city_id or "everywhere"
-    key = cache_key(root_id, country_id, city_id)
+    try:
+        version = VERSION_PATH.read_text().strip() or "0"
+    except OSError:
+        version = "0"
+
+    key = f"category-counts:{version}:{country_id}:{city_id}:{root_id}"
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -44,14 +34,14 @@ def counts(root_id, country_id="everywhere", city_id="everywhere"):
 def invalidate(root_id):
     # One item is counted in its city, its country, and the whole-world view.
     if root_id:
-        bump_version()
+        VERSION_PATH.write_text(str(time.time()))
 
 
 def refresh_all():
     """Drop every process's category cache and return whole-world root totals."""
     from categories.models import Category
 
-    bump_version()
+    VERSION_PATH.write_text(str(time.time()))
     totals = {}
     for root_id in Category.objects.filter(parent__isnull=True).values_list("id", flat=True):
         fresh = calculate(root_id, "everywhere", "everywhere")
@@ -59,18 +49,15 @@ def refresh_all():
     return totals
 
 
-def in_place(items, country_id, city_id):
-    """Items listed in this country and city. Worldwide items are not included."""
-    if city_id and city_id != "everywhere":
-        return items.filter(Q(city_id=city_id) | Q(city__isnull=True, country_id=country_id))
-    if country_id and country_id != "everywhere":
-        return items.filter(country_id=country_id)
-    return items
-
-
 def calculate(root_id, country_id="everywhere", city_id="everywhere"):
+    items = Item.visible_objects()
+    if city_id and city_id != "everywhere":
+        items = items.filter(Q(city_id=city_id) | Q(city__isnull=True, country_id=country_id))
+    elif country_id and country_id != "everywhere":
+        items = items.filter(country_id=country_id)
+
     grouped = (
-        in_place(Item.visible_objects(), country_id, city_id)
+        items
         .filter(category_id=root_id)
         .order_by()
         .values("subcategory_id")

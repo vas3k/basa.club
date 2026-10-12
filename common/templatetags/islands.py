@@ -7,11 +7,6 @@ from django.utils.html import format_html
 register = template.Library()
 
 
-def camelcase(name):
-    first, *rest = name.split("_")
-    return first + "".join(word.capitalize() for word in rest)
-
-
 @register.simple_tag
 def island(island_name, **props):
     """
@@ -20,8 +15,13 @@ def island(island_name, **props):
 
     {% island "MarkdownEditor" name="description" value=form.description.value %}
     """
+    converted_props = {}
+    for key, value in props.items():
+        first, *rest = key.split("_")
+        converted_props[first + "".join(word.capitalize() for word in rest)] = value
+
     return format_html(
         '<div data-island="{}" data-props="{}"></div>',
         island_name,
-        json.dumps({camelcase(key): value for key, value in props.items()}, cls=DjangoJSONEncoder),
+        json.dumps(converted_props, cls=DjangoJSONEncoder),
     )

@@ -1,40 +1,41 @@
 from django import forms
-from django.core.validators import MaxLengthValidator
 
 from comments.models import Comment
 from common.request import parse_ip_address, parse_useragent
 
 
 class CommentForm(forms.ModelForm):
+    vibe = forms.ChoiceField(
+        label="Как вам?",
+        choices=Comment.VIBES,
+        widget=forms.RadioSelect(),
+        error_messages={"required": "Выберите, как вам", "invalid_choice": "Выберите, как вам"},
+    )
+    text = forms.CharField(
+        label="Комментарий",
+        widget=forms.Textarea(attrs={
+            "placeholder": "Расскажите, как всё прошло",
+            "maxlength": 3000,
+        }),
+        error_messages={
+            "required": "Комментарий пустой",
+            "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
+        },
+    )
+
     class Meta:
         model = Comment
         fields = ("vibe", "text")
-        widgets = {
-            "vibe": forms.RadioSelect(),
-            "text": forms.Textarea(attrs={
-                "placeholder": "Расскажите, как всё прошло",
-                "maxlength": 3000,
-            }),
-        }
-        labels = {
-            "vibe": "Как вам?",
-            "text": "Комментарий",
-        }
-        error_messages = {
-            "vibe": {"required": "Выберите, как вам", "invalid_choice": "Выберите, как вам"},
-            "text": {
-                "required": "Комментарий пустой",
-                "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
-            },
-        }
 
     def __init__(self, *args, item, **kwargs):
         self.item = item
         super().__init__(*args, **kwargs)
-        self.fields["vibe"].required = True
-        self.fields["vibe"].choices = Comment.VIBES  # ModelForm adds a blank option because the model field is nullable
-        self.fields["text"].max_length = 3000
-        self.fields["text"].validators.append(MaxLengthValidator(3000))
+
+    def clean_text(self):
+        text = self.cleaned_data["text"]
+        if len(text) > 3000:
+            raise forms.ValidationError(self.fields["text"].error_messages["max_length"], code="max_length")
+        return text
 
     def save(self, *, author, request, commit=True):
         comment = super().save(commit=False)
@@ -48,34 +49,44 @@ class CommentForm(forms.ModelForm):
 
 
 class ReplyForm(forms.ModelForm):
+    text = forms.CharField(
+        label="Ответ",
+        widget=forms.TextInput(attrs={
+            "placeholder": "Ваш ответ",
+            "maxlength": 3000,
+        }),
+        error_messages={
+            "required": "Комментарий пустой",
+            "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
+        },
+    )
+    reply_to = forms.ModelChoiceField(
+        queryset=Comment.objects.none(),
+        required=False,
+        widget=forms.HiddenInput(),
+        error_messages={
+            "required": "Нет комментария для ответа",
+            "invalid_choice": "Нельзя ответить на этот комментарий",
+        },
+    )
+
     class Meta:
         model = Comment
         fields = ("text", "reply_to")
-        widgets = {
-            "text": forms.TextInput(attrs={
-                "placeholder": "Ваш ответ",
-                "maxlength": 3000,
-            }),
-            "reply_to": forms.HiddenInput(),
-        }
-        labels = {"text": "Ответ"}
-        error_messages = {
-            "text": {
-                "required": "Комментарий пустой",
-                "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
-            },
-            "reply_to": {"required": "Нет комментария для ответа", "invalid_choice": "Нельзя ответить на этот комментарий"},
-        }
 
     def __init__(self, *args, item, **kwargs):
         self.item = item
         super().__init__(*args, **kwargs)
-        self.fields["text"].max_length = 3000
-        self.fields["text"].validators.append(MaxLengthValidator(3000))
         self.fields["reply_to"].queryset = Comment.objects.filter(
             item=item,
             reply_to__isnull=True,
         )
+
+    def clean_text(self):
+        text = self.cleaned_data["text"]
+        if len(text) > 3000:
+            raise forms.ValidationError(self.fields["text"].error_messages["max_length"], code="max_length")
+        return text
 
     def save(self, *, author, request, commit=True):
         comment = super().save(commit=False)

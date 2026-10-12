@@ -35,58 +35,6 @@ def anonymous_search_redirect(request):
     return None
 
 
-def show_global_param(request):
-    raw = (request.GET.get("show_global") or "").lower()
-    if raw in {"1", "true", "on", "yes"}:
-        return "1"
-    if raw in {"0", "false", "off", "no"}:
-        return "0"
-    return None
-
-
-def show_global_enabled(request, category):
-    explicit = show_global_param(request)
-    if explicit is not None:
-        return explicit == "1"
-    return bool(category and category.is_global)
-
-
-def listing_queryset(request, items, category=None):
-    if request.city_id != "everywhere":
-        items = items.filter(
-            Q(city_id=request.city_id)
-            | Q(city__isnull=True, country_id=request.country_id)
-            | Q(city__isnull=True, country__isnull=True)
-        )
-    elif request.country_id != "everywhere":
-        items = items.filter(Q(country_id=request.country_id) | Q(country__isnull=True))
-
-    query = (request.GET.get("query") or "").strip()
-    if query and request.user.is_authenticated:
-        items = search.filter_items(items, query)
-
-    if not show_global_enabled(request, category):
-        items = items.exclude(country__isnull=True)
-
-    sort = request.GET.get("sort")
-    ordering = list(FEED_SORTS.get(sort, FEED_SORTS["standard"]))
-    if query and request.user.is_authenticated and sort not in {"date", "rating"}:
-        ordering = ["-search_rank", *ordering]
-    return items.order_by(*ordering)
-
-
-def listing_feed_context(request, items, category=None):
-    items = paginate(request, listing_queryset(request, items, category))
-    sort = request.GET.get("sort")
-    return {
-        "items": items,
-        "feed_sort": sort if sort in FEED_SORTS else "standard",
-        "show_global": show_global_enabled(request, category),
-        "show_global_param": show_global_param(request),
-        "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
-    }
-
-
 def index_page(request, country=None):
     if response := anonymous_search_redirect(request):
         return response
@@ -97,19 +45,17 @@ def index_page(request, country=None):
         request.city_id = "everywhere"
 
     page_query = (request.GET.get("query") or "").strip()
+    ordering = ("-search_rank", "-created_at") if page_query else ("-created_at",)
 
     country_items = []
     if request.country_id != "everywhere":
         country_items = Item.objects_for_user(request.user).filter(country_id=request.country_id)
-        country_items = _order_search(search.filter_items(country_items, page_query), page_query)
+        country_items = search.filter_items(country_items, page_query).order_by(*ordering)
         country_items = list(country_items[:20])
 
     world_items = []
     all_items = []
-    feed = _order_search(
-        search.filter_items(Item.objects_for_user(request.user), page_query),
-        page_query,
-    )[:10]
+    feed = search.filter_items(Item.objects_for_user(request.user), page_query).order_by(*ordering)[:10]
     if request.country_id == "everywhere":
         world_items = list(feed)
     else:
@@ -148,7 +94,7 @@ def index_page(request, country=None):
                 items = search.filter_items(items, subscription.query)
             if page_query:
                 items = search.filter_items(items, page_query)
-            subscription.index_items = list(_order_search(items, page_query)[:10])
+            subscription.index_items = list(items.order_by(*ordering)[:10])
 
     response = render(request, "index.html", {
         "country_items": country_items,
@@ -162,12 +108,6 @@ def index_page(request, country=None):
         response.set_cookie("country", request.country_id, max_age=max_age, samesite="Lax", path="/")
         response.set_cookie("city", "everywhere", max_age=max_age, samesite="Lax", path="/")
     return response
-
-
-def _order_search(items, query):
-    if (query or "").strip():
-        return items.order_by("-search_rank", "-created_at")
-    return items.order_by("-created_at")
 
 
 def listing_page(request, country, city, category=None, subcategory=None):
@@ -190,30 +130,50 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         items = items.filter(category_id=category)
 
-    return render(request, "listing.html", listing_feed_context(request, items, current_category))
+    raw = (request.GET.get("show_global") or "").lower()
+    show_global_param = None
+    show_global = bool(current_category and current_category.is_global)
+    if raw in {"1", "true", "on", "yes"}:
+        show_global_param = "1"
+        show_global = True
+    elif raw in {"0", "false", "off", "no"}:
+        show_global_param = "0"
+        show_global = False
 
+    if request.city_id != "everywhere":
+        items = items.filter(
+            Q(city_id=request.city_id)
+            | Q(city__isnull=True, country_id=request.country_id)
+            | Q(city__isnull=True, country__isnull=True)
+        )
+    elif request.country_id != "everywhere":
+        items = items.filter(Q(country_id=request.country_id) | Q(country__isnull=True))
 
-def is_item_admin(user):
-    return user.is_authenticated and user.is_moderator
+    query = (request.GET.get("query") or "").strip()
+    if query and request.user.is_authenticated:
+        items = search.filter_items(items, query)
 
+    if not show_global:
+        items = items.exclude(country__isnull=True)
 
-def moderator_item_activity(item, limit=7):
-    upvotes = item.votes.filter(user__isnull=False)
-    bookmarks = item.bookmarks.all()
-    flags = list(item.flags.select_related("user").order_by("-created_at"))
-    return {
-        "upvoters": [vote.user for vote in upvotes.select_related("user").order_by("-created_at")[:limit]],
-        "upvote_count": upvotes.count(),
-        "bookmarkers": [bookmark.user for bookmark in bookmarks.select_related("user").order_by("-created_at")[:limit]],
-        "bookmark_count": bookmarks.count(),
-        "flags": flags,
-        "flag_count": len(flags),
-    }
+    sort = request.GET.get("sort")
+    ordering = list(FEED_SORTS.get(sort, FEED_SORTS["standard"]))
+    if query and request.user.is_authenticated and sort not in {"date", "rating"}:
+        ordering = ["-search_rank", *ordering]
+    items = paginate(request, items.order_by(*ordering))
+
+    return render(request, "listing.html", {
+        "items": items,
+        "feed_sort": sort if sort in FEED_SORTS else "standard",
+        "show_global": show_global,
+        "show_global_param": show_global_param,
+        "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
+    })
 
 
 def render_item_page(request, item, *, comment_form=None, reply_form=None, status=200):
     is_owner = request.user.is_authenticated and request.user.pk == item.author_id
-    is_admin = is_item_admin(request.user)
+    is_admin = request.user.is_authenticated and request.user.is_moderator
 
     comments_tree = []
     if request.user.is_authenticated:
@@ -231,11 +191,25 @@ def render_item_page(request, item, *, comment_form=None, reply_form=None, statu
         comment_form = comment_form or CommentForm(item=item)
         reply_form = reply_form or ReplyForm(item=item)
 
+    moderation = None
+    if is_admin:
+        upvotes = item.votes.filter(user__isnull=False)
+        bookmarks = item.bookmarks.all()
+        flags = list(item.flags.select_related("user").order_by("-created_at"))
+        moderation = {
+            "upvoters": [vote.user for vote in upvotes.select_related("user").order_by("-created_at")[:7]],
+            "upvote_count": upvotes.count(),
+            "bookmarkers": [bookmark.user for bookmark in bookmarks.select_related("user").order_by("-created_at")[:7]],
+            "bookmark_count": bookmarks.count(),
+            "flags": flags,
+            "flag_count": len(flags),
+        }
+
     return render(request, "items/show/default.html", {
         "item": item,
         "show_owner_actions": is_owner and not is_admin,
         "show_admin_actions": is_admin,
-        "moderation": moderator_item_activity(item) if is_admin else None,
+        "moderation": moderation,
         "comments_tree": comments_tree,
         "comment_form": comment_form,
         "reply_form": reply_form,
@@ -257,7 +231,7 @@ def item_page(request, country, city, category, item_id, subcategory=None):
         raise Http404()
     is_owner = request.user.is_authenticated and request.user.pk == item.author_id
     is_public = item.visibility in (Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY) and not item.is_expired
-    if not is_public and not is_owner and not is_item_admin(request.user):
+    if not is_public and not is_owner and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
 
     Item.objects.filter(pk=item.pk).update(view_count=F("view_count") + 1)
@@ -323,7 +297,7 @@ def create_item(request):
 @require_http_methods(["GET", "POST"])
 def edit_item(request, item_id):
     item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not is_item_admin(request.user):
+    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
     old = Item.objects.get(pk=item.pk)
     form = ItemForm(request.POST or None, instance=item)
@@ -384,7 +358,7 @@ def edit_item(request, item_id):
 @require_POST
 def hide_item(request, item_id):
     item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not is_item_admin(request.user):
+    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
     old = Item.objects.get(pk=item.pk)
     item.visibility = Item.VISIBILITY_DRAFT
@@ -400,7 +374,7 @@ def hide_item(request, item_id):
 @require_POST
 def delete_item(request, item_id):
     item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not is_item_admin(request.user):
+    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
     was_listed = item.is_listed
     is_owner = item.author_id == request.user.pk

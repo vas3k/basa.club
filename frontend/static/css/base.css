@@ -316,7 +316,7 @@ a.inline-block:visited {
     white-space: nowrap;
 }
 
-.inline-block-secure:has([data-island-mounted]) .inline-block-secure-source {
+.inline-block-secure:has(.inline-block-secure-painted) .inline-block-secure-source {
     position: absolute;
     width: 1px;
     height: 1px;
@@ -327,13 +327,17 @@ a.inline-block:visited {
     border: 0;
 }
 
-.inline-block-secure [data-island] {
-    display: flex;
+.inline-block-secure-canvas {
+    display: none;
     align-items: center;
     max-width: 16em;
     overflow: hidden;
     line-height: 0;
     pointer-events: none;
+}
+
+.inline-block-secure-painted {
+    display: flex;
 }
 
 .inline-block-secure-pixels {

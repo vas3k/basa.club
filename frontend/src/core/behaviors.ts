@@ -3,10 +3,6 @@ export type Behavior = (element: HTMLElement) => void;
 // Eager: behaviors are tiny and must work right after page load without extra requests
 const behaviors = import.meta.glob<Behavior>("../behaviors/*.ts", { eager: true, import: "default" });
 
-function behaviorByName(name: string): Behavior | undefined {
-    return behaviors[`../behaviors/${name}.ts`];
-}
-
 export function attachBehaviors(root: ParentNode = document) {
     root.querySelectorAll<HTMLElement>("[data-behavior]").forEach((element) => {
         const attached = new Set((element.dataset.behaviorAttached || "").split(" ").filter(Boolean));
@@ -14,7 +10,7 @@ export function attachBehaviors(root: ParentNode = document) {
         for (const name of (element.dataset.behavior || "").split(" ").filter(Boolean)) {
             if (attached.has(name)) continue;
 
-            const behavior = behaviorByName(name);
+            const behavior = behaviors[`../behaviors/${name}.ts`];
             if (!behavior) {
                 console.error(`Behavior "${name}" not found in frontend/src/behaviors/`);
                 continue;

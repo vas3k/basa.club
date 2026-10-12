@@ -7,7 +7,6 @@ from django.utils import timezone
 from categories.models import Category
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
-from notifications.subscriptions import _query_matches
 from search import search
 from search.models import SearchIndex
 from users.models import User
@@ -109,9 +108,9 @@ class SearchIndexTests(TestCase):
         subscription = type("Subscription", (), {"query": "квартиры"})()
         empty = type("Subscription", (), {"query": ""})()
         miss = type("Subscription", (), {"query": "zzznomatch"})()
-        self.assertTrue(_query_matches(subscription, item))
-        self.assertTrue(_query_matches(empty, item))
-        self.assertFalse(_query_matches(miss, item))
+        self.assertTrue(search.item_matches(item, subscription.query))
+        self.assertTrue(search.item_matches(item, empty.query))
+        self.assertFalse(search.item_matches(item, miss.query))
 
     def test_listing_and_home_search(self):
         self.make_item(title="Квартира на два месяца", description="")

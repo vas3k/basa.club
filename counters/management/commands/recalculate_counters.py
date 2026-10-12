@@ -36,7 +36,7 @@ class Command(BaseCommand):
         ).exclude(
             author_id=F("item__author_id"),
         ).values("author_id", "item_id", "vibe").annotate(n=Count("pk")).order_by():
-            points = row["n"] * counters.vibe_sign(row["vibe"]) * counters.VIBE_POINTS
+            points = row["n"] * counters.VIBE_SIGNS.get(row["vibe"], 0) * counters.VIBE_POINTS
             users[row["author_id"]] += points
             items[row["item_id"]] += points
 
@@ -50,7 +50,7 @@ class Command(BaseCommand):
         ).annotate(n=Count("pk")).order_by():
             users[row["comment__author_id"]] += row["n"]
             comments[row["comment_id"]] += row["n"]
-            items[row["comment__item_id"]] += row["n"] * counters.vibe_sign(row["comment__vibe"])
+            items[row["comment__item_id"]] += row["n"] * counters.VIBE_SIGNS.get(row["comment__vibe"], 0)
             if row["comment__author_id"]:
                 user_upvotes[row["comment__author_id"]] += row["n"]
 

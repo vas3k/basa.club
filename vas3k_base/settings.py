@@ -3,18 +3,18 @@ from datetime import timedelta
 from pathlib import Path
 
 import sentry_sdk
+from django.core.exceptions import ImproperlyConfigured
 from sentry_sdk.integrations.django import DjangoIntegration
 
 from utils.strings import random_string
 
-# Build paths inside the project like this: BASE_DIR / "subdir".
 BASE_DIR = Path(__file__).resolve().parent.parent
 
-# SECURITY WARNING: keep the secret key used in production secret!
 SECRET_KEY = os.getenv("SECRET_KEY") or "wow-so-secret"
 
-# SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = (os.getenv("DEBUG") != "false")
+if not DEBUG and not os.getenv("SECRET_KEY"):
+    raise ImproperlyConfigured("SECRET_KEY must be set when DEBUG is false")
 
 ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0", "basa.club"]
 INTERNAL_IPS = ["127.0.0.1", "::1"]
@@ -222,7 +222,7 @@ LOGGING = {
     "loggers": {
         "": {  # "catch all" loggers by referencing it with the empty string
             "handlers": ["console"],
-            "level": "DEBUG",
+            "level": "DEBUG" if DEBUG else "INFO",
         },
     },
 }

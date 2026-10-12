@@ -184,7 +184,8 @@
         margin-bottom: 0;
     }
 
-    .content-feed-setting {
+    .content-feed-setting,
+    .content-feed-settings > .feed-button {
         width: 100%;
         white-space: normal;
     }

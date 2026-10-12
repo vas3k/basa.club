@@ -71,7 +71,7 @@ def club_callback(request):
             "message": "Что-то сломалось или сайт упал, попробуйте еще раз."
         })
 
-    userinfo = token.get("userinfo")
+    userinfo = token.get("userinfo") if isinstance(token, dict) else None
 
     if not token or not userinfo:
         return render(request, "error.html", {
@@ -84,9 +84,10 @@ def club_callback(request):
         club_profile = requests.get(
             url=f"{oauth.club.api_base_url}/user/me.json",
             headers={"Authorization": f"{token['token_type']} {token['access_token']}"},
+            timeout=30,
         ).json()
-    except Exception as ex:
-        log.exception(ex)
+    except (requests.exceptions.RequestException, ValueError, KeyError):
+        log.warning("Could not load the Club profile")
         club_profile = None
 
     member = club_profile.get("user") if isinstance(club_profile, dict) else None

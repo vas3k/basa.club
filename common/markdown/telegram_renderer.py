@@ -6,9 +6,6 @@ from common.markdown.common import split_title_and_css_classes
 
 
 class TelegramRenderer(mistune.HTMLRenderer):
-    def __init__(self, *args, **kwargs):
-        super().__init__()
-
     def link(self, text, url, title=None):
         text, _ = split_title_and_css_classes(text or "")
         return super().link(text, url, title)

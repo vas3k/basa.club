@@ -12,13 +12,13 @@ from users.flags import ALLOWED_USER_FLAGS, set_user_flag
 def update_user_flag(request):
     try:
         payload = json.loads(request.body or b"{}")
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse({"error": "Некорректный запрос"}, status=400)
     if not isinstance(payload, dict):
         return JsonResponse({"error": "Некорректный запрос"}, status=400)
 
     flag = payload.get("flag")
-    if flag not in ALLOWED_USER_FLAGS:
+    if not isinstance(flag, str) or flag not in ALLOWED_USER_FLAGS:
         return JsonResponse({"error": "Неизвестный флаг"}, status=400)
 
     value = payload.get("value")

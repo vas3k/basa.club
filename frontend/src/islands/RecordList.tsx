@@ -1,6 +1,5 @@
 import { useState } from "react";
 
-// Editable list of records. Submits a JSON array in a hidden input named `name`.
 // `records` may be an array or a JSON string (Django's JSONField prepares a string).
 
 type Option = {
@@ -32,52 +31,46 @@ type Props = {
 
 let nextId = 1;
 
-function parseRecords(records: unknown): unknown[] {
-    if (typeof records === "string") {
-        if (!records) return [];
-        try {
-            return parseRecords(JSON.parse(records));
-        } catch {
-            return [];
+export default function RecordList({ name, label, addLabel = "Добавить", fields, records }: Props) {
+    const defaults: Record<string, string> = {};
+    for (const field of fields) {
+        const options = field.options ?? [];
+        defaults[field.key] = "";
+        if (field.kind === "select" && !options.some((option) => option.value === "")) {
+            defaults[field.key] = options[0]?.value ?? "";
         }
     }
-    return Array.isArray(records) ? records : [];
-}
 
-function coerce(field: Field, value: unknown): string {
-    const text = typeof value === "string" ? value : "";
-    if (field.kind !== "select") return text;
-    const options = field.options ?? [];
-    if (options.some((option) => option.value === text)) return text;
-    return options[0]?.value ?? "";
-}
-
-function blankValues(fields: Field[]): Record<string, string> {
-    const values: Record<string, string> = {};
-    for (const field of fields) values[field.key] = coerce(field, "");
-    return values;
-}
-
-function toRows(fields: Field[], records: unknown): Row[] {
-    const rows = parseRecords(records).map((record) => {
-        const values = blankValues(fields);
-        if (record && typeof record === "object") {
-            const source = record as Record<string, unknown>;
-            for (const field of fields) values[field.key] = coerce(field, source[field.key]);
+    const [rows, setRows] = useState<Row[]>(() => {
+        let source = records;
+        while (typeof source === "string") {
+            try {
+                source = JSON.parse(source);
+            } catch {
+                source = [];
+            }
         }
-        return { id: nextId++, values };
+
+        const initial = (Array.isArray(source) ? source : []).map((record) => {
+            const values = { ...defaults };
+            if (record && typeof record === "object") {
+                for (const field of fields) {
+                    const value = record[field.key];
+                    const text = typeof value === "string" ? value : "";
+                    const options = field.options ?? [];
+                    values[field.key] = text;
+                    if (field.kind === "select" && !options.some((option) => option.value === text)) {
+                        values[field.key] = options[0]?.value ?? "";
+                    }
+                }
+            }
+            return { id: nextId++, values };
+        });
+        return initial.length ? initial : [{ id: nextId++, values: { ...defaults } }];
     });
-    if (!rows.length) rows.push({ id: nextId++, values: blankValues(fields) });
-    return rows;
-}
-
-function isFilled(fields: Field[], row: Row): boolean {
-    return fields.some((field) => field.kind !== "select" && (row.values[field.key] ?? "").trim() !== "");
-}
-
-export default function RecordList({ name, label, addLabel = "Добавить", fields, records }: Props) {
-    const [rows, setRows] = useState(() => toRows(fields, records));
-    const payload = rows.filter((row) => isFilled(fields, row)).map((row) => row.values);
+    const payload = rows
+        .filter((row) => fields.some((field) => field.kind !== "select" && (row.values[field.key] ?? "").trim() !== ""))
+        .map((row) => row.values);
 
     function update(id: number, key: string, value: string) {
         setRows((current) =>
@@ -131,7 +124,7 @@ export default function RecordList({ name, label, addLabel = "Добавить",
             <button
                 type="button"
                 className="button button-inverted button-small record-list-add"
-                onClick={() => setRows((current) => [...current, { id: nextId++, values: blankValues(fields) }])}
+                onClick={() => setRows((current) => [...current, { id: nextId++, values: { ...defaults } }])}
             >
                 {addLabel}
             </button>

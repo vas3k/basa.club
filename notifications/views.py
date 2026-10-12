@@ -21,25 +21,21 @@ def toggle_listing_subscription(request):
         )
     except InvalidSubscription:
         pass
-    return redirect(_next_url(request))
+
+    target = request.POST.get("next") or reverse("index")
+    if not url_has_allowed_host_and_scheme(
+        target, allowed_hosts={request.get_host()}, require_https=request.is_secure(),
+    ):
+        target = reverse("index")
+    return redirect(target)
 
 
 @login_required
 @require_POST
 def remove_subscription(request, subscription_id):
     Subscription.objects.filter(user=request.user, pk=subscription_id).delete()
-    return redirect(_bookmarks_next(request))
 
-
-def _bookmarks_next(request):
     target = request.POST.get("next") or ""
-    if target == "/bookmarks" or target.startswith("/bookmarks?") or target.startswith("/bookmarks/"):
-        return target
-    return reverse("bookmarks")
-
-
-def _next_url(request):
-    target = request.POST.get("next") or reverse("index")
-    if url_has_allowed_host_and_scheme(target, allowed_hosts={request.get_host()}, require_https=request.is_secure()):
-        return target
-    return reverse("index")
+    if not (target == "/bookmarks" or target.startswith(("/bookmarks?", "/bookmarks/"))):
+        target = reverse("bookmarks")
+    return redirect(target)

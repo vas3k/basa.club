@@ -7,12 +7,14 @@ from common.markdown.telegram_renderer import TelegramRenderer
 
 
 def markdown_text(text, renderer=ClubRenderer, uniq_id=None, disable_mentions=False):
+    if issubclass(renderer, ClubRenderer):
+        renderer_instance = renderer(uniq_id=uniq_id, disable_mentions=disable_mentions)
+    else:
+        renderer_instance = renderer()
+
     markdown = mistune.create_markdown(
         escape=True,
-        renderer=renderer(
-            uniq_id=uniq_id,
-            disable_mentions=disable_mentions
-        ),
+        renderer=renderer_instance,
         plugins=["strikethrough", "url"],
     )
     return (markdown(text) or "").strip()

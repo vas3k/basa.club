@@ -26,11 +26,11 @@ def bot_url(request, user=None):
     return f"{settings.TELEGRAM_BOT_URL}?start={auth_code.code}"
 
 
-def _payload(data):
+def confirm(code, data):
     telegram_id = str((data or {}).get("id") or "").strip()
     if not telegram_id.isdigit():
         raise TelegramAuthError("Telegram не прислал id. Попробуйте ещё раз.")
-    return {
+    payload = {
         "id": telegram_id,
         "username": data.get("username"),
         "first_name": data.get("first_name"),
@@ -38,10 +38,6 @@ def _payload(data):
         "language_code": data.get("language_code"),
     }
 
-
-def confirm(code, data):
-    payload = _payload(data)
-    telegram_id = payload["id"]
     auth_code = Code.objects.filter(code=(code or "").strip().upper()).select_related("user").first()
     if not auth_code or auth_code.is_expired():
         raise TelegramAuthError("Ссылка устарела. Откройте бота заново со страницы входа.")
@@ -77,38 +73,24 @@ def confirm(code, data):
     return text, url
 
 
-def _error(request, message):
-    return render(request, "error.html", {
-        "title": "Ссылка не сработала",
-        "message": message,
-    })
-
-
-def _new_slug(full_name):
-    base = (slugify(full_name) or "user")[:24]
-    if base == "me":
-        base = "user"
-    slug = base
-    number = 2
-    while User.objects.filter(slug=slug).exists():
-        suffix = f"-{number}"
-        slug = f"{base[:32 - len(suffix)]}{suffix}"
-        number += 1
-    return slug
-
-
 def finish(request):
     code = (request.GET.get("code") or "").strip().upper()
     auth_code = Code.objects.filter(code=code).select_related("user").first()
     payload = auth_code.telegram_data if auth_code and isinstance(auth_code.telegram_data, dict) else {}
     telegram_id = str(payload.get("id") or "")
     if not auth_code or auth_code.is_expired() or not telegram_id.isdigit():
-        return _error(request, "Сначала нажмите кнопку в боте, потом откройте ссылку, которую он пришлёт.")
+        return render(request, "error.html", {
+            "title": "Ссылка не сработала",
+            "message": "Сначала нажмите кнопку в боте, потом откройте ссылку, которую он пришлёт.",
+        })
 
     account = User.objects.filter(telegram_id=telegram_id).first()
     if auth_code.user_id:
         if not account or account.pk != auth_code.user_id:
-            return _error(request, "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.")
+            return render(request, "error.html", {
+                "title": "Ссылка не сработала",
+                "message": "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.",
+            })
         auth_code.delete()
         return account
 
@@ -123,12 +105,28 @@ def finish(request):
     with transaction.atomic():
         auth_code = Code.objects.select_for_update(of=("self",)).filter(pk=auth_code.pk).first()
         if not auth_code or auth_code.user_id or str((auth_code.telegram_data or {}).get("id") or "") != telegram_id:
-            return _error(request, "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.")
+            return render(request, "error.html", {
+                "title": "Ссылка не сработала",
+                "message": "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.",
+            })
         if User.objects.filter(telegram_id=telegram_id).exists():
-            return _error(request, "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.")
+            return render(request, "error.html", {
+                "title": "Ссылка не сработала",
+                "message": "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.",
+            })
+
+        base = (slugify(form.cleaned_data["full_name"]) or "user")[:24]
+        if base == "me":
+            base = "user"
+        slug = base
+        number = 2
+        while User.objects.filter(slug=slug).exists():
+            suffix = f"-{number}"
+            slug = f"{base[:32 - len(suffix)]}{suffix}"
+            number += 1
 
         user = User.objects.create_user(
-            username=_new_slug(form.cleaned_data["full_name"]),
+            username=slug,
             email=form.cleaned_data["email"],
             full_name=form.cleaned_data["full_name"],
             city=form.cleaned_data["city"],

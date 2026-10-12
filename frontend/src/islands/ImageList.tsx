@@ -30,29 +30,6 @@ type Props = {
 
 let nextId = 1;
 
-function rowId() {
-    nextId += 1;
-    return `image-${nextId}`;
-}
-
-function parseImages(images: unknown): ImageRow[] {
-    if (typeof images === "string") {
-        if (!images) return [];
-        try {
-            return parseImages(JSON.parse(images));
-        } catch {
-            return [];
-        }
-    }
-    if (!Array.isArray(images)) return [];
-    return images.flatMap((row) => {
-        if (!row || typeof row !== "object") return [];
-        const image = (row as { image?: unknown }).image;
-        if (typeof image !== "string" || !image) return [];
-        return [{ id: rowId(), image }];
-    });
-}
-
 function SortableImage({ row, onRemove }: { row: ImageRow; onRemove: (id: string) => void }) {
     const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
         id: row.id,
@@ -89,9 +66,24 @@ function SortableImage({ row, onRemove }: { row: ImageRow; onRemove: (id: string
 
 export default function ImageList({ name, images }: Props) {
     const input = useRef<HTMLInputElement>(null);
-    const [rows, setRows] = useState(() => parseImages(images));
-    const rowsRef = useRef(rows);
-    rowsRef.current = rows;
+    const [rows, setRows] = useState<ImageRow[]>(() => {
+        let source = images;
+        while (typeof source === "string") {
+            try {
+                source = JSON.parse(source);
+            } catch {
+                source = [];
+            }
+        }
+
+        if (!Array.isArray(source)) return [];
+        return source.flatMap((row) => {
+            if (!row || typeof row !== "object") return [];
+            const image = (row as { image?: unknown }).image;
+            if (typeof image !== "string" || !image) return [];
+            return [{ id: `image-${++nextId}`, image }];
+        });
+    });
     const [over, setOver] = useState(false);
     const [error, setError] = useState("");
     const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 8 } }));
@@ -113,7 +105,7 @@ export default function ImageList({ name, images }: Props) {
         if (!files.length) return;
 
         const pending = files.map((file) => ({
-            id: rowId(),
+            id: `image-${++nextId}`,
             image: URL.createObjectURL(file),
             uploading: true,
             file,

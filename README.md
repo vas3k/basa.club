@@ -84,10 +84,7 @@ Add small HTML interactions in `frontend/src/behaviors/` and attach them with
 {% island "MarkdownEditor" name="description" value=form.description.value|default:"" %}
 ```
 
-Island keyword arguments become JSON props, with names converted to camelCase.
-Widgets inside forms submit regular named inputs through Django. Shared React
-components belong in `frontend/src/components/`; shared TypeScript helpers belong
-in `frontend/src/lib/`.
+Island keyword arguments become JSON props, with names converted to camelCase. Widgets inside forms submit regular named inputs through Django. React is reserved for interactive widgets; page content and navigation stay in Django templates. Reusable TypeScript helpers belong in `frontend/src/lib/`. See `AGENTS.md` for contributor conventions.
 
 `npm run build --prefix frontend` checks TypeScript and builds Vite assets into
 `frontend/static/dist/`. Django reads `dist/.vite/manifest.json`; production nginx
@@ -133,6 +130,8 @@ It publishes `ghcr.io/vas3k/base` with `sha-COMMIT` and `latest` tags, using the
 metadata and registry-cache setup as Club. The uploaded `.env` selects the commit
 image. GitHub's automatic `GITHUB_TOKEN` authenticates both image publishing and
 the host's image pull.
+
+With `DEBUG=false`, Django requires an explicit `SECRET_KEY` and refuses to start without it. Development keeps its local default. Production logs use `INFO`; development logs use `DEBUG`.
 
 Configure repository secrets:
 

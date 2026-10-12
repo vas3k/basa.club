@@ -51,10 +51,9 @@ class ItemForm(forms.ModelForm):
     )
     title = forms.CharField(
         label="Заголовок",
-        min_length=8,
         max_length=Item._meta.get_field("title").max_length,
         strip=True,
-        widget=forms.TextInput(attrs={"placeholder": "Заголовок, краткое описание"}),
+        widget=forms.TextInput(attrs={"placeholder": "Заголовок, краткое описание", "minlength": 8}),
         error_messages={
             "required": "Нужен заголовок",
             "min_length": "Слишком короткий заголовок",
@@ -71,9 +70,8 @@ class ItemForm(forms.ModelForm):
         label="Место",
         required=False,
         strip=True,
-        min_length=5,
         max_length=Item._meta.get_field("location").max_length,
-        widget=forms.TextInput(attrs={"placeholder": "Адрес или ссылка на карту"}),
+        widget=forms.TextInput(attrs={"placeholder": "Адрес или ссылка на карту", "minlength": 5}),
         error_messages={
             "min_length": "Слишком короткое место",
             "max_length": "Слишком длинное место",
@@ -91,12 +89,12 @@ class ItemForm(forms.ModelForm):
         label="Промокод",
         required=False,
         strip=True,
-        min_length=3,
         max_length=Item._meta.get_field("promo_code").max_length,
         widget=forms.TextInput(attrs={
             "placeholder": "Например, SUMMER",
             "autocomplete": "off",
             "spellcheck": "false",
+            "minlength": 3,
         }),
         error_messages={
             "min_length": "Слишком короткий промокод",
@@ -144,6 +142,24 @@ class ItemForm(forms.ModelForm):
 
     def clean_prefix(self):
         return self.cleaned_data.get("prefix") or None
+
+    def clean_title(self):
+        title = self.cleaned_data["title"]
+        if len(title) < 8:
+            raise forms.ValidationError(self.fields["title"].error_messages["min_length"], code="min_length")
+        return title
+
+    def clean_location(self):
+        location = self.cleaned_data["location"]
+        if location and len(location) < 5:
+            raise forms.ValidationError(self.fields["location"].error_messages["min_length"], code="min_length")
+        return location
+
+    def clean_promo_code(self):
+        promo_code = self.cleaned_data["promo_code"]
+        if promo_code and len(promo_code) < 3:
+            raise forms.ValidationError(self.fields["promo_code"].error_messages["min_length"], code="min_length")
+        return promo_code
 
     def clean_contacts(self):
         raw = self.cleaned_data.get("contacts") or []
@@ -221,37 +237,22 @@ class ItemForm(forms.ModelForm):
             elif not item.published_at:
                 item.published_at = timezone.now()
 
-        self._apply_expiry(item)
+        choice = self.cleaned_data.get("expires_in") or "never"
+        now = timezone.now()
+        if choice == "day":
+            item.expires_at = now + timedelta(days=1)
+        elif choice == "week":
+            item.expires_at = now + timedelta(days=7)
+        elif choice in {"month", "quarter", "year"}:
+            months = {"month": 1, "quarter": 3, "year": 12}[choice]
+            month_index = now.month - 1 + months
+            year = now.year + month_index // 12
+            month = month_index % 12 + 1
+            day = min(now.day, calendar.monthrange(year, month)[1])
+            item.expires_at = now.replace(year=year, month=month, day=day)
+        elif choice != "keep":
+            item.expires_at = None
 
         if commit:
             item.save()
         return item
-
-    def _apply_expiry(self, item):
-        choice = self.cleaned_data.get("expires_in") or "never"
-        if choice == "keep":
-            return
-        item.expires_at = expires_at_for(choice)
-
-
-def expires_at_for(choice):
-    now = timezone.now()
-    if choice == "day":
-        return now + timedelta(days=1)
-    if choice == "week":
-        return now + timedelta(days=7)
-    if choice == "month":
-        return add_months(now, 1)
-    if choice == "quarter":
-        return add_months(now, 3)
-    if choice == "year":
-        return add_months(now, 12)
-    return None
-
-
-def add_months(moment, months):
-    month_index = moment.month - 1 + months
-    year = moment.year + month_index // 12
-    month = month_index % 12 + 1
-    day = min(moment.day, calendar.monthrange(year, month)[1])
-    return moment.replace(year=year, month=month, day=day)

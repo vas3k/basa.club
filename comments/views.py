@@ -1,3 +1,5 @@
+from copy import deepcopy
+
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -49,7 +51,7 @@ def edit_comment(request, comment_id):
     form = form_class(request.POST or None, item=comment.item, instance=comment)
     form.fields.pop("vibe", None)
     if is_reply:
-        form.fields["text"].widget = CommentForm.Meta.widgets["text"]
+        form.fields["text"].widget = deepcopy(CommentForm.base_fields["text"].widget)
 
     if request.method == "POST" and form.is_valid():
         comment = form.save(author=request.user, request=request, commit=False)

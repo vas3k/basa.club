@@ -6,46 +6,6 @@ from users.models import User
 EVERYWHERE = "everywhere"
 
 
-def apply_place(form):
-    cleaned = form.cleaned_data
-    country_id = (cleaned.get("country") or "").strip()
-    city_id = (cleaned.get("city") or "").strip()
-
-    if not country_id:
-        form.add_error("country", "Выберите страну или «Весь мир»")
-        return cleaned
-
-    if country_id == EVERYWHERE:
-        cleaned["country_id"] = EVERYWHERE
-        cleaned["city_id"] = EVERYWHERE
-        cleaned["country"] = ""
-        cleaned["city"] = ""
-        return cleaned
-
-    country = GeoCountry.objects.filter(pk=country_id).first()
-    if not country:
-        form.add_error("country", "Выберите страну из списка")
-        return cleaned
-
-    if not city_id or city_id == EVERYWHERE:
-        cleaned["country_id"] = country.id
-        cleaned["city_id"] = EVERYWHERE
-        cleaned["country"] = country.name
-        cleaned["city"] = ""
-        return cleaned
-
-    city = GeoCity.objects.filter(pk=city_id, country=country).first()
-    if not city:
-        form.add_error("city", "Выберите город из списка")
-        return cleaned
-
-    cleaned["country_id"] = country.id
-    cleaned["city_id"] = city.id
-    cleaned["country"] = country.name
-    cleaned["city"] = city.name
-    return cleaned
-
-
 class ProfileForm(forms.ModelForm):
     full_name = forms.CharField(
         label="Ваше имя",
@@ -72,6 +32,7 @@ class ProfileForm(forms.ModelForm):
         widget=forms.Textarea(attrs={"rows": 3}),
         error_messages={"min_length": "Слишком короткий текст"},
     )
+    # The picker submits geo IDs, but the profile stores country and city names.
     country = forms.CharField(required=False, widget=forms.HiddenInput())
     city = forms.CharField(required=False, widget=forms.HiddenInput())
 
@@ -83,9 +44,34 @@ class ProfileForm(forms.ModelForm):
         avatar = (self.cleaned_data.get("avatar") or "").strip()
         return avatar or None
 
-    def clean(self):
-        super().clean()
-        return apply_place(self)
+    def clean_country(self):
+        country_id = self.cleaned_data["country"].strip()
+        if not country_id:
+            raise forms.ValidationError("Выберите страну или «Весь мир»")
+        if country_id == EVERYWHERE:
+            self.cleaned_data["country_id"] = EVERYWHERE
+            return ""
+
+        country = GeoCountry.objects.filter(pk=country_id).first()
+        if not country:
+            raise forms.ValidationError("Выберите страну из списка")
+
+        self.cleaned_data["country_id"] = country.id
+        return country.name
+
+    def clean_city(self):
+        country_id = self.cleaned_data.get("country_id")
+        city_id = self.cleaned_data["city"].strip()
+        if not country_id or country_id == EVERYWHERE or not city_id or city_id == EVERYWHERE:
+            self.cleaned_data["city_id"] = EVERYWHERE
+            return ""
+
+        city = GeoCity.objects.filter(pk=city_id, country_id=country_id).first()
+        if not city:
+            raise forms.ValidationError("Выберите город из списка")
+
+        self.cleaned_data["city_id"] = city.id
+        return city.name
 
 
 class WelcomeForm(ProfileForm):

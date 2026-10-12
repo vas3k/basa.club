@@ -1,8 +1,10 @@
-import { rememberGeo } from "../lib/geo";
+import { setCookie } from "../lib/cookies";
 
-// <a href="/de/berlin/" data-behavior="geo-link" data-country="de" data-city="berlin">
 export default function geoLink(link: HTMLElement) {
     link.addEventListener("click", () => {
-        rememberGeo(link.dataset.country || "everywhere", link.dataset.city || "everywhere");
+        const country = link.dataset.country || "everywhere";
+        const city = link.dataset.city || "everywhere";
+        setCookie("country", country, 31536000);
+        setCookie("city", city, 31536000);
     });
 }

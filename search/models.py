@@ -45,17 +45,27 @@ class SearchIndex(models.Model):
             cls.objects.filter(item=item).delete()
             return False
 
-        vector = _multi_search_vector("title", weight="A") \
-            + _multi_search_vector("description", weight="B") \
-            + _multi_search_vector("location", weight="B") \
-            + _multi_search_vector("promo_code", weight="B") \
-            + _multi_search_vector(Cast("contacts", TextField()), weight="B") \
-            + _multi_search_vector("author__slug", weight="C") \
-            + _multi_search_vector(_text("author__full_name"), weight="C") \
-            + _multi_search_vector("category__name", weight="C") \
-            + _multi_search_vector(_text("subcategory__name"), weight="C") \
-            + _multi_search_vector(_text("country__name"), weight="C") \
-            + _multi_search_vector(_text("city__name"), weight="C")
+        # Null names from optional joins must not erase the rest of the search vector.
+        fields = (
+            ("title", "A"),
+            ("description", "B"),
+            ("location", "B"),
+            ("promo_code", "B"),
+            (Cast("contacts", TextField()), "B"),
+            ("author__slug", "C"),
+            (Coalesce(F("author__full_name"), Value(""), output_field=TextField()), "C"),
+            ("category__name", "C"),
+            (Coalesce(F("subcategory__name"), Value(""), output_field=TextField()), "C"),
+            (Coalesce(F("country__name"), Value(""), output_field=TextField()), "C"),
+            (Coalesce(F("city__name"), Value(""), output_field=TextField()), "C"),
+        )
+        vector = None
+        for expression, weight in fields:
+            field_vector = (
+                SearchVector(expression, weight=weight, config="russian")
+                + SearchVector(expression, weight=weight, config="simple")
+            )
+            vector = field_vector if vector is None else vector + field_vector
 
         cls.objects.update_or_create(
             item=item,
@@ -64,15 +74,3 @@ class SearchIndex(models.Model):
             },
         )
         return True
-
-
-def _text(field):
-    # A null joined name makes the whole tsvector null.
-    return Coalesce(F(field), Value(""), output_field=TextField())
-
-
-def _multi_search_vector(*expressions, weight=None):
-    return (
-        SearchVector(*expressions, weight=weight, config="russian")
-        + SearchVector(*expressions, weight=weight, config="simple")
-    )

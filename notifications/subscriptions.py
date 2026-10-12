@@ -24,7 +24,7 @@ def subscribe_to_geo(user, country_id, city_id):
 
     country_id and city_id are geo primary keys, or "everywhere".
     """
-    country_id, city_id = _geo_ids(country_id, city_id)
+    country_id, city_id = normalize_geo_ids(country_id, city_id)
     try:
         subscription, _created = Subscription.objects.get_or_create(
             user=user,
@@ -52,7 +52,26 @@ def subscribe_to_geo(user, country_id, city_id):
 
 def toggle_subscription(user, country_id, city_id, category_id, query):
     """Create the listing subscription, or delete it if it already exists."""
-    country, city, category, query = normalize_target(country_id, city_id, category_id, query)
+    country = None
+    city = None
+    category = None
+    country_id, city_id = normalize_geo_ids(country_id, city_id)
+    query = (query or "").strip()[:Subscription.QUERY_MAX_LENGTH]
+
+    if country_id:
+        country = GeoCountry.objects.filter(pk=country_id).first()
+        if not country:
+            raise InvalidSubscription(country_id)
+    if city_id:
+        city = GeoCity.objects.filter(pk=city_id, country=country).first() if country else None
+        if not city:
+            raise InvalidSubscription(city_id)
+    category_id = (category_id or "").strip()
+    if category_id:
+        category = Category.objects.filter(pk=category_id).first()
+        if not category:
+            raise InvalidSubscription(category_id)
+
     existing = Subscription.objects.filter(
         user=user,
         country=country,
@@ -99,9 +118,9 @@ def subscribers(request):
     Parent categories, child categories, and broader places do not match.
     """
     country_id, city_id, category_id, query = listing_target(request)
-    country_id, city_id = _geo_ids(country_id, city_id)
+    country_id, city_id = normalize_geo_ids(country_id, city_id)
     category_id = (category_id or "").strip() or None
-    query = _query(query)
+    query = (query or "").strip()[:Subscription.QUERY_MAX_LENGTH]
     found = Subscription.objects.filter(
         country_id=country_id,
         city_id=city_id,
@@ -116,9 +135,9 @@ def subscribers(request):
 def is_subscribed(user, country_id, city_id, category_id, query):
     if not user.is_authenticated:
         return False
-    country_id, city_id = _geo_ids(country_id, city_id)
+    country_id, city_id = normalize_geo_ids(country_id, city_id)
     category_id = (category_id or "").strip() or None
-    query = _query(query)
+    query = (query or "").strip()[:Subscription.QUERY_MAX_LENGTH]
     return Subscription.objects.filter(
         user=user,
         country_id=country_id,
@@ -146,62 +165,6 @@ def subscribers_for_item(item):
     Overlapping subscriptions all match. The user still gets one message.
     Only members with a linked Telegram account.
     """
-    chosen = {}
-    for subscription in _candidates(item):
-        if subscription.user_id in chosen or not _query_matches(subscription, item):
-            continue
-        chosen[subscription.user_id] = subscription
-    return list(chosen.values())
-
-
-def subscription_kind(subscription):
-    if subscription.query:
-        return "query"
-    if subscription.category_id:
-        return "category"
-    if subscription.city_id:
-        return "city"
-    if subscription.country_id:
-        return "country"
-    return "global"
-
-
-def normalize_target(country_id, city_id, category_id, query):
-    country = None
-    city = None
-    category = None
-    country_id, city_id = _geo_ids(country_id, city_id)
-    query = _query(query)
-
-    if country_id:
-        country = GeoCountry.objects.filter(pk=country_id).first()
-        if not country:
-            raise InvalidSubscription(country_id)
-    if city_id:
-        city = GeoCity.objects.filter(pk=city_id, country=country).first() if country else None
-        if not city:
-            raise InvalidSubscription(city_id)
-    category_id = (category_id or "").strip()
-    if category_id:
-        category = Category.objects.filter(pk=category_id).first()
-        if not category:
-            raise InvalidSubscription(category_id)
-    return country, city, category, query
-
-
-def _geo_ids(country_id, city_id):
-    country_id = None if not country_id or country_id == EVERYWHERE else country_id
-    city_id = None if not city_id or city_id == EVERYWHERE else city_id
-    if city_id and not country_id:
-        city_id = None
-    return country_id, city_id
-
-
-def _query(query):
-    return (query or "").strip()[:Subscription.QUERY_MAX_LENGTH]
-
-
-def _candidates(item):
     geo = Q(country__isnull=True, city__isnull=True)
     if item.country_id and item.city_id:
         geo |= Q(country_id=item.country_id, city__isnull=True)
@@ -220,7 +183,7 @@ def _candidates(item):
         categories |= Q(category_id=item.subcategory_id)
 
     now = timezone.now()
-    return (
+    candidates = (
         Subscription.objects
         .select_related("user", "country", "city", "category")
         .filter(geo, categories)
@@ -232,6 +195,29 @@ def _candidates(item):
         .exclude(user_id=item.author_id)
     )
 
+    chosen = {}
+    for subscription in candidates:
+        if subscription.user_id in chosen or not search.item_matches(item, subscription.query):
+            continue
+        chosen[subscription.user_id] = subscription
+    return list(chosen.values())
 
-def _query_matches(subscription, item):
-    return search.item_matches(item, subscription.query)
+
+def subscription_kind(subscription):
+    if subscription.query:
+        return "query"
+    if subscription.category_id:
+        return "category"
+    if subscription.city_id:
+        return "city"
+    if subscription.country_id:
+        return "country"
+    return "global"
+
+
+def normalize_geo_ids(country_id, city_id):
+    country_id = None if not country_id or country_id == EVERYWHERE else country_id
+    city_id = None if not city_id or city_id == EVERYWHERE else city_id
+    if city_id and not country_id:
+        city_id = None
+    return country_id, city_id

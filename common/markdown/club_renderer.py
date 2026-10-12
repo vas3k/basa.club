@@ -33,7 +33,7 @@ class ClubRenderer(mistune.HTMLRenderer):
     def link(self, text, url, title=None):
         link = normalize_url(url)
         safe = self.safe_url(link) if link else ""
-        if not self._is_allowed_link(safe):
+        if not safe or safe == "#harmful-link" or not safe.startswith(("#", "/", "mailto:", "http://", "https://")):
             return html.escape(text or url or "")
 
         display = html.escape(unquote(html.unescape(text or link)))
@@ -52,10 +52,3 @@ class ClubRenderer(mistune.HTMLRenderer):
 
     def inline_html(self, html_text):
         return self.MEDIA_PLACEHOLDER
-
-    def _is_allowed_link(self, url: str) -> bool:
-        if not url or url == "#harmful-link":
-            return False
-        if url.startswith(("#", "/", "mailto:")):
-            return True
-        return url.startswith(("http://", "https://"))

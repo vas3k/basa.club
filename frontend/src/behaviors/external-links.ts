@@ -1,18 +1,19 @@
-// Opens external links in a new tab and prepends their favicon
 export default function externalLinks(element: HTMLElement) {
-    const internal = new RegExp(location.host.replace("www.", ""), "i");
+    const hostname = location.hostname.replace(/^www\./, "");
 
     element.querySelectorAll<HTMLAnchorElement>("a").forEach((link) => {
-        if (!link.host || internal.test(link.host)) return;
+        if (!["http:", "https:"].includes(link.protocol)) return;
+        const linkHostname = link.hostname.replace(/^www\./, "");
+        if (linkHostname === hostname || linkHostname.endsWith(`.${hostname}`)) return;
 
         link.setAttribute("target", "_blank");
-        link.setAttribute("rel", "noopener");
+        link.relList.add("noopener");
         if (link.hasAttribute("data-nofavicon")) return;
 
-        const domain = link.host.split(":")[0];
         const img = document.createElement("img");
-        img.src = `https://www.google.com/s2/favicons?domain=${domain}&sz=32`;
+        img.src = `https://www.google.com/s2/favicons?domain=${encodeURIComponent(link.hostname)}&sz=32`;
         img.className = "link-favicon";
+        img.alt = "";
         link.insertBefore(img, link.firstChild);
     });
 }

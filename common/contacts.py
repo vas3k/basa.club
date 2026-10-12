@@ -1,8 +1,5 @@
 import re
 
-# Stored on an item as a list of {"type", "text", "comment"}.
-# "custom" is a free-form contact: text and an optional comment, shown with a link icon.
-
 CONTACT_MAX_LENGTH = 128
 CONTACT_MAX_COUNT = 100
 
@@ -39,8 +36,8 @@ CONTACT_EDITOR_FIELDS = [
     },
 ]
 
-_BY_TYPE = {item["type"]: item for item in CONTACTS}
-_TELEGRAM_HANDLE = re.compile(r"^[A-Za-z0-9_]{3,32}$")
+CONTACT_BY_TYPE = {item["type"]: item for item in CONTACTS}
+TELEGRAM_HANDLE = re.compile(r"^[A-Za-z0-9_]{3,32}$")
 
 
 def present_contacts(contacts):
@@ -56,8 +53,35 @@ def present_contacts(contacts):
         comment = str(contact.get("comment") or "").strip()
         if not text:
             continue
-        known = _BY_TYPE.get(contact_type)
-        href = contact_href(contact_type if known else "custom", text)
+        known = CONTACT_BY_TYPE.get(contact_type)
+        href = ""
+        if contact_type == "phone":
+            digits = re.sub(r"\D", "", text)
+            if len(digits) >= 6:
+                prefix = "+" if text.startswith("+") else ""
+                href = f"tel:{prefix}{digits}"
+        elif contact_type == "telegram":
+            if text.startswith(("http://", "https://")):
+                href = http_url(text)
+            else:
+                handle = text
+                for prefix in ("t.me/", "@"):
+                    if handle.startswith(prefix):
+                        handle = handle[len(prefix):]
+                        break
+                handle = handle.split("?", 1)[0].strip("/")
+                if TELEGRAM_HANDLE.fullmatch(handle):
+                    href = f"https://t.me/{handle}"
+        elif contact_type == "whatsapp":
+            if text.startswith(("http://", "https://")):
+                href = http_url(text)
+            else:
+                digits = re.sub(r"\D", "", text)
+                if len(digits) >= 8:
+                    href = f"https://wa.me/{digits}"
+        else:
+            href = http_url(text)
+
         shown.append({
             "icon": known["icon"] if known else "🔗",
             "label": known["label"] if known else "Ссылка",
@@ -69,51 +93,7 @@ def present_contacts(contacts):
     return shown
 
 
-def contact_href(contact_type, text):
-    text = text.strip()
-    if contact_type == "phone":
-        return _phone_href(text)
-    if contact_type == "telegram":
-        return _telegram_href(text)
-    if contact_type == "whatsapp":
-        return _whatsapp_href(text)
-    if contact_type in {"website", "custom"}:
-        return _http_url(text)
-    return ""
-
-
-def _phone_href(text):
-    digits = re.sub(r"\D", "", text)
-    if len(digits) < 6:
-        return ""
-    prefix = "+" if text.startswith("+") else ""
-    return f"tel:{prefix}{digits}"
-
-
-def _telegram_href(text):
-    if text.startswith(("http://", "https://")):
-        return _http_url(text)
-    handle = text
-    for prefix in ("https://t.me/", "http://t.me/", "t.me/", "@"):
-        if handle.startswith(prefix):
-            handle = handle[len(prefix):]
-            break
-    handle = handle.split("?", 1)[0].strip("/")
-    if _TELEGRAM_HANDLE.fullmatch(handle):
-        return f"https://t.me/{handle}"
-    return ""
-
-
-def _whatsapp_href(text):
-    if text.startswith(("http://", "https://")):
-        return _http_url(text)
-    digits = re.sub(r"\D", "", text)
-    if len(digits) < 8:
-        return ""
-    return f"https://wa.me/{digits}"
-
-
-def _http_url(text):
+def http_url(text):
     if not text or any(char.isspace() for char in text):
         return ""
     if text.startswith(("http://", "https://")):

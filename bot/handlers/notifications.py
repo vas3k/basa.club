@@ -23,21 +23,17 @@ async def unsubscribe_callback(update: Update, context: CallbackContext) -> None
         else:
             await query.answer("Вы уже отписались от этого раздела")
 
-        await _drop_unsubscribe_button(query)
+        markup = query.message.reply_markup if query.message else None
+        rows = []
+        if markup:
+            for row in markup.inline_keyboard:
+                kept = [button for button in row if not (button.callback_data or "").startswith("unsub:")]
+                if kept:
+                    rows.append(kept)
+
+        try:
+            await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(rows))
+        except Exception:
+            log.exception("failed to update unsubscribe keyboard")
     finally:
         close_old_connections()
-
-
-async def _drop_unsubscribe_button(query):
-    markup = query.message.reply_markup if query.message else None
-    rows = []
-    if markup:
-        for row in markup.inline_keyboard:
-            kept = [button for button in row if not (button.callback_data or "").startswith("unsub:")]
-            if kept:
-                rows.append(kept)
-                
-    try:
-        await query.edit_message_reply_markup(reply_markup=InlineKeyboardMarkup(rows))
-    except Exception:
-        log.exception("failed to update unsubscribe keyboard")

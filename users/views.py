@@ -27,9 +27,15 @@ def profile_page(request, slug):
         Item.objects_for_user(request.user).filter(author=profile_user),
         settings.PROFILE_POSTS_PAGE_SIZE,
     )
+    inactive_items = Item.objects.none()
+    if request.user.pk == profile_user.pk:
+        visible_ids = Item.visible_objects().filter(author=profile_user).values("pk")
+        inactive_items = Item.for_author(profile_user).exclude(pk__in=visible_ids)
+        inactive_items = Item.objects_for_user(request.user, inactive_items)
+
     inactive_items = paginate(
         request,
-        Item.objects_for_user(request.user, Item.for_author(profile_user).exclude(pk__in=Item.visible_objects().filter(author=profile_user).values("pk"))) if request.user.pk == profile_user.pk else Item.objects.none(),
+        inactive_items,
         settings.PROFILE_POSTS_PAGE_SIZE,
         "inactive_page",
     )
@@ -58,7 +64,11 @@ def edit_profile(request, slug):
     if user.pk != request.user.pk:
         raise Http404()
 
-    country_id, city_id = _geo_selection(user)
+    country = GeoCountry.objects.filter(name=user.country).first() if user.country else None
+    city = GeoCity.objects.filter(country=country, name=user.city).first() if country and user.city else None
+    country_id = country.id if country else EVERYWHERE
+    city_id = city.id if city else EVERYWHERE
+
     form = ProfileForm(request.POST or None, instance=user, initial={
         "country": country_id,
         "city": city_id,
@@ -67,12 +77,22 @@ def edit_profile(request, slug):
         form.save()
         return redirect("user_profile", slug=user.slug)
 
+    countries = [
+        {
+            "id": country.id,
+            "name": country.name,
+            "icon": country.icon,
+            "cities": [{"id": city.id, "name": city.name, "icon": city.icon} for city in country.cities.all()],
+        }
+        for country in GeoCountry.objects.prefetch_related("cities")
+    ]
+
     return render(request, "users/edit.html", {
         "form": form,
         "slug": user.slug,
         "country_id": form["country"].value() or "",
         "city_id": form["city"].value() or "",
-        "countries_options": _country_options(),
+        "countries_options": countries,
     })
 
 
@@ -83,12 +103,16 @@ def welcome(request):
         return redirect("user_profile", slug=request.user.slug)
 
     user = request.user
-    country_id, city_id = _geo_selection(user)
+    country = GeoCountry.objects.filter(name=user.country).first() if user.country else None
+    city = GeoCity.objects.filter(country=country, name=user.city).first() if country and user.city else None
+    country_id = country.id if country else EVERYWHERE
+    city_id = city.id if city else EVERYWHERE
+
     form = WelcomeForm(request.POST or None, instance=user, initial={
         "country": country_id,
         "city": city_id,
     })
-    
+
     if request.method == "POST" and form.is_valid():
         user = form.save(commit=False)
         metadata = dict(user.metadata or {})
@@ -97,22 +121,13 @@ def welcome(request):
         user.save()
 
         subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
-        
+
         return redirect("user_profile", slug=user.slug)
 
     country_id = form["country"].value() or ""
     city_id = form["city"].value() or ""
 
-    return render(request, "users/welcome.html", {
-        "form": form,
-        "country_id": country_id,
-        "city_id": city_id,
-        "countries_options": _country_options(),
-    })
-
-
-def _country_options():
-    return [
+    countries = [
         {
             "id": country.id,
             "name": country.name,
@@ -122,16 +137,9 @@ def _country_options():
         for country in GeoCountry.objects.prefetch_related("cities")
     ]
 
-
-def _geo_selection(user):
-    if not user.country:
-        return EVERYWHERE, EVERYWHERE
-    country = GeoCountry.objects.filter(name=user.country).first()
-    if not country:
-        return EVERYWHERE, EVERYWHERE
-    if not user.city:
-        return country.id, EVERYWHERE
-    city = GeoCity.objects.filter(country=country, name=user.city).first()
-    if not city:
-        return country.id, EVERYWHERE
-    return country.id, city.id
+    return render(request, "users/welcome.html", {
+        "form": form,
+        "country_id": country_id,
+        "city_id": city_id,
+        "countries_options": countries,
+    })

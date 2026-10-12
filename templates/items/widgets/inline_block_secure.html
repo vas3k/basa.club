@@ -1,5 +1,8 @@
 <a class="inline-block inline-block-secure {{ css_class }}" href="{% url "login" %}" aria-label="Войти, чтобы посмотреть">
     <span class="inline-block-icon {{ icon_class }}" aria-hidden="true">{{ icon }}</span>
     <span class="inline-block-secure-source" aria-hidden="true">{{ teaser }}</span>
-    {% island "PixelText" text=teaser %}
+    <span class="inline-block-secure-canvas">
+        <canvas class="inline-block-secure-pixels" data-behavior="pixel-text"
+                data-text="{{ teaser }}" aria-hidden="true"></canvas>
+    </span>
 </a>

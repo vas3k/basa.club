@@ -375,24 +375,49 @@
     text-align: center;
 }
 
-.feed-subscribe-button {
+.feed-button {
+    display: inline-flex;
+    align-items: center;
+    justify-content: flex-start;
     gap: 8px;
+    box-sizing: border-box;
+    margin: 0;
+    padding: 8px 12px;
+    border-radius: var(--button-border-radius);
     background-color: #fff;
     color: #000;
     border: solid 2px #000;
+    font-family: var(--sans-font);
+    font-size: 90%;
+    font-weight: 600;
+    line-height: 1em;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+    white-space: nowrap;
+    transition: 0.2s ease-out;
 }
 
-.feed-subscribe-button:hover {
+.content-feed-settings > .feed-button {
+    font-size: 100%;
+}
+
+.feed-button:hover,
+.feed-button:has(:checked),
+.feed-button-active,
+.feed-button-active:hover {
     background-color: #000;
     color: #fff;
     border-color: #000;
 }
 
-.feed-subscribe-active,
-.feed-subscribe-active:hover {
-    background-color: #000;
-    color: #fff;
-    border-color: #000;
+.feed-button input[type="checkbox"] {
+    width: 1.1em;
+    height: 1.1em;
+    margin: 0;
+    flex-shrink: 0;
+    accent-color: currentColor;
+    cursor: pointer;
 }
 
     .content-feed-setting {
@@ -416,14 +441,6 @@
         padding: 4px 28px 4px 10px;
         background-size: 8px;
         background-position: right 10px center;
-    }
-
-    .content-feed-settings input[type="checkbox"] {
-        width: 1.1em;
-        height: 1.1em;
-        margin: 0;
-        flex-shrink: 0;
-        cursor: pointer;
     }
 
     .content-subcategory {

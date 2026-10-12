@@ -16,7 +16,7 @@ from notifications import notification
 def flag_item(request, item_id):
     try:
         payload = json.loads(request.body or b"{}")
-    except json.JSONDecodeError:
+    except (json.JSONDecodeError, UnicodeDecodeError):
         return JsonResponse({"error": "Некорректный запрос"}, status=400)
     if not isinstance(payload, dict):
         return JsonResponse({"error": "Некорректный запрос"}, status=400)
