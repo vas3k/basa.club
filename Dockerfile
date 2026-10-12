@@ -19,10 +19,9 @@ ENV UV_COMPILE_BYTECODE=1 \
     PYTHONDONTWRITEBYTECODE=1
 
 RUN apt-get update \
-    && apt-get install --no-install-recommends -yq libpq5 curl ca-certificates \
+    && apt-get install --no-install-recommends -yq libpq5 curl ca-certificates make \
     && rm -rf /var/lib/apt/lists/*
 
-# supercronic runs etc/crontab in the cron container. Binary matches the image arch.
 ARG TARGETARCH=amd64
 ARG SUPERCRONIC_VERSION=0.2.33
 RUN curl -fsSL "https://github.com/aptible/supercronic/releases/download/v${SUPERCRONIC_VERSION}/supercronic-linux-${TARGETARCH}" \
@@ -34,7 +33,13 @@ WORKDIR /app
 COPY pyproject.toml uv.lock ./
 RUN uv sync --frozen --no-dev --no-install-project
 
+RUN groupadd --gid 1000 app \
+    && useradd --uid 1000 --gid app --no-create-home --shell /usr/sbin/nologin app
+
 COPY . .
 COPY --from=frontend /frontend/static/dist ./frontend/static/dist
 
 EXPOSE 8000
+
+USER 1000:1000
+CMD ["make", "docker-run-production"]

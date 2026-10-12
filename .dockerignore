@@ -6,7 +6,6 @@ __pycache__
 frontend/node_modules
 frontend/static/dist
 
-# Local credentials and deployment secrets
 .env
 .env.*
 !.env.example
@@ -15,3 +14,7 @@ private_settings.py
 local_settings.py
 *.pem
 *.key
+
+node_modules
+.idea
+.DS_Store

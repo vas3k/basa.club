@@ -162,6 +162,29 @@
         font-weight: 500;
     }
 
+    .sidebar-soon {
+        margin-top: 8px;
+        padding: 14px 20px 2px;
+        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        color: #9a9a9a;
+        font-size: 11px;
+        font-weight: 500;
+        line-height: 1;
+    }
+
+    .sidebar-item-soon,
+    .sidebar-item-soon:hover {
+        color: #b0b0b0;
+        background: none;
+        pointer-events: none;
+        cursor: default;
+    }
+
+    .sidebar-item-soon .sidebar-item-icon {
+        filter: grayscale(1);
+        opacity: 0.55;
+    }
+
 .index-section + .index-section {
     margin-top: 66px;
 }

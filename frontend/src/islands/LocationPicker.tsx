@@ -15,8 +15,8 @@ export default function LocationPicker({ countries, country = "", city = "", all
     const [countryId, setCountryId] = useState(country);
     const [cityId, setCityId] = useState(city || (allowEverywhere ? everywhere : ""));
 
+    const wholeWorld = countryId === everywhere;
     const cities = countries.find((c) => c.id === countryId)?.cities ?? [];
-    const wholeWorld = allowEverywhere && countryId === everywhere;
 
     return (
         <div className="form-row">
@@ -28,17 +28,15 @@ export default function LocationPicker({ countries, country = "", city = "", all
                     required
                     value={countryId}
                     onChange={(event) => {
-                        setCountryId(event.target.value);
-                        setCityId(allowEverywhere ? everywhere : "");
+                        const nextCountry = event.target.value;
+                        setCountryId(nextCountry);
+                        setCityId(nextCountry === everywhere || allowEverywhere ? everywhere : "");
                     }}
                 >
-                    {allowEverywhere ? (
-                        <option value={everywhere}>🌎 Весь мир</option>
-                    ) : (
-                        <option value="" disabled>
-                            Выберите страну
-                        </option>
-                    )}
+                    <option value="" disabled>
+                        Выберите страну
+                    </option>
+                    <option value={everywhere}>🌎 Весь мир</option>
                     {countries.map((c) => (
                         <option key={c.id} value={c.id}>
                             {c.icon} {c.name}
@@ -50,7 +48,7 @@ export default function LocationPicker({ countries, country = "", city = "", all
             {countryId && (
                 <div className="form-group">
                     <label htmlFor="id_city">Город</label>
-                    {wholeWorld && <input type="hidden" name="city" value={everywhere} />}
+                    {wholeWorld && <input type="hidden" name="city" value="" />}
                     <select
                         id="id_city"
                         name={wholeWorld ? undefined : "city"}
@@ -58,7 +56,7 @@ export default function LocationPicker({ countries, country = "", city = "", all
                         disabled={wholeWorld}
                         onChange={(event) => setCityId(event.target.value)}
                     >
-                        {allowEverywhere ? (
+                        {wholeWorld || allowEverywhere ? (
                             <option value={everywhere}>Везде</option>
                         ) : (
                             <option value="">Вся страна</option>

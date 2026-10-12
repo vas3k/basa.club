@@ -1,190 +1,175 @@
 # Vas3k Base
 
-Django app with server-rendered templates. Dynamic widgets are small React components ("islands") built by Vite from `frontend/`.
+Community listings at [basa.club](https://basa.club), organized by
+country, city and category. Members can publish listings, comment, vote, bookmark
+items and subscribe to notifications. Authentication uses Vas3k Club and Telegram;
+image uploads use the existing media service.
 
-## Running locally without Docker
+The backend is Django 6 with PostgreSQL. Django renders pages and handles forms;
+Vite builds TypeScript behaviors and React islands. Background jobs use django-q2
+with Redis, Telegram runs as a separate process, and Supercronic handles scheduled
+maintenance.
 
-Requirements: Python 3.14 + [uv](https://docs.astral.sh/uv/), Node 24+, PostgreSQL, Redis.
+## Local development
 
-```bash
+Requirements: Python 3.14, uv, Node.js 24, PostgreSQL and Redis.
+
+Settings read environment variables directly. Export your local connection values
+before running Django; `.env` files are not loaded automatically:
+
+```sh
+export POSTGRES_DB=vas3k_base
+export POSTGRES_USER=postgres
+export POSTGRES_PASSWORD=postgres
+export POSTGRES_HOST=127.0.0.1
+export REDIS_HOST=127.0.0.1
+```
+
+Create the PostgreSQL database, then install dependencies and apply migrations:
+
+```sh
 uv sync --frozen
-cd frontend && npm ci && cd ..
+npm ci --prefix frontend
 uv run python manage.py migrate
 ```
 
-Settings read the process environment directly; no `.env` loader is configured. Export the database, Redis and integration variables before running these commands.
+Run these processes in separate terminals:
 
-Then run Django, the queue worker, and Vite:
-
-```bash
-# terminal 1
-uv run python manage.py runserver
+```sh
+uv run python manage.py runserver 127.0.0.1:8000
 ```
 
-```bash
-# terminal 2
+```sh
+npm run dev --prefix frontend
+```
+
+```sh
 uv run python manage.py qcluster
 ```
 
-```bash
-# terminal 3
-cd frontend && npm run dev
-```
+Open http://127.0.0.1:8000. Django defaults to debug mode and loads frontend assets
+from Vite on port 5173. Set `TELEGRAM_TOKEN` to a real bot token before starting
+`uv run python bot/main.py`; the bot uses polling in development.
 
-Open http://127.0.0.1:8000. With `DEBUG` on (the default), Django loads JS directly from the Vite dev server on http://localhost:5173, so changes in `frontend/src/` show up instantly with hot reload. No rebuild is needed.
+To use the built frontend locally:
 
-If Vite isn't running in this mode, pages still render but all React widgets are missing.
-
-### Running with the production bundle
-
-To check the built bundle instead of the dev server:
-
-```bash
-cd frontend && npm run build && cd ..
+```sh
+npm run build --prefix frontend
 VITE_DEV_MODE=false uv run python manage.py runserver
 ```
 
-`npm run build` writes the bundle and `manifest.json` to `frontend/static/dist/`, which Django serves as `/static/dist/`. Without `npm run dev`, nothing watches for changes, so rebuild after every edit.
+`docker-compose.yml` contains the development services and source mounts;
+`docker-compose.production.yml` is a separate deployment configuration.
 
-## Running locally with Docker
+## Project layout
 
-```bash
-docker compose up
-```
+| Path | Purpose |
+| --- | --- |
+| `vas3k_base/` | Django settings, URLs and middleware |
+| `items/`, `categories/`, `geo/` | Listings and their organization |
+| `authn/`, `users/`, `godmode/` | Authentication, profiles and moderation |
+| `comments/`, `counters/`, `bookmarks/` | Discussions, ratings and saved items |
+| `notifications/`, `bot/` | Subscriptions and Telegram delivery |
+| `templates/` | Server-rendered pages and reusable widgets |
+| `frontend/src/` | TypeScript behaviors and React islands |
+| `frontend/static/` | CSS, images, fonts and generated bundles |
+| `etc/` | nginx and cron configuration |
+| `Makefile` | Production application startup |
+| `.github/` | Build and deployment workflows |
 
-This starts `postgres`, `redis`, `app` (Django on :8000), `queue` (django-q2 worker), `bot`, and `frontend` (Vite dev server on :5173 with hot reload). The `frontend/` folder is mounted into the container, so editing files locally updates the page in the browser.
-
-The application image is built by the `Dockerfile`: a Node stage runs `npm run build`, and the result is copied into the Python image under `frontend/static/dist`. Set `DEBUG=false` and `VITE_DEV_MODE=false` in production. The image requires an explicit process command and static-file serving configuration; Compose runs development servers.
-
-## Templates
-
-Items have separate templates per page type, so future item types can get their own look:
-
-```
-templates/items/
-  list/default.html     # item card in listings (included in a loop)
-  show/layout.html      # item page shell: title, messages, comments
-  show/default.html     # extends show/layout.html, fills {% block item %}
-  compose/layout.html   # create/edit form shell: <form>, csrf, submit buttons
-  compose/default.html  # extends compose/layout.html, fills {% block fields %}
-  widgets/              # small pieces shared by list and show (tags, badges, manage)
-templates/users/widgets/user_small.html   # avatar + name + reputation, reuse everywhere
-```
-
-`default.html` is the only variant for now. To add a type, create e.g. `show/event.html` that extends the same layout.
-
-## Ratings
-
-Rating is not the same as upvotes. Upvotes are a plain counter of clicks, while rating is calculated from votes and comment vibes. Users, items and comments each have their own rating.
-
-All rules live in the `counters` app. Views persist the action, then call a matching function (`counters.item_upvoted`, `counters.comment_created`, …). Counter updates belong in this module rather than models or forms. Counters currently run synchronously; asynchronous updates are planned. Vote/bookmark responses return the loaded counter values without a database refresh, so those values may lag behind the action. User rating changes are stored in the `ratings` table and shown at `/user/<slug>/ratings/`.
-
-| Action | Comment author | Item | Comment | Item author |
-|--------|----------------|------|---------|-------------|
-| Upvote an item | | +1 | | +1 |
-| Retract an item upvote | | -1 | | -1 |
-| Top-level comment with a "good" vibe | +5 | +5 | | |
-| Top-level comment with a "bad" vibe | -5 | -5 | | |
-| Neutral comment or reply | | | | |
-| «Полезно» on any comment | +1 | | +1 | |
-| «Полезно» on a "good" vibe comment | +1 | +1 | +1 | |
-| «Полезно» on a "bad" vibe comment | +1 | -1 | +1 | |
-| Retract «Полезно» | -1 | -1 / +1 for "good" / "bad" vibe | -1 | |
-Comments on your own item (and upvotes on those comments) do not change anyone's rating. Deleting a comment does not change ratings; run `recalculate_counters` if they drift.
-
-Ratings are stored as integers and displayed divided by 10 with the `rating` template filter (`{{ user.rating|rating }}` shows 15 as +1.5 and -7 as -0.7). Items and top-level comments show their rating under the upvote button via `templates/common/widgets/rating.html`: green if positive, red if negative, hidden if zero.
-
-To rebuild live ratings and counters from scratch (after changing the rules, or if they drift). This never touches the `ratings` history table:
-
-```bash
-uv run python manage.py recalculate_counters
-```
-
-## Frontend
-
-All JS lives in `frontend/` and is bundled by Vite. Django renders the pages and owns forms, validation, and redirects. JS only makes parts of a page dynamic, in one of two ways:
-
-- **Behavior**: plain TypeScript that adds interactivity to HTML Django already rendered, such as toggling the sidebar or making selects navigate. No React.
-- **Island**: a React component that renders a widget itself, such as pickers or the markdown editor.
-
-When choosing between them: if the markup comes from Django and you only need event handlers, write a behavior. If the widget has its own state and renders its own UI, write an island.
-
-```
-frontend/src/
-  main.ts           # entry point: attaches behaviors, mounts islands
-  core/             # runtime: behaviors.ts and islands.ts registries (rarely touched)
-  behaviors/*.ts    # one file = one behavior, name = file name (kebab-case)
-  islands/*.tsx     # one file = one island, name = file name (PascalCase)
-  components/       # shared React components used by several islands
-  lib/              # shared plain TS helpers (cookies, fetch, formatting)
-  types.ts          # shared types
-```
-
-### Behaviors
-
-Attach one or more behaviors with a space-separated `data-behavior` attribute. The element is passed to the behavior's default export:
-
-```django
-<form class="subheader-search" data-behavior="geo-select">...</form>
-```
-
-```ts
-// frontend/src/behaviors/geo-select.ts
-export default function geoSelect(form: HTMLElement) { ... }
-```
-
-Behaviors are bundled into `main.js` and run on every page that has a matching attribute, so keep them small.
-
-### Islands
-
-Mount an island from any template using the `island` tag (available everywhere, no `{% load %}` needed):
+Add small HTML interactions in `frontend/src/behaviors/` and attach them with
+`data-behavior`. Use `frontend/src/islands/` for widgets that render their own UI:
 
 ```django
 {% island "MarkdownEditor" name="description" value=form.description.value|default:"" %}
 ```
 
-Keyword arguments become React props, so they must be JSON-serializable. Names are converted to camelCase (`upvote_url=...` becomes `upvoteUrl`). If props need Python logic (permissions, URLs), wrap the island in a template tag, like `{% item_upvote item %}` in `items/templatetags/listing.py`. Inside a `<form>`, an island renders regular inputs with proper `name` attributes, so a normal form POST submits them.
+Island keyword arguments become JSON props, with names converted to camelCase.
+Widgets inside forms submit regular named inputs through Django. Shared React
+components belong in `frontend/src/components/`; shared TypeScript helpers belong
+in `frontend/src/lib/`.
 
-Islands are code-split: React and each island's code load only on pages that use them, so heavy islands (like the markdown editor) don't slow down other pages.
+`npm run build --prefix frontend` checks TypeScript and builds Vite assets into
+`frontend/static/dist/`. Django reads `dist/.vite/manifest.json`; production nginx
+serves the exported static files under `/static/`.
 
-To add a new widget, create `frontend/src/islands/MyWidget.tsx` with a default export and use `{% island "MyWidget" ... %}`. When an island grows, move its parts into `components/` (if shared) or into a folder next to it, like `islands/MyWidget/Toolbar.tsx`. Only `islands/*.tsx` files are registered as islands.
+## Production
 
-Useful commands (run in `frontend/`):
+Deployment follows Vas3k Club: GitHub Actions builds an image, creates `.env` from
+repository secrets, copies it and Compose to the host, then runs `pull` and `up -d`.
+The Docker build installs locked Python dependencies and builds the frontend with
+`npm ci` and `npm run build`.
 
-- `npm run dev`: dev server with hot reload
-- `npm run build`: type-check and build the production bundle into `frontend/static/dist/`
-- `npm run typecheck`: TypeScript check only
+`make docker-run-production` applies migrations, collects static files and starts
+Gunicorn. Compose mounts `frontend/static/` from the host at `/tmp/static` so nginx
+can serve the collected files. Queue workers, Telegram and cron run separately.
+Only the web container runs migrations, including on container restarts.
 
-### Settings
+### Host setup
 
-Environment variables:
+Use the existing Linux amd64 host with Docker Engine and Compose v2. Create
+`/home/vas3k/basa.club` and give the SSH deployment user ownership and Docker
+access. nginx needs permission to traverse the directory and read `frontend/static/`.
 
-- `VITE_DEV_MODE` (`true`/`false`, defaults to the `DEBUG` value): load JS from the Vite dev server instead of `frontend/static/dist`
-- `VITE_DEV_SERVER_HOST`, `VITE_DEV_SERVER_PORT` (defaults `localhost`, `5173`): where the browser finds the Vite dev server
+Reuse host PostgreSQL with database `vas3k_base` and role `vas3k`, which must have
+migration permissions. Containers connect through `host.docker.internal`;
+PostgreSQL must listen on the private Docker gateway address and allow the Docker
+subnet in `pg_hba.conf` and the host firewall.
 
-## Authentication and uploads
+Install `etc/nginx/basa.club.conf` alongside Club's vhost. It uses the existing
+`/home/vas3k/certs` certificate paths; the certificate must cover `basa.club`.
+The configuration requires nginx 1.25.1+ for `http2 on`. Check and reload nginx when
+ready to deploy.
 
-Image uploads require an authenticated, unbanned user and CSRF. Original files
-are forwarded to `settings.MEDIA_UPLOAD_URL`, backed by
-[Pepic](https://github.com/vas3k/pepic), which owns media validation and processing.
-The app trusts its returned URLs, including avatars, and imposes no local image
-size, pixel, format, animation, count or hostname restrictions.
+Base binds Django to `127.0.0.1:8824` and Telegram to `127.0.0.1:8826`. Redis is
+private to the Compose project and persists its queue in a Docker volume. The
+existing media service handles uploads. Production uses the normal Django settings
+with environment values from `docker-compose.production.yml` and `.env`.
 
-No new migration or webhook configuration is required by these fixes.
+### GitHub Actions
 
-User creation and editing in Godmode require a superuser. Staff retain their
-existing permissions for other models and moderation actions. This prevents
-staff from granting privileges or changing a superuser's login identity.
-`createsuperuser` accepts the model's email/slug fields, and manager-created
-passwords are hashed before saving.
+`.github/workflows/deploy.yml` deploys pushes to `main` and supports manual runs.
+It publishes `ghcr.io/vas3k/base` with `sha-COMMIT` and `latest` tags, using the same
+metadata and registry-cache setup as Club. The uploaded `.env` selects the commit
+image. GitHub's automatic `GITHUB_TOKEN` authenticates both image publishing and
+the host's image pull.
 
-## Production checklist
+Configure repository secrets:
 
-- Set `DEBUG=false` exactly and `VITE_DEV_MODE=false`. Provide a strong, private `SECRET_KEY` and set `APP_HOST=https://base.vas3k.club`. The source still has development defaults; do not rely on them in production.
-- Supply PostgreSQL, Redis, Club OAuth, media upload, Telegram and SMTP configuration through the runtime environment. Use the names in `vas3k_base/settings.py`; optional Sentry uses `SENTRY_DSN`. Keep secrets out of Git, the image and frontend props. Local `.env*`, private settings and key files are excluded from Git and Docker build contexts. Example environment files must contain placeholders only.
-- Build with the locked dependencies: `uv sync --frozen`, then `npm ci` and `npm run build` in `frontend/`. Serve `frontend/static/` as `/static/` (that directory holds `css/`, `images/`, `fonts/`, and the built `dist/`). Keep `frontend/static/dist/.vite/manifest.json` available to Django in the application filesystem. `STATIC_ROOT` is not configured in this repository.
-- Run a production WSGI/ASGI server, the `qcluster` worker and the Telegram bot as separate managed processes. The image has no default command or bundled production web server. Do not use the development Compose deployment unchanged.
-- Configure HTTPS and trusted proxy headers, private database/Redis access and persistent PostgreSQL storage. Take a recoverable database backup, review pending migrations, then apply migrations once before starting the new processes.
-- Run `uv run python manage.py check --deploy` with the actual production environment and resolve its applicable warnings. Confirm Club OAuth callbacks and Telegram webhook routing match the deployed host; identity merging and webhook changes remain deferred.
-- Manually check login/logout, banned-account handling, staff/superuser permissions, posting, comments, votes, bookmarks, uploads and notification delivery. Counters may be stale in immediate API responses. Tests have been removed; do not create or run them unless explicitly requested.
-- Review the release diff and history for credentials. Keep credentials, auth codes, session cookies and user tokens out of logs; review application logs, proxy logs and external error reporting for sensitive values. Rotate any genuinely exposed credential before deploying.
+| Secret | Value |
+| --- | --- |
+| `PRODUCTION_SSH_HOST` | Deployment hostname |
+| `PRODUCTION_SSH_USERNAME` | Deployment user |
+| `PRODUCTION_SSH_KEY` | Private deployment key |
+| `PRODUCTION_SSH_KNOWN_HOSTS` | Verified SSH known-hosts entry |
+| `SECRET_KEY` | Django secret key |
+| `POSTGRES_PASSWORD` | Database password |
+| `TELEGRAM_TOKEN` | Base bot token |
+| `TELEGRAM_ADMIN_CHAT_ID` | Optional admin chat |
+| `CLUB_OPENID_CONFIG_SECRET` | Club OAuth secret |
+| `CLUB_SERVICE_TOKEN` | Club service token |
+| `MEDIA_UPLOAD_CODE` | Media service upload credential |
+| `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | SMTP credentials |
+| `SENTRY_DSN` | Optional error reporting |
+
+`.env.example` lists the generated environment values for reference. CI replaces
+the host `.env` on each deployment. There are no separate release scripts,
+production settings module, or deployment health checks.
+
+Deployments restart services with a brief interruption. Keep migrations compatible
+with existing application and background processes, and back up the database before
+releases. A failed startup or migration requires inspecting container logs; CI does
+not wait for application readiness.
+
+## Maintenance
+
+Run management commands with `uv run python manage.py` locally. In production:
+
+```sh
+cd /home/vas3k/basa.club
+docker compose -f docker-compose.production.yml exec app python manage.py createsuperuser
+```
+
+Useful commands include `recalculate_counters`, `update_search_index`,
+`delete_expired_codes` and `clearsessions`. The latter three run on the schedules
+in `etc/crontab`. Rating rules live in `counters/`.

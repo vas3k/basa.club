@@ -170,7 +170,6 @@ ADMIN = ClubAdmin(
                         "name",
                         "id",
                         "items_count",
-                        "sort_order",
                     ],
                 ),
                 ClubAdminModel(
@@ -185,7 +184,6 @@ ADMIN = ClubAdmin(
                         "id",
                         "country",
                         "items_count",
-                        "sort_order",
                     ],
                 ),
             ],

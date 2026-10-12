@@ -16,9 +16,9 @@ SECRET_KEY = os.getenv("SECRET_KEY") or "wow-so-secret"
 # SECURITY WARNING: don"t run with debug turned on in production!
 DEBUG = (os.getenv("DEBUG") != "false")
 
-ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0", "base.vas3k.club"]
+ALLOWED_HOSTS = ["127.0.0.1", "localhost", "0.0.0.0", "basa.club"]
 INTERNAL_IPS = ["127.0.0.1", "::1"]
-CSRF_TRUSTED_ORIGINS = ["https://base.vas3k.club"]
+CSRF_TRUSTED_ORIGINS = ["https://basa.club"]
 RELEASE = random_string(length=8)
 
 ADMINS = [
@@ -126,7 +126,7 @@ CACHES = {
     }
 }
 
-if bool(os.getenv("POSTGRES_USE_POOLING")):
+if os.getenv("POSTGRES_USE_POOLING", "").lower() in {"1", "true"}:
     DATABASES["default"]["OPTIONS"] = {
         "pool": {
             "min_size": 3,
@@ -169,6 +169,7 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/6.0/howto/static-files/
 
 STATIC_URL = "/static/"
+STATIC_ROOT = os.getenv("STATIC_ROOT") or "/tmp/static"
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "frontend", "static"),
 ]

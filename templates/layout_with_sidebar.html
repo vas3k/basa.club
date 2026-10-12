@@ -8,9 +8,24 @@
                     🌎 Весь мир
                 </option>
                 {% for country in countries %}
-                    <option value="{{ country.id }}" data-url="{% listing_url country=country.id city='everywhere' category=current_category.id %}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
-                        {{ country.icon|safe }} {{ country.name }}{% if country.items_count %} ({{ country.items_count }}){% endif %}
-                    </option>
+                    {% if country.items_count %}
+                        {% ifchanged %}
+                            <option disabled value="">─────────</option>
+                        {% endifchanged %}
+                        <option value="{{ country.id }}" data-url="{% listing_url country=country.id city='everywhere' category=current_category.id %}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                            {{ country.icon|safe }} {{ country.name }}{% if country.items_count %} ({{ country.items_count }}){% endif %}
+                        </option>
+                    {% endif %}
+                {% endfor %}
+                {% for country in countries %}
+                    {% if not country.items_count %}
+                        {% ifchanged %}
+                            <option disabled value="">─────────</option>
+                        {% endifchanged %}
+                        <option value="{{ country.id }}" data-url="{% listing_url country=country.id city='everywhere' category=current_category.id %}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                            {{ country.icon|safe }} {{ country.name }}
+                        </option>
+                    {% endif %}
                 {% endfor %}
             </select>
 
@@ -51,6 +66,12 @@
                         {% endif %}
                     </a>
                 {% endfor %}
+
+                <div class="sidebar-soon">coming soon (наверное)...</div>
+                <div class="sidebar-item sidebar-item-soon"><span class="sidebar-item-icon">💼</span><span class="sidebar-item-name">Работа</span></div>
+                <div class="sidebar-item sidebar-item-soon"><span class="sidebar-item-icon">🛍️</span><span class="sidebar-item-name">Куплю Продам</span></div>
+                <div class="sidebar-item sidebar-item-soon"><span class="sidebar-item-icon">🛋️</span><span class="sidebar-item-name">Каучсерфинг</span></div>
+                <div class="sidebar-item sidebar-item-soon"><span class="sidebar-item-icon">🪩</span><span class="sidebar-item-name">Тусовки и друзья</span></div>
             {% endblock %}
         </aside>
 

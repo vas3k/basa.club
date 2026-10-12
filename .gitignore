@@ -1,6 +1,5 @@
 *.py[co]
 
-# Packages
 *.egg
 *.egg-info
 dist
@@ -11,24 +10,18 @@ sdist
 develop-eggs
 .installed.cfg
 
-# Installer logs
 pip-log.txt
 
-# Unit test / coverage reports
 .coverage
 .tox
 coverage/
 
-# Translations
 *.mo
 
-# IDEA
 .idea
 
-# Mac OS X
 .DS_Store
 
-# Node
 node_modules/
 .npm
 .yarn/cache
@@ -41,7 +34,6 @@ yarn-error.log*
 lerna-debug.log*
 webpack-stats.json
 
-# Python
 .mypy_cache
 .ruff_cache/
 media/images
@@ -55,7 +47,6 @@ venv/
 gdpr/downloads/*.zip
 .history
 
-# Local credentials and deployment secrets
 .env
 .env.*
 !.env.example
@@ -64,3 +55,4 @@ private_settings.py
 local_settings.py
 *.pem
 *.key
+

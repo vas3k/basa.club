@@ -20,10 +20,10 @@ EXPIRES_CHOICES = (
 
 
 class ItemForm(forms.ModelForm):
-    country = forms.ModelChoiceField(
+    country = forms.CharField(
         label="Страна",
-        queryset=GeoCountry.objects.all(),
-        error_messages={"required": "Выберите страну", "invalid_choice": "Нет такой страны"},
+        required=False,
+        widget=forms.HiddenInput(),
     )
     city = forms.ModelChoiceField(
         label="Город",
@@ -51,10 +51,15 @@ class ItemForm(forms.ModelForm):
     )
     title = forms.CharField(
         label="Заголовок",
+        min_length=8,
         max_length=Item._meta.get_field("title").max_length,
         strip=True,
         widget=forms.TextInput(attrs={"placeholder": "Заголовок, краткое описание"}),
-        error_messages={"required": "Нужен заголовок", "max_length": "Слишком длинный заголовок"},
+        error_messages={
+            "required": "Нужен заголовок",
+            "min_length": "Слишком короткий заголовок",
+            "max_length": "Слишком длинный заголовок",
+        },
     )
     description = forms.CharField(
         label="Описание",
@@ -66,9 +71,13 @@ class ItemForm(forms.ModelForm):
         label="Место",
         required=False,
         strip=True,
+        min_length=5,
         max_length=Item._meta.get_field("location").max_length,
         widget=forms.TextInput(attrs={"placeholder": "Адрес или ссылка на карту"}),
-        error_messages={"max_length": "Слишком длинное место"},
+        error_messages={
+            "min_length": "Слишком короткое место",
+            "max_length": "Слишком длинное место",
+        },
     )
     contacts = forms.JSONField(
         required=False,
@@ -82,13 +91,17 @@ class ItemForm(forms.ModelForm):
         label="Промокод",
         required=False,
         strip=True,
+        min_length=3,
         max_length=Item._meta.get_field("promo_code").max_length,
         widget=forms.TextInput(attrs={
             "placeholder": "Например, SUMMER",
             "autocomplete": "off",
             "spellcheck": "false",
         }),
-        error_messages={"max_length": "Слишком длинный промокод"},
+        error_messages={
+            "min_length": "Слишком короткий промокод",
+            "max_length": "Слишком длинный промокод",
+        },
     )
     expires_in = forms.ChoiceField(
         label="Истекает через:",
@@ -106,6 +119,8 @@ class ItemForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        if not self.is_bound and not self.initial.get("country") and not self.instance.country_id:
+            self.initial["country"] = "everywhere"
         if not self.instance.expires_at:
             return
         shown = formats.date_format(self.instance.expires_at, "j E Y")
@@ -115,6 +130,17 @@ class ItemForm(forms.ModelForm):
         )
         if not self.is_bound:
             self.initial["expires_in"] = "keep"
+
+    def clean_country(self):
+        raw = (self.cleaned_data.get("country") or "").strip()
+        if not raw:
+            raise forms.ValidationError("Выберите страну или «Весь мир»")
+        if raw == "everywhere":
+            return None
+        country = GeoCountry.objects.filter(pk=raw).first()
+        if not country:
+            raise forms.ValidationError("Нет такой страны")
+        return country
 
     def clean_prefix(self):
         return self.cleaned_data.get("prefix") or None
@@ -142,6 +168,8 @@ class ItemForm(forms.ModelForm):
                 continue
             if not text:
                 raise forms.ValidationError("У контакта нет значения")
+            if len(text) < 3:
+                raise forms.ValidationError("Слишком короткий контакт")
             if len(contact_type) > CONTACT_MAX_LENGTH or len(text) > CONTACT_MAX_LENGTH or len(comment) > CONTACT_MAX_LENGTH:
                 raise forms.ValidationError("Контакт длиннее 128 символов")
             if contact_type not in CONTACT_TYPES:
@@ -169,7 +197,9 @@ class ItemForm(forms.ModelForm):
 
         country = cleaned_data.get("country")
         city = cleaned_data.get("city")
-        if country and city and city.country_id != country.id:
+        if not country:
+            cleaned_data["city"] = None
+        elif city and city.country_id != country.id:
             self.add_error("city", "Этот город не из выбранной страны")
 
         category = cleaned_data.get("category")

@@ -269,7 +269,7 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 @require_http_methods(["GET", "POST"])
 def create_item(request):
     form = ItemForm(request.POST or None, initial={
-        "country": request.country_id if request.country_id != "everywhere" else None,
+        "country": request.country_id,
         "city": request.city_id if request.city_id != "everywhere" else None,
     })
 

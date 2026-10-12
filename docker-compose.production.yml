@@ -1,0 +1,66 @@
+name: vas3k-base
+
+x-app: &app
+  image: ghcr.io/vas3k/base:${GITHUB_SHA:-latest}
+  env_file: .env
+  environment:
+    MODE: production
+    DEBUG: "false"
+    VITE_DEV_MODE: "false"
+    APP_HOST: https://basa.club
+    POSTGRES_DB: vas3k_base
+    POSTGRES_USER: vas3k
+    POSTGRES_HOST: host.docker.internal
+    POSTGRES_USE_POOLING: "0"
+    REDIS_HOST: redis
+    TELEGRAM_BOT_WEBHOOK_PORT: "8001"
+    DEFAULT_FROM_EMAIL: "Вастрик База <base@vas3k.club>"
+    TZ: UTC
+  extra_hosts:
+    - "host.docker.internal:host-gateway"
+  init: true
+  restart: unless-stopped
+  stop_grace_period: 60s
+  logging: &logging
+    driver: json-file
+    options:
+      max-size: "20m"
+      max-file: "3"
+
+services:
+  app:
+    <<: *app
+    user: root
+    command: make docker-run-production
+    volumes:
+      - ./frontend/static:/tmp/static
+    ports:
+      - "127.0.0.1:8824:8000"
+    depends_on: [redis]
+
+  queue:
+    <<: *app
+    command: python manage.py qcluster
+    depends_on: [redis]
+
+  bot:
+    <<: *app
+    command: python bot/main.py
+    ports:
+      - "127.0.0.1:8826:8001"
+
+  cron:
+    <<: *app
+    command: supercronic -json -split-logs /app/etc/crontab
+    depends_on: [redis]
+
+  redis:
+    image: redis:7.4-alpine
+    command: redis-server --appendonly yes --appendfsync everysec
+    restart: unless-stopped
+    volumes:
+      - redis-data:/data
+    logging: *logging
+
+volumes:
+  redis-data:

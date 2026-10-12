@@ -49,11 +49,15 @@ def apply_place(form):
 class ProfileForm(forms.ModelForm):
     full_name = forms.CharField(
         label="Ваше имя",
-        max_length=User._meta.get_field("full_name").max_length,
+        min_length=5,
+        max_length=64,
         required=False,
         strip=True,
         widget=forms.TextInput(),
-        error_messages={"max_length": "Слишком длинное значение"},
+        error_messages={
+            "min_length": "Слишком короткое имя",
+            "max_length": "Слишком длинное значение",
+        },
     )
     avatar = forms.URLField(
         label="Аватар",
@@ -63,8 +67,10 @@ class ProfileForm(forms.ModelForm):
     bio = forms.CharField(
         label="Расскажите о себе",
         required=False,
+        min_length=10,
         strip=True,
         widget=forms.Textarea(attrs={"rows": 3}),
+        error_messages={"min_length": "Слишком короткий текст"},
     )
     country = forms.CharField(required=False, widget=forms.HiddenInput())
     city = forms.CharField(required=False, widget=forms.HiddenInput())
@@ -85,17 +91,24 @@ class ProfileForm(forms.ModelForm):
 class WelcomeForm(ProfileForm):
     full_name = forms.CharField(
         label="Ваше имя",
-        max_length=User._meta.get_field("full_name").max_length,
+        min_length=5,
+        max_length=64,
         required=True,
         strip=True,
         widget=forms.TextInput(),
-        error_messages={"required": "Заполните поле", "max_length": "Слишком длинное значение"},
+        error_messages={
+            "required": "Заполните поле",
+            "min_length": "Слишком короткое имя",
+            "max_length": "Слишком длинное значение",
+        },
     )
     bio = forms.CharField(
         label="Расскажите о себе",
         required=False,
+        min_length=10,
         strip=True,
         widget=forms.Textarea(attrs={"rows": 5}),
+        error_messages={"min_length": "Слишком короткий текст"},
     )
     agree_data = forms.BooleanField(
         required=True,
