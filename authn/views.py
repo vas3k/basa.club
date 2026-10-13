@@ -128,16 +128,17 @@ def login_telegram(request):
 
 
 @login_required
+@require_http_methods(["GET", "POST"])
 def bot_page(request):
-    if request.user.telegram_id:
-        return redirect("user_profile", slug=request.user.slug)
+    if request.method != "POST":
+        return render(request, "authn/bot.html")
 
     try:
         url = telegram.bot_url(request, user=request.user)
     except RateLimitException as ex:
         return render(request, "error.html", {"title": ex.title, "message": ex.message})
 
-    return render(request, "authn/bot.html", {"bot_url": url})
+    return redirect(url)
 
 
 @require_http_methods(["GET", "POST"])

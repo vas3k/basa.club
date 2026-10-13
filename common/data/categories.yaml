@@ -1,259 +1,70 @@
-- id: recommendations
-  name: Рекомендации
-  icon: ❤️‍🔥
+- id: services
+  name: Услуги
+  icon: ❤️
   children:
-    - id: doctors
-      name: Врачи
-      icon: '<i class="fas fa-user-md"></i>'
-    - id: dentists
-      name: Стоматологи
-      icon: '<i class="fas fa-tooth"></i>'
-    - id: psychologists
-      name: Психологи
-      icon: '<i class="fas fa-brain"></i>'
-      is_global: true
-    - id: lawyers
-      name: Юристы
-      icon: '<i class="fas fa-balance-scale"></i>'
-    - id: accountants
-      name: Бухгалтеры
-      icon: '<i class="fas fa-file-invoice"></i>'
-    - id: movers
-      name: Грузчики
-      icon: '<i class="fas fa-dolly"></i>'
-    - id: plumbers
-      name: Сантехники
-      icon: '<i class="fas fa-wrench"></i>'
-    - id: electricians
-      name: Электрики
-      icon: '<i class="fas fa-bolt"></i>'
-    - id: mechanics
-      name: Автомеханики
+    - id: auto
+      name: Автосервисы
       icon: '<i class="fas fa-car"></i>'
-    - id: repair
-      name: Ремонт техники
-      icon: '<i class="fas fa-tools"></i>'
-    - id: tutors
-      name: Репетиторы
-      icon: '<i class="fas fa-book"></i>'
-    - id: photo
-      name: Фото и видео
-      icon: '<i class="fas fa-camera"></i>'
-    - id: services-beauty
-      name: Красота
-      icon: '<i class="fas fa-cut"></i>'
+    - id: doctors
+      name: Врачи и терапевты
+      icon: '<i class="fas fa-user-md"></i>'
+    - id: lawyers
+      name: Юристы и адвокаты
+      icon: '<i class="fas fa-balance-scale"></i>'
     - id: cleaning
       name: Клининг
       icon: '<i class="fas fa-broom"></i>'
+    - id: tutors
+      name: Репетиторы
+      icon: '<i class="fas fa-book"></i>'
+    - id: home
+      name: Ремонт дома
+      icon: '<i class="fas fa-wrench"></i>'
     - id: translation
-      name: Переводы
+      name: Переводчики
       icon: '<i class="fas fa-language"></i>'
+    - id: rental
+      name: Аренда
+      icon: '<i class="fas fa-toolbox"></i>'
+    - id: movers
+      name: Грузчики
+      icon: '<i class="fas fa-dolly"></i>'
+    - id: repair
+      name: Ремонт техники
+      icon: '<i class="fas fa-tools"></i>'
+    - id: photo
+      name: Фото и видео
+      icon: '<i class="fas fa-camera"></i>'
+    - id: accountants
+      name: Налоги и бухгалтеры
+      icon: '<i class="fas fa-file-invoice"></i>'
+    - id: services-beauty
+      name: Красота
+      icon: '<i class="fas fa-cut"></i>'
 
 - id: coupons
   name: Купоны и скидки
   icon: 🎟️
   is_global: true
   children:
-    - id: food
-      name: Еда и рестораны
-      icon: '<i class="fas fa-utensils"></i>'
-    - id: groceries
-      name: Продукты
-      icon: '<i class="fas fa-shopping-basket"></i>'
-    - id: clothes
-      name: Одежда и обувь
-      icon: '<i class="fas fa-tshirt"></i>'
-    - id: electronics
-      name: Электроника
-      icon: '<i class="fas fa-laptop"></i>'
+    - id: software
+      name: Софт и подписки
+      icon: '<i class="fas fa-sync"></i>'
+    - id: stores
+      name: Магазины
+      icon: '<i class="fas fa-store"></i>'
     - id: travel
       name: Путешествия
       icon: '<i class="fas fa-plane"></i>'
-    - id: beauty
-      name: Красота и здоровье
+    - id: lifestyle
+      name: Спорт и красота
       icon: '<i class="fas fa-spa"></i>'
-    - id: sport
-      name: Спорт и фитнес
-      icon: '<i class="fas fa-dumbbell"></i>'
     - id: education
       name: Образование
       icon: '<i class="fas fa-graduation-cap"></i>'
     - id: fun
       name: Развлечения
       icon: '<i class="fas fa-ticket-alt"></i>'
-    - id: home
-      name: Дом и ремонт
-      icon: '<i class="fas fa-home"></i>'
-    - id: auto
-      name: Авто
-      icon: '<i class="fas fa-car"></i>'
-    - id: internet
-      name: Связь и интернет
-      icon: '<i class="fas fa-wifi"></i>'
-    - id: subscriptions
-      name: Подписки
-      icon: '<i class="fas fa-sync"></i>'
     - id: other
       name: Другое
       icon: '<i class="fas fa-ellipsis-h"></i>'
-
-- id: jobs
-  name: Работа
-  icon: 💼
-  children:
-    - id: it
-      name: IT и разработка
-      icon: '<i class="fas fa-code"></i>'
-    - id: design
-      name: Дизайн
-      icon: '<i class="fas fa-palette"></i>'
-    - id: marketing
-      name: Маркетинг
-      icon: '<i class="fas fa-bullhorn"></i>'
-    - id: sales
-      name: Продажи
-      icon: '<i class="fas fa-handshake"></i>'
-    - id: management
-      name: Менеджмент
-      icon: '<i class="fas fa-tasks"></i>'
-    - id: finance
-      name: Финансы и бухгалтерия
-      icon: '<i class="fas fa-calculator"></i>'
-    - id: jobs-education
-      name: Образование
-      icon: '<i class="fas fa-chalkboard-teacher"></i>'
-    - id: medicine
-      name: Медицина
-      icon: '<i class="fas fa-user-md"></i>'
-    - id: legal
-      name: Юриспруденция
-      icon: '<i class="fas fa-gavel"></i>'
-    - id: production
-      name: Производство
-      icon: '<i class="fas fa-industry"></i>'
-    - id: logistics
-      name: Логистика
-      icon: '<i class="fas fa-truck"></i>'
-    - id: admin
-      name: Администрирование
-      icon: '<i class="fas fa-clipboard"></i>'
-    - id: internships
-      name: Стажировки
-      icon: '<i class="fas fa-seedling"></i>'
-    - id: remote
-      name: Удалёнка
-      icon: '<i class="fas fa-home"></i>'
-    - id: relocation
-      name: Для релокантов
-      icon: '<i class="fas fa-globe"></i>'
-
-- id: services
-  name: Услуги
-  icon: 🧑‍🏭
-  children:
-    - id: freelance
-      name: Фриланс
-      icon: '<i class="fas fa-laptop-code"></i>'
-    - id: tools
-      name: Аренда инструментов
-      icon: '<i class="fas fa-toolbox"></i>'
-    - id: trips
-      name: Поедем вместе
-      icon: '<i class="fas fa-route"></i>'
-
-- id: market
-  name: Куплю продам
-  icon: 🛍️
-  children:
-    - id: phones
-      name: Электроника
-      icon: '<i class="fas fa-mobile-alt"></i>'
-    - id: computers
-      name: Компьютеры
-      icon: '<i class="fas fa-desktop"></i>'
-    - id: market-clothes
-      name: Одежда
-      icon: '<i class="fas fa-tshirt"></i>'
-    - id: furniture
-      name: Мебель
-      icon: '<i class="fas fa-couch"></i>'
-    - id: kids
-      name: Детские товары
-      icon: '<i class="fas fa-baby"></i>'
-    - id: bikes
-      name: Велосипеды
-      icon: '<i class="fas fa-bicycle"></i>'
-    - id: market-auto
-      name: Авто и запчасти
-      icon: '<i class="fas fa-car"></i>'
-    - id: market-sport
-      name: Спорттовары
-      icon: '<i class="fas fa-football-ball"></i>'
-    - id: books
-      name: Книги
-      icon: '<i class="fas fa-book"></i>'
-    - id: housing
-      name: Жильё
-      icon: '<i class="fas fa-building"></i>'
-    - id: rent
-      name: Аренда
-      icon: '<i class="fas fa-key"></i>'
-    - id: pets
-      name: Животные
-      icon: '<i class="fas fa-paw"></i>'
-    - id: plants
-      name: Растения
-      icon: '<i class="fas fa-leaf"></i>'
-    - id: hobby
-      name: Хобби
-      icon: '<i class="fas fa-puzzle-piece"></i>'
-    - id: free
-      name: Отдам даром
-      icon: '<i class="fas fa-gift"></i>'
-
-- id: social
-  name: Тусовки и друзья
-  icon: 🪩
-  children:
-    - id: meetups
-      name: Встречи
-      icon: '<i class="fas fa-users"></i>'
-    - id: social-sport
-      name: Спорт
-      icon: '<i class="fas fa-running"></i>'
-    - id: boardgames
-      name: Настолки
-      icon: '<i class="fas fa-dice"></i>'
-    - id: cinema
-      name: Кино
-      icon: '<i class="fas fa-film"></i>'
-    - id: music
-      name: Музыка
-      icon: '<i class="fas fa-music"></i>'
-    - id: social-travel
-      name: Путешествия
-      icon: '<i class="fas fa-map-marked-alt"></i>'
-    - id: languages
-      name: Языковой обмен
-      icon: '<i class="fas fa-comments"></i>'
-    - id: volunteering
-      name: Волонтёрство
-      icon: '<i class="fas fa-hands-helping"></i>'
-    - id: romance
-      name: Романтика
-      icon: '<i class="fas fa-heart"></i>'
-    - id: parents
-      name: Родительство
-      icon: '<i class="fas fa-child"></i>'
-    - id: gaming
-      name: Гейминг
-      icon: '<i class="fas fa-gamepad"></i>'
-    - id: bars
-      name: Еда и бары
-      icon: '<i class="fas fa-beer"></i>'
-    - id: networking
-      name: Нетворкинг
-      icon: '<i class="fas fa-briefcase"></i>'
-    - id: social-pets
-      name: Питомцы
-      icon: '<i class="fas fa-dog"></i>'

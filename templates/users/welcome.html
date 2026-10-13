@@ -9,7 +9,7 @@
     <div class="block profile-form-page">
         <div class="block-header block-header-big">👋 Добро пожаловать в Базу</div>
         <div class="block-description block-description-center">
-            Давайте начнем с заполнения профиля. Нам приятно видеть живых настоящих людей!
+            Давайте начнем с заполнения небольшого профиля. Нам всегда приятно видеть живых настоящих людей, а анонимные аккаунты у нас не вызывают особого доверия.
         </div>
 
         <form class="profile-form" method="post" action="{% url "welcome" %}">
@@ -25,13 +25,13 @@
 
                 <label class="welcome-agreement">
                     {{ form.agree_rules }}
-                    <span>я прочитал <a href="{% url "rules" %}" target="_blank" rel="noopener noreferrer">правила сообщества</a> и буду их соблюдать, не буду требовать с админов компенсаций если меня заскамят</span>
+                    <span>я прочитал <a href="{% url "about" %}" target="_blank" rel="noopener noreferrer">правила сообщества</a> и буду их соблюдать</span>
                 </label>
                 {% if form.agree_rules.errors %}<div class="form-error">{{ form.agree_rules.errors }}</div>{% endif %}
 
                 <label class="welcome-agreement">
                     {{ form.agree_conduct }}
-                    <span>если я буду вести себя как долбоеб — меня забанят! мне нравится!</span>
+                    <span>а если я буду вести себя плохо — меня забанят! мне нравится!</span>
                 </label>
                 {% if form.agree_conduct.errors %}<div class="form-error">{{ form.agree_conduct.errors }}</div>{% endif %}
             </div>

@@ -40,7 +40,8 @@ def confirm(code, data):
 
     auth_code = Code.objects.filter(code=(code or "").strip().upper()).select_related("user").first()
     if not auth_code or auth_code.is_expired():
-        raise TelegramAuthError("Ссылка устарела. Откройте бота заново со страницы входа.")
+        page = f"{settings.APP_HOST.rstrip('/')}{reverse('bot')}"
+        raise TelegramAuthError(f"Ссылка устарела. Откройте бота заново со страницы привязки:\n{page}")
 
     previous = str((auth_code.telegram_data or {}).get("id") or "")
     if previous and previous != telegram_id:

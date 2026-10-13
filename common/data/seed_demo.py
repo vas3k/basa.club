@@ -20,6 +20,8 @@ django.setup()
 from django.db import connection  # noqa: E402
 from django.utils import timezone  # noqa: E402
 
+from categories.models import Category  # noqa: E402
+
 USERS = [
     ("anna-kovaleva", "Анна Ковалёва", "Берлин", "Германия", "Продакт. Собираю врачей, кафе и нормальные сервисы."),
     ("mark-shevchenko", "Марк Шевченко", "Мюнхен", "Германия", "Инженер. Часто ищу мастеров и скидки на технику."),
@@ -706,8 +708,15 @@ def build():
             "created_at": now - timedelta(days=120 - index),
         })
 
+    parents = {
+        category.id: category.parent_id
+        for category in Category.objects.exclude(parent=None)
+    }
     items = []
-    for sub_index, (subcategory, category, kind, titles) in enumerate(CATALOG):
+    for sub_index, (subcategory, _category, kind, titles) in enumerate(CATALOG):
+        parent_id = parents.get(subcategory)
+        if not parent_id:
+            continue
         for slot, title in enumerate(titles):
             number = sub_index * 4 + slot
             if slot == 3 and sub_index % 3 == 0:
@@ -734,7 +743,7 @@ def build():
                 "id": str(uuid.uuid4()),
                 "title": title,
                 "description": f"{title}. {closing}",
-                "category_id": category,
+                "category_id": parent_id,
                 "subcategory_id": subcategory,
                 "country_id": country_id,
                 "city_id": city_id,
@@ -749,7 +758,6 @@ def build():
             })
 
     commented = [item for index, item in enumerate(items) if index % 3 == 1][:100]
-    assert len(commented) == 100
     comments = []
     for index, item in enumerate(commented):
         author = users[(index + 3) % len(users)]
@@ -814,6 +822,7 @@ def insert_users(users):
             "0",
             sql_quote(user["created_at"]),
             sql_quote(user["created_at"]),
+            "'{}'::jsonb",
             "'{}'::varchar[]",
             "false",
             "false",
@@ -822,7 +831,7 @@ def insert_users(users):
 INSERT INTO users (
     id, password, slug, email, full_name, bio, city, country,
     rating, upvotes, items_count, comments_count,
-    created_at, updated_at, roles, is_staff, is_superuser
+    created_at, updated_at, metadata, roles, is_staff, is_superuser
 ) VALUES
 {','.join(values)};
 """
@@ -851,12 +860,15 @@ def insert_items(items):
             sql_quote(item["location"]),
             sql_quote(item["contacts"]) + "::jsonb",
             sql_quote(item["promo_code"]),
+            "'[]'::jsonb",
+            "0",
+            "0",
         ]) + ")")
     return f"""
 INSERT INTO items (
     id, title, description, category_id, subcategory_id, country_id, city_id, author_id,
     visibility, upvotes, rating, comment_count, published_at, expires_at, created_at, updated_at,
-    location, contacts, promo_code
+    location, contacts, promo_code, images, bookmark_count, view_count
 ) VALUES
 {','.join(values)};
 """
