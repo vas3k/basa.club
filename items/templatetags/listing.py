@@ -79,6 +79,44 @@ def listing_url(context, country="", city="", category="", subcategory=""):
 
 
 
+@register.simple_tag(takes_context=True)
+def geo_title(context, item=None):
+    if item is not None:
+        subcategory = item.subcategory
+        category = item.category
+        city = item.city
+        country = item.country
+        empty_place = "Весь мир"
+    else:
+        subcategory = context.get("current_subcategory")
+        category = context.get("current_category")
+        city = context.get("current_city")
+        country = context.get("current_country")
+        empty_place = ""
+
+    parts = []
+    if subcategory:
+        parts.append(subcategory.name)
+    if category:
+        parts.append(category.name)
+
+    place = []
+    if city:
+        place.append(city.name)
+    if country:
+        place.append(country.name)
+    if place:
+        parts.append(", ".join(place))
+    elif empty_place:
+        parts.append(empty_place)
+    label = " · ".join(parts)
+    if not label:
+        return ""
+    if item is not None:
+        return f" · {label}"
+    return f"{label} — "
+
+
 @register.simple_tag
 def item_url(item):
     return item.get_absolute_url()

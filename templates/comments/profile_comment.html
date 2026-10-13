@@ -1,6 +1,6 @@
 <div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
     <a class="profile-comment-source" href="{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">
-        {% if comment.item.city %}{% if comment.item.city.icon %}{{ comment.item.city.icon|safe }} {% endif %}{{ comment.item.city.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}{% if comment.item.subcategory %}{% if comment.item.subcategory.icon %}{{ comment.item.subcategory.icon|safe }} {% endif %}{{ comment.item.subcategory.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}{{ comment.item.title }}
+        {% if comment.item.city %}{% if comment.item.city.icon %}{{ comment.item.city.icon|safe }} {% endif %}{{ comment.item.city.name }}{% elif comment.item.country %}{% if comment.item.country.icon %}{{ comment.item.country.icon|safe }} {% endif %}{{ comment.item.country.name }}{% else %}🌍 Весь мир{% endif %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% if comment.item.subcategory %}{% if comment.item.subcategory.icon %}{{ comment.item.subcategory.icon|safe }} {% endif %}{{ comment.item.subcategory.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}{{ comment.item.title }}
     </a>
 
     <div class="comment-header">

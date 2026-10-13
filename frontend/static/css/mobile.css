@@ -218,6 +218,10 @@
         align-items: flex-start;
     }
 
+    .footer-top:not(:has(.footer-logout)) {
+        align-items: center;
+    }
+
     .footer-logout {
         margin-left: 0;
     }

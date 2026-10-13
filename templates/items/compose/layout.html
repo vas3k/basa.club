@@ -3,6 +3,7 @@
 {% block title %}
     {{ form_title }} — {{ block.super }}
 {% endblock %}
+{% block og_title %}{{ form_title }} — {{ block.super }}{% endblock %}
 
 {% block content %}
     <div class="block">

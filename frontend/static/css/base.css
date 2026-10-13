@@ -104,6 +104,11 @@
     font-weight: 600;
 }
 
+.join-block {
+    max-width: 800px;
+    margin: 66px auto 30px;
+}
+
 
 /* Buttons */
 

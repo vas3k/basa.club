@@ -251,6 +251,10 @@
     margin-bottom: 24px;
 }
 
+.footer-top:not(:has(.footer-logout)) {
+    justify-content: center;
+}
+
 .footer-about {
     margin: 0;
     text-align: center;

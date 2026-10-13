@@ -35,6 +35,7 @@ INSTALLED_APPS = [
     "django.contrib.sessions",
     "django.contrib.messages",
     "django.contrib.staticfiles",
+    "django.contrib.sitemaps",
     "django.contrib.postgres",
     "django_vite",
     "django_q",
@@ -73,7 +74,7 @@ TEMPLATES = [
         "DIRS": [
             os.path.join(BASE_DIR, "templates"),
         ],
-        "APP_DIRS": False,
+        "APP_DIRS": True,
         "OPTIONS": {
             "context_processors": [
                 "django.template.context_processors.request",
@@ -283,8 +284,6 @@ AUTH_MAX_CODE_COUNT_TOTAL = 100
 if DEBUG:
     INSTALLED_APPS = ["debug_toolbar", *INSTALLED_APPS]
     MIDDLEWARE.insert(0, "debug_toolbar.middleware.DebugToolbarMiddleware")
-    # App template dirs are off in production; the toolbar ships its own templates.
-    TEMPLATES[0]["APP_DIRS"] = True
 
 # Sentry
 

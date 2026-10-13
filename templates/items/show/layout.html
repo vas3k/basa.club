@@ -1,13 +1,9 @@
 {% extends "layout_with_sidebar.html" %}
 
-{% block title %}{{ item.title_with_prefix }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
-{% block og_title %}{{ item.title_with_prefix }}{% if item.subcategory %} · {{ item.subcategory.name }}{% elif item.category %} · {{ item.category.name }}{% endif %}{% if item.city %} · {{ item.city.name }}{% endif %}{% if item.country %} · {{ item.country.name }}{% endif %} — {{ settings.APP_TITLE }}{% endblock %}
-{% block meta %}
-    {{ block.super }}
-    {% if item.description %}
-        <meta property="og:description" content="{{ item.description|public_preview|force_escape }}">
-    {% endif %}
-{% endblock %}
+{% block title %}{{ item.title_with_prefix }}{% geo_title item %} — {{ block.super }}{% endblock %}
+{% block og_title %}{{ item.title_with_prefix }}{% geo_title item %} — {{ block.super }}{% endblock %}
+{% block meta_description %}{% if item.description %}{{ item.description|public_preview }}{% else %}{{ item.title_with_prefix }}{% endif %}{% endblock %}
+{% block og_description %}{% if item.description %}{{ item.description|public_preview }}{% else %}{{ item.title_with_prefix }}{% endif %}{% endblock %}
 
 {% block content %}
     {% block item %}{% endblock %}
@@ -32,6 +28,8 @@
 
                 {% include "comments/form.html" %}
             </section>
+        {% else %}
+            {% include "common/widgets/join.html" %}
         {% endif %}
     {% endblock %}
 {% endblock %}

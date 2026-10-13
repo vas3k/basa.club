@@ -151,7 +151,7 @@ def bump_geo(item, delta):
     """+/- items_count on the country and city this item is listed in.
 
     Worldwide items (no country) are ignored.
-    An item with a country but no city is counted in every city of that country.
+    An item with a country but no city is counted on the country only.
     """
     if not item.country_id:
         return
@@ -159,5 +159,3 @@ def bump_geo(item, delta):
     GeoCountry.objects.filter(pk=item.country_id).update(items_count=F("items_count") + delta)
     if item.city_id:
         GeoCity.objects.filter(pk=item.city_id).update(items_count=F("items_count") + delta)
-    else:
-        GeoCity.objects.filter(country_id=item.country_id).update(items_count=F("items_count") + delta)

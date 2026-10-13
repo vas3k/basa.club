@@ -45,25 +45,25 @@ class SearchIndexTests(TestCase):
 
     def test_listed_item_is_indexed_and_hidden_items_are_not(self):
         item = self.make_item()
-        self.assertTrue(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertTrue(SearchIndex.objects.filter(item_id=item.pk).exists())
 
         item.visibility = Item.VISIBILITY_DRAFT
         item.save()
         search.update_item_index(item)
-        self.assertFalse(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertFalse(SearchIndex.objects.filter(item_id=item.pk).exists())
 
         item.visibility = Item.VISIBILITY_VISIBLE
         item.expires_at = timezone.now() - timedelta(hours=1)
         item.save()
         search.update_item_index(item)
-        self.assertFalse(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertFalse(SearchIndex.objects.filter(item_id=item.pk).exists())
 
         item.expires_at = None
         item.save()
         search.update_item_index(item)
         item.delete(by=self.author)
         search.delete_item_index(item)
-        self.assertFalse(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertFalse(SearchIndex.objects.filter(item_id=item.pk).exists())
 
     def test_search_stems_russian_and_keeps_exact_tokens(self):
         item = self.make_item(title="Квартира на два месяца", description="")
@@ -96,12 +96,12 @@ class SearchIndexTests(TestCase):
         self.author.is_banned_until = timezone.now() + timedelta(days=3)
         self.author.save(update_fields=["is_banned_until"])
         search.delete_author_index(self.author)
-        self.assertFalse(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertFalse(SearchIndex.objects.filter(item_id=item.pk).exists())
 
         self.author.is_banned_until = None
         self.author.save(update_fields=["is_banned_until"])
         search.update_item_index(item)
-        self.assertTrue(SearchIndex.objects.filter(pk=item.pk).exists())
+        self.assertTrue(SearchIndex.objects.filter(item_id=item.pk).exists())
 
     def test_notification_match_uses_the_index(self):
         item = self.make_item(title="Квартира на два месяца", description="")
@@ -131,10 +131,10 @@ class SearchIndexTests(TestCase):
 
     def test_rebuild_command_drops_stale_rows(self):
         item = self.make_item()
-        SearchIndex.objects.filter(pk=item.pk).delete()
+        SearchIndex.objects.filter(item_id=item.pk).delete()
         draft = self.make_item(title="Черновик")
         draft.visibility = Item.VISIBILITY_DRAFT
         draft.save()
         call_command("update_search_index")
-        self.assertTrue(SearchIndex.objects.filter(pk=item.pk).exists())
-        self.assertFalse(SearchIndex.objects.filter(pk=draft.pk).exists())
+        self.assertTrue(SearchIndex.objects.filter(item_id=item.pk).exists())
+        self.assertFalse(SearchIndex.objects.filter(item_id=draft.pk).exists())

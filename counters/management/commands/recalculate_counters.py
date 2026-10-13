@@ -139,13 +139,9 @@ class Command(BaseCommand):
             row["city_id"]: row["n"]
             for row in visible.exclude(city__isnull=True).values("city_id").annotate(n=Count("pk"))
         }
-        countrywide = {
-            row["country_id"]: row["n"]
-            for row in visible.filter(city__isnull=True, country__isnull=False).values("country_id").annotate(n=Count("pk"))
-        }
         cities = list(GeoCity.objects.all())
         for city in cities:
-            city.items_count = city_counts.get(city.id, 0) + countrywide.get(city.country_id, 0)
+            city.items_count = city_counts.get(city.id, 0)
         if cities:
             GeoCity.objects.bulk_update(cities, ["items_count"])
 

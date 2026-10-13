@@ -3,14 +3,14 @@
         <a class="item-tag" href="{% listing_url country=item.country_id city="everywhere" %}" data-behavior="geo-link" data-country="{{ item.country_id }}" data-city="everywhere">
             {% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}
         </a>
-        {% if item.city %}
-            <span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>
-            <a class="item-tag" href="{% listing_url country=item.city.country_id city=item.city_id %}" data-behavior="geo-link" data-country="{{ item.city.country_id }}" data-city="{{ item.city_id }}">
-                {% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}
-            </a>
-        {% endif %}
-    {% else %}
+    {% elif not item.city %}
         <span class="item-tag">🌍 Весь мир</span>
+    {% endif %}
+    {% if item.city %}
+        {% if item.country %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}
+        <a class="item-tag" href="{% listing_url country=item.city.country_id|default:item.country_id city=item.city_id %}" data-behavior="geo-link" data-country="{{ item.city.country_id|default:item.country_id }}" data-city="{{ item.city_id }}">
+            {% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}
+        </a>
     {% endif %}
 
     {% if item.subcategory %}

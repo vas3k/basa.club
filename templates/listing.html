@@ -1,7 +1,9 @@
 {% extends "layout_with_sidebar.html" %}
 
-{% block title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
-{% block og_title %}{% if current_category %}{% if current_subcategory %}{{ current_subcategory.name }} · {% endif %}{{ current_category.name }}{% if current_city or current_country %} · {% if current_city %}{{ current_city.name }}{% if current_country %}, {% endif %}{% endif %}{% if current_country %}{{ current_country.name }}{% endif %}{% endif %} — {{ settings.APP_TITLE }}{% else %}{{ block.super }}{% endif %}{% endblock %}
+{% block title %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block og_title %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block meta_description %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block og_description %}{% geo_title %}{{ block.super }}{% endblock %}
 
 {% block content %}
     {% if current_category %}
@@ -62,8 +64,8 @@
             {% include "items/list/default.html" %}
         {% empty %}
             <div class="block feed-empty">
-                <p>Тут пока ничего нет</p>
-                <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>
+                <p>Тут почему-то всё еще пусто!</p>
+                <p>Давайте начнём наконец-то: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то еще!</p>
                 <div class="feed-empty-actions">
                     <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                     {% include "notifications/widgets/subscribe_button.html" %}
@@ -79,6 +81,8 @@
             </div>
         {% endfor %}
     </section>
+
+    {% include "common/widgets/join.html" %}
 
     {% paginator items %}
 {% endblock %}

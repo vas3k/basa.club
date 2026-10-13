@@ -55,11 +55,11 @@ def index_page(request, country=None):
 
     world_items = []
     all_items = []
-    feed = search.filter_items(Item.objects_for_user(request.user), page_query).order_by(*ordering)[:10]
+    feed = search.filter_items(Item.objects_for_user(request.user), page_query).order_by(*ordering)
     if request.country_id == "everywhere":
-        world_items = list(feed)
-    else:
-        all_items = list(feed)
+        world_items = list(feed[:10])
+    elif country_items:
+        all_items = list(feed[:10])
 
     subscriptions = []
     if request.user.is_authenticated:
@@ -76,16 +76,13 @@ def index_page(request, country=None):
                 query="",
             )
         subscriptions = list(subscriptions[:5])
+        with_items = []
         for subscription in subscriptions:
             items = Item.objects_for_user(request.user)
             if subscription.city_id:
-                items = items.filter(
-                    Q(city_id=subscription.city_id)
-                    | Q(city__isnull=True, country_id=subscription.country_id)
-                    | Q(city__isnull=True, country__isnull=True)
-                )
+                items = items.filter(city_id=subscription.city_id)
             elif subscription.country_id:
-                items = items.filter(Q(country_id=subscription.country_id) | Q(country__isnull=True))
+                items = items.filter(country_id=subscription.country_id)
             if subscription.category_id and subscription.category.parent_id:
                 items = items.filter(subcategory_id=subscription.category_id)
             elif subscription.category_id:
@@ -95,6 +92,9 @@ def index_page(request, country=None):
             if page_query:
                 items = search.filter_items(items, page_query)
             subscription.index_items = list(items.order_by(*ordering)[:10])
+            if subscription.index_items:
+                with_items.append(subscription)
+        subscriptions = with_items
 
     response = render(request, "index.html", {
         "country_items": country_items,
@@ -141,13 +141,9 @@ def listing_page(request, country, city, category=None, subcategory=None):
         show_global = False
 
     if request.city_id != "everywhere":
-        items = items.filter(
-            Q(city_id=request.city_id)
-            | Q(city__isnull=True, country_id=request.country_id)
-            | Q(city__isnull=True, country__isnull=True)
-        )
+        items = items.filter(city_id=request.city_id)
     elif request.country_id != "everywhere":
-        items = items.filter(Q(country_id=request.country_id) | Q(country__isnull=True))
+        items = items.filter(country_id=request.country_id)
 
     query = (request.GET.get("query") or "").strip()
     if query and request.user.is_authenticated:

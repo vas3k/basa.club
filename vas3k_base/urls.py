@@ -1,5 +1,7 @@
 from django.conf import settings
+from django.contrib.sitemaps.views import sitemap
 from django.urls import include, path
+from django.views.decorators.cache import cache_page
 from django.views.generic import TemplateView
 
 from authn.views import banned, bot_page, club_callback, log_in, log_out, login_club, login_telegram, telegram_continue
@@ -32,6 +34,7 @@ from counters.views import user_ratings
 from notifications.views import remove_subscription, toggle_listing_subscription
 from users.api import update_user_flag
 from users.views import edit_profile, profile_page, welcome
+from vas3k_base.sitemap import sitemaps
 
 urlpatterns = [
     path("", index_page, name="index"),
@@ -39,6 +42,7 @@ urlpatterns = [
     path("login/", log_in, name="login"),
     path("logout/", log_out, name="logout"),
     path("welcome/", welcome, name="welcome"),
+    path("sitemap.xml", cache_page(60 * 60)(sitemap), {"sitemaps": sitemaps}, name="sitemap"),
     path("about/", TemplateView.as_view(template_name="docs/about.html"), name="about"),
     path("data_policy/", TemplateView.as_view(template_name="docs/data_policy.html"), name="data_policy"),
     path("bot/", bot_page, name="bot"),

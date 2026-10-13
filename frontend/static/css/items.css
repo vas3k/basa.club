@@ -675,10 +675,11 @@
 
 .item-title-input select {
     flex: 0 0 auto;
-    width: 2.6rem;
-    padding: 14px 1.7rem 14px 0.55rem;
+    width: 4.4rem;
+    padding: 14px 1.7rem 14px 0.7rem;
+    background-color: var(--inline-block-bg);
     background-position: right 0.65rem center;
-    color: transparent;
+    color: rgba(51, 51, 51, 0.45);
     font-size: 200%;
     font-weight: 700;
 }
@@ -691,9 +692,6 @@
 
 .item-title-input:has(option[value="ask"]:checked) select {
     width: auto;
-    padding-left: 18px;
-    padding-right: 2.2rem;
-    color: var(--input-color);
 }
 
 .item-form-title input[type=text] {

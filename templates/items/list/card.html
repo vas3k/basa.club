@@ -2,10 +2,16 @@
 <article class="index-card block block-clickable">
     <a class="index-card-cover" href="{{ url }}" aria-label="{{ item.title_with_prefix }}"></a>
     <div class="index-card-category">
-        {% if show_city and item.city %}
-            <span>{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}</span>
-            <span class="item-tag-separator item-tag-separator-wide">·</span>
-        {% endif %}
+        <span>
+            {% if item.city %}
+                {% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}
+            {% elif item.country %}
+                {% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}
+            {% else %}
+                🌍 Весь мир
+            {% endif %}
+        </span>
+        <span class="item-tag-separator item-tag-separator-wide">·</span>
         <span>{% if item.category.icon %}{{ item.category.icon|safe }} {% endif %}{{ item.category.name }}</span>
     </div>
     <div class="index-card-title-row">

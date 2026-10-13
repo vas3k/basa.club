@@ -3,7 +3,7 @@ import time
 from pathlib import Path
 
 from django.core.cache import cache
-from django.db.models import Count, Q
+from django.db.models import Count
 
 from items.models import Item
 
@@ -52,7 +52,7 @@ def refresh_all():
 def calculate(root_id, country_id="everywhere", city_id="everywhere"):
     items = Item.visible_objects()
     if city_id and city_id != "everywhere":
-        items = items.filter(Q(city_id=city_id) | Q(city__isnull=True, country_id=country_id))
+        items = items.filter(city_id=city_id)
     elif country_id and country_id != "everywhere":
         items = items.filter(country_id=country_id)
 

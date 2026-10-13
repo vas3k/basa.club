@@ -12,14 +12,20 @@ from users.models import User
 
 class SearchIndex(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
-    item = models.OneToOneField(Item, related_name="search_index", null=True, on_delete=models.CASCADE)
+    item = models.ForeignKey(
+        Item,
+        related_name="search_indexes",
+        null=True,
+        blank=True,
+        on_delete=models.CASCADE,
+    )
     updated_at = models.DateTimeField(auto_now=True)
     index = SearchVectorField(null=False, editable=False)
 
     class Meta:
         db_table = "search_index"
         indexes = [
-            GinIndex(fields=["index"], fastupdate=False),
+            GinIndex(fields=["index"], name="search_index_gin", fastupdate=False),
         ]
 
     def __str__(self):

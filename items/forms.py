@@ -44,7 +44,7 @@ class ItemForm(forms.ModelForm):
     prefix = forms.ChoiceField(
         required=False,
         choices=(
-            ("", ""),
+            ("", "➕"),
             *Item.PREFIXES,
         ),
         widget=forms.Select(attrs={"aria-label": "Префикс"}),

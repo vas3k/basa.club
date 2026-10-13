@@ -2,9 +2,9 @@
 
 {% block subheader %}
     <section class="subheader">
-        <form class="subheader-search" action="" method="get" data-behavior="geo-select form-change">
+        <form class="subheader-search" action="" method="get" data-behavior="geo-select">
             <select class="subheader-search-geo" data-geo="country" aria-label="Страна">
-                <option value="everywhere" data-url="{% listing_url country='everywhere' city='everywhere' category=current_category.id %}" {% if not current_country %}selected{% endif %}>
+                <option value="everywhere" {% if not current_country %}selected{% endif %}>
                     🌎 Весь мир
                 </option>
                 {% for country in countries %}
@@ -12,7 +12,7 @@
                         {% ifchanged %}
                             <option disabled value="">─────────</option>
                         {% endifchanged %}
-                        <option value="{{ country.id }}" data-url="{% listing_url country=country.id city='everywhere' category=current_category.id %}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                        <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
                             {{ country.icon|safe }} {{ country.name }}{% if country.items_count %} ({{ country.items_count }}){% endif %}
                         </option>
                     {% endif %}
@@ -22,7 +22,7 @@
                         {% ifchanged %}
                             <option disabled value="">─────────</option>
                         {% endifchanged %}
-                        <option value="{{ country.id }}" data-url="{% listing_url country=country.id city='everywhere' category=current_category.id %}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                        <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
                             {{ country.icon|safe }} {{ country.name }}
                         </option>
                     {% endif %}
@@ -30,11 +30,11 @@
             </select>
 
             <select class="subheader-search-geo" data-geo="city" aria-label="Город">
-                <option value="everywhere" data-url="{% listing_url city='everywhere' category=current_category.id %}" {% if not current_city %}selected{% endif %}>
+                <option value="everywhere" {% if not current_city %}selected{% endif %}>
                     Везде
                 </option>
                 {% for city in cities %}
-                    <option value="{{ city.id }}" data-url="{% listing_url city=city.id category=current_category.id %}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
+                    <option value="{{ city.id }}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
                         {% if city.icon %}{{ city.icon|safe }} {% endif %}{{ city.name }}{% if city.items_count %} ({{ city.items_count }}){% endif %}
                     </option>
                 {% endfor %}

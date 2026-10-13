@@ -165,22 +165,25 @@ def subscribers_for_item(item):
     Overlapping subscriptions all match. The user still gets one message.
     Only members with a linked Telegram account.
     """
-    geo = Q(country__isnull=True, city__isnull=True)
-    if item.country_id and item.city_id:
-        geo |= Q(country_id=item.country_id, city__isnull=True)
-        geo |= Q(city_id=item.city_id)
+    # Same level or more specific only. A city subscription does not receive a
+    # country-wide item, and a country or category subscription does not receive
+    # a worldwide item. Only a subscription with no country and no city does.
+    if item.city_id:
+        geo = (
+            Q(city_id=item.city_id)
+            | Q(country_id=item.country_id, city__isnull=True)
+            | Q(country__isnull=True, city__isnull=True)
+        )
     elif item.country_id:
-        # A country-wide item is shown on every city page of that country.
-        geo |= Q(country_id=item.country_id)
+        geo = Q(country_id=item.country_id, city__isnull=True) | Q(country__isnull=True, city__isnull=True)
     else:
-        # A worldwide item is shown on every listing.
-        geo = Q()
+        geo = Q(country__isnull=True, city__isnull=True)
 
     categories = Q(category__isnull=True)
-    if item.category_id:
-        categories |= Q(category_id=item.category_id)
     if item.subcategory_id:
-        categories |= Q(category_id=item.subcategory_id)
+        categories |= Q(category_id=item.subcategory_id) | Q(category_id=item.category_id)
+    elif item.category_id:
+        categories |= Q(category_id=item.category_id)
 
     now = timezone.now()
     candidates = (
