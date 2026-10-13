@@ -1,6 +1,7 @@
 from django_q.tasks import async_task
 
 from notifications.subscriptions import subscribers_for_item
+from notifications.telegram.base import send_telegram_base_new_item
 from notifications.telegram.comments import send_telegram_user_new_comment
 from notifications.telegram.items import send_telegram_user_new_item
 from notifications.telegram.moderation import send_telegram_admin_new_flag, send_telegram_admin_new_item
@@ -9,6 +10,7 @@ from notifications.telegram.users import send_telegram_user_banned
 
 def item_created(item):
     async_task(send_telegram_admin_new_item, item.id)
+    async_task(send_telegram_base_new_item, item.id)
     async_task(send_telegram_user_new_item, item.id, [s.id for s in subscribers_for_item(item)])
 
 

@@ -66,6 +66,7 @@ jobs:
           secret_EMAIL_HOST_PASSWORD: ${{ secrets.EMAIL_HOST_PASSWORD }}
           secret_TELEGRAM_TOKEN: ${{ secrets.TELEGRAM_TOKEN }}
           secret_TELEGRAM_ADMIN_CHAT_ID: ${{ secrets.TELEGRAM_ADMIN_CHAT_ID }}
+          secret_TELEGRAM_BASE_CHAT_ID: ${{ secrets.TELEGRAM_BASE_CHAT_ID }}
           secret_CLUB_OPENID_CONFIG_SECRET: ${{ secrets.CLUB_OPENID_CONFIG_SECRET }}
           secret_CLUB_SERVICE_TOKEN: ${{ secrets.CLUB_SERVICE_TOKEN }}
       - name: Configure SSH

@@ -117,8 +117,6 @@ subnet in `pg_hba.conf` and the host firewall.
 
 Install `etc/nginx/basa.club.conf` alongside Club's vhost. It uses the existing
 `/home/vas3k/certs` certificate paths; the certificate must cover `basa.club`.
-The configuration requires nginx 1.25.1+ for `http2 on`. Check and reload nginx when
-ready to deploy.
 
 Base binds Django to `127.0.0.1:8824` and Telegram to `127.0.0.1:8826`. Redis is
 private to the Compose project and persists its queue in a Docker volume. The
@@ -147,6 +145,7 @@ Configure repository secrets:
 | `POSTGRES_PASSWORD` | Database password |
 | `TELEGRAM_TOKEN` | Base bot token |
 | `TELEGRAM_ADMIN_CHAT_ID` | Optional admin chat |
+| `TELEGRAM_BASE_CHAT_ID` | Optional public Base chat for new items |
 | `CLUB_OPENID_CONFIG_SECRET` | Club OAuth secret |
 | `CLUB_SERVICE_TOKEN` | Club service token |
 | `MEDIA_UPLOAD_CODE` | Media service upload credential |
