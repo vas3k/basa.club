@@ -97,10 +97,12 @@ repository secrets, copies it and Compose to the host, then runs `pull` and `up 
 The Docker build installs locked Python dependencies and builds the frontend with
 `npm ci` and `npm run build`.
 
-`make docker-run-production` applies migrations, collects static files and starts
-Gunicorn. Compose mounts `frontend/static/` from the host at `/tmp/static` so nginx
-can serve the collected files. Queue workers, Telegram and cron run separately.
-Only the web container runs migrations, including on container restarts.
+`make docker-run-production` applies migrations, updates categories from
+`common/data/categories.yaml`, collects static files and starts Gunicorn. A
+category update reports problems and still lets the server start. Compose mounts
+`frontend/static/` from the host at `/tmp/static` so nginx can serve the collected
+files. Queue workers, Telegram and cron run separately. Only the web container
+runs migrations, including on container restarts.
 
 ### Host setup
 

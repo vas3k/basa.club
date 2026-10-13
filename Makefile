@@ -5,6 +5,7 @@ SHELL := /bin/bash
 .PHONY: docker-run-production
 docker-run-production:
 	python manage.py migrate --noinput
+	python manage.py update_categories || true
 	python manage.py collectstatic --noinput
 	exec gunicorn vas3k_base.wsgi:application \
 		--bind 0.0.0.0:8000 \

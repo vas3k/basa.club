@@ -14,33 +14,33 @@
     - id: cleaning
       name: Клининг
       icon: '<i class="fas fa-broom"></i>'
-    - id: tutors
-      name: Репетиторы
-      icon: '<i class="fas fa-book"></i>'
     - id: home
-      name: Ремонт дома
-      icon: '<i class="fas fa-wrench"></i>'
-    - id: translation
-      name: Переводчики
-      icon: '<i class="fas fa-language"></i>'
-    - id: rental
-      name: Аренда
-      icon: '<i class="fas fa-toolbox"></i>'
+      name: Работы по дому
+      icon: '<i class="fas fa-home"></i>'
     - id: movers
       name: Грузчики
       icon: '<i class="fas fa-dolly"></i>'
     - id: repair
       name: Ремонт техники
       icon: '<i class="fas fa-tools"></i>'
+    - id: rental
+      name: Аренда
+      icon: '<i class="fas fa-toolbox"></i>'
+    - id: tutors
+      name: Репетиторы
+      icon: '<i class="fas fa-book"></i>'
     - id: photo
       name: Фото и видео
       icon: '<i class="fas fa-camera"></i>'
     - id: accountants
       name: Налоги и бухгалтеры
       icon: '<i class="fas fa-file-invoice"></i>'
-    - id: services-beauty
+    - id: beauty
       name: Красота
       icon: '<i class="fas fa-cut"></i>'
+    - id: translation
+      name: Переводчики
+      icon: '<i class="fas fa-language"></i>'
 
 - id: coupons
   name: Купоны и скидки
@@ -49,7 +49,7 @@
   children:
     - id: software
       name: Софт и подписки
-      icon: '<i class="fas fa-sync"></i>'
+      icon: '<i class="fas fa-desktop"></i>'
     - id: stores
       name: Магазины
       icon: '<i class="fas fa-store"></i>'

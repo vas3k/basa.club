@@ -37,6 +37,7 @@ class Subscription(models.Model):
         on_delete=models.CASCADE,
     )
     query = models.CharField(max_length=QUERY_MAX_LENGTH, blank=True, default="")
+    with_global = models.BooleanField(default=False, verbose_name="Глобальные")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -93,6 +94,11 @@ class Subscription(models.Model):
             path = reverse("index")
         else:
             path = reverse("listing", kwargs={"country": country, "city": city})
+        params = {}
         if self.query:
-            return f"{path}?{urlencode({'query': self.query})}"
+            params["query"] = self.query
+        if self.with_global:
+            params["show_global"] = "1"
+        if params:
+            return f"{path}?{urlencode(params)}"
         return path

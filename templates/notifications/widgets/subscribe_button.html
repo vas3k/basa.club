@@ -12,6 +12,9 @@
         {% if request.GET.query %}
             <input type="hidden" name="query" value="{{ request.GET.query }}">
         {% endif %}
+        {% if show_global %}
+            <input type="hidden" name="with_global" value="1">
+        {% endif %}
         <button
             type="submit"
             class="button button-small feed-button feed-subscribe-button{% if listing_subscribed %} feed-button-active{% endif %}"

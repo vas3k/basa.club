@@ -12,6 +12,7 @@
                     <a class="subscription-label" href="{{ subscription.listing_url }}" data-behavior="geo-link" data-country="{{ subscription.country_id|default:'everywhere' }}" data-city="{{ subscription.city_id|default:'everywhere' }}">
                         <i class="far fa-bell"></i>
                         <span>{{ subscription.label }}</span>
+                        {% if subscription.with_global %}<span class="subscription-global">включая глобальные</span>{% endif %}
                     </a>
                     <form method="post" action="{% url "subscription_remove" subscription.id %}" class="subscription-remove">
                         {% csrf_token %}

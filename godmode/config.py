@@ -203,6 +203,7 @@ ADMIN = ClubAdmin(
                         "city",
                         "category",
                         "query",
+                        "with_global",
                         "created_at",
                     ],
                 ),
