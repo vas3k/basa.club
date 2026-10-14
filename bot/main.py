@@ -11,16 +11,11 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 django.setup()
 
 from django.conf import settings
-from telegram.ext import Application, CallbackQueryHandler, CommandHandler, filters
+from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, filters
 
-from bot.config import WELCOME_MESSAGE
-from bot.handlers import auth, notifications
+from bot.handlers import auth, help, items, notifications
 
 log = logging.getLogger(__name__)
-
-
-async def command_help(update, context) -> None:
-    await update.effective_chat.send_message(WELCOME_MESSAGE)
 
 
 def main() -> None:
@@ -30,7 +25,12 @@ def main() -> None:
 
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", auth.command_start, filters.ChatType.PRIVATE))
-    application.add_handler(CommandHandler("help", command_help, filters.ChatType.PRIVATE))
+    application.add_handler(CommandHandler("help", help.command_help, filters.ChatType.PRIVATE))
+    application.add_handler(CommandHandler("add", items.command_add))
+    application.add_handler(MessageHandler(
+        filters.ChatType.PRIVATE & (filters.TEXT | filters.CAPTION) & ~filters.COMMAND,
+        items.private_message,
+    ))
     application.add_handler(CallbackQueryHandler(auth.confirm_callback, pattern=r"^link:.+"))
     application.add_handler(CallbackQueryHandler(notifications.unsubscribe_callback, pattern=r"^unsub:"))
     if settings.DEBUG:

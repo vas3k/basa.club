@@ -98,7 +98,7 @@ The Docker build installs locked Python dependencies and builds the frontend wit
 `npm ci` and `npm run build`.
 
 `make docker-run-production` applies migrations, updates categories from
-`common/data/categories.yaml`, collects static files and starts Gunicorn. A
+`common/data/categories.py`, collects static files and starts Gunicorn. A
 category update reports problems and still lets the server start. Compose mounts
 `frontend/static/` from the host at `/tmp/static` so nginx can serve the collected
 files. Queue workers, Telegram and cron run separately. Only the web container
@@ -151,6 +151,7 @@ Configure repository secrets:
 | `MEDIA_UPLOAD_CODE` | Media service upload credential |
 | `EMAIL_HOST_USER`, `EMAIL_HOST_PASSWORD` | SMTP credentials |
 | `SENTRY_DSN` | Optional error reporting |
+| `OPENAI_API_KEY` | OpenAI API key for the item parser |
 
 `.env.example` lists the generated environment values for reference. CI replaces
 the host `.env` on each deployment. There are no separate release scripts,

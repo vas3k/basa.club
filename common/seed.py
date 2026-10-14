@@ -1,64 +1,56 @@
-from pathlib import Path
-
-import yaml
-
-DATA_DIR = Path(__file__).resolve().parent / "data"
+from common.data.categories import CATEGORIES
+from common.data.geo import GEO
 
 
 def seed_categories(Category):
     def create_tree(nodes, parent=None, root=None):
         for index, node in enumerate(nodes):
-            if "is_global" in node:
-                is_global = bool(node["is_global"])
-            else:
+            if node.is_global is None:
                 is_global = bool(parent and getattr(parent, "is_global", False))
+            else:
+                is_global = bool(node.is_global)
             defaults = {
-                "name": node["name"],
-                "icon": node.get("icon") or "",
-                "description": node.get("description") or "",
+                "name": node.name,
+                "icon": node.icon or "",
+                "description": node.description or "",
                 "parent": parent,
                 "root": root,
-                "sort_order": node.get("sort_order", index),
+                "sort_order": index,
             }
             if any(field.name == "is_global" for field in Category._meta.fields):
                 defaults["is_global"] = is_global
             category, _ = Category.objects.update_or_create(
-                id=node["id"],
+                id=node.id,
                 defaults=defaults,
             )
-            create_tree(node.get("children") or [], parent=category, root=root or category)
+            create_tree(node.children, parent=category, root=root or category)
 
-    with open(DATA_DIR / "categories.yaml", encoding="utf-8") as file:
-        categories = yaml.safe_load(file) or []
-    create_tree(categories)
+    create_tree(CATEGORIES)
 
 
 def seed_geo(GeoCountry, GeoCity):
-    with open(DATA_DIR / "geo.yaml", encoding="utf-8") as file:
-        catalog = yaml.safe_load(file) or []
-
-    for country in catalog:
-        country_id = geo_id(country.get("id"), country.get("name"))
+    for country in GEO:
+        country_id = geo_id(country.id, country.name)
         country_obj, _ = GeoCountry.objects.update_or_create(
             id=country_id,
             defaults={
-                "name": country["name"],
-                "icon": country.get("icon") or "",
+                "name": country.name,
+                "icon": country.icon or "",
             },
         )
-        for city in country.get("cities") or []:
+        for city in country.cities:
             GeoCity.objects.update_or_create(
-                id=geo_id(city.get("id"), city.get("name")),
+                id=geo_id(city.id, city.name),
                 defaults={
-                    "name": city["name"],
-                    "icon": city.get("icon") or "",
+                    "name": city.name,
+                    "icon": city.icon or "",
                     "country": country_obj,
                 },
             )
 
 
 def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
-    """Upsert geo.yaml and drop catalog rows nothing points at anymore.
+    """Upsert the geo catalog and drop catalog rows nothing points at anymore.
 
     Listings, subscriptions, and profile places keep their country and city.
     An unquoted YAML `no` was loaded as false, so Norway may be stored as "False".
@@ -91,13 +83,10 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
     }
     country_ids = set()
     city_ids = set()
-    with open(DATA_DIR / "geo.yaml", encoding="utf-8") as file:
-        catalog = yaml.safe_load(file) or []
-
-    for country in catalog:
-        country_ids.add(geo_id(country.get("id"), country.get("name")))
-        for city in country.get("cities") or []:
-            city_ids.add(geo_id(city.get("id"), city.get("name")))
+    for country in GEO:
+        country_ids.add(geo_id(country.id, country.name))
+        for city in country.cities:
+            city_ids.add(geo_id(city.id, city.name))
     seed_geo(GeoCountry, GeoCity)
 
     renamed_city_ids = []
@@ -152,6 +141,6 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
 def geo_id(value, label):
     if not isinstance(value, str) or not value.strip():
         raise ValueError(
-            f"geo.yaml id for {label!r} must be a quoted string, got {value!r}"
+            f"geo id for {label!r} must be a non-empty string, got {value!r}"
         )
     return value.strip()

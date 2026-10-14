@@ -1,5 +1,6 @@
 from django.utils import timezone
 
+from bot.handlers.help import HELP_MESSAGE
 from notifications.telegram.common import render_html_message, send_telegram_message
 from users.models import User
 
@@ -8,7 +9,10 @@ def send_telegram_user_logged_in(user_id):
     user = User.objects.filter(pk=user_id).first()
     if not user or not user.telegram_id:
         return
-    send_telegram_message(user.telegram_id, "✅ <b>Ура! Вы успешно вошли в Базу</b>")
+    send_telegram_message(
+        user.telegram_id,
+        "✅ <b>Ура! Вы успешно вошли в Базу</b>\n\n" + HELP_MESSAGE,
+    )
 
 
 def send_telegram_user_banned(user_id, reason, comment, until, is_permanent):

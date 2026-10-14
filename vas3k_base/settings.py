@@ -252,6 +252,10 @@ CSRF_COOKIE_SECURE = not DEBUG
 CSRF_COOKIE_SAMESITE = "Lax"
 
 
+# AI
+
+OPENAI_API_KEY = os.getenv("OPENAI_API_KEY") or ""
+
 # Stripe
 
 STRIPE_API_KEY = os.getenv("STRIPE_API_KEY") or ""
@@ -263,6 +267,9 @@ STRIPE_CANCEL_URL = f"{APP_HOST}/user/me/"
 # Auth
 
 AUTH_USER_MODEL = "users.User"
+BOT_USER_SLUG = "bot"
+MODERATOR_USER_SLUG = "moderator"
+DELETED_USER_SLUG = "deleted"
 CLUB_BASE_URL = "https://vas3k.club"
 CLUB_OPENID_CONFIG = {
     "name": "club",

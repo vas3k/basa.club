@@ -3,17 +3,17 @@ from django.db import IntegrityError, transaction
 from django.db.models import Q
 
 from categories.models import Category
-from common.seed import DATA_DIR
+from common.data.categories import CATEGORIES
 from items.models import Item
 from notifications.models import Subscription
 
-# categories.yaml stays the catalog until the tree stops changing. Take this command
+# CATEGORIES stays the catalog until the tree stops changing. Take this command
 # off the production boot path when that happens.
 
 
 class Command(BaseCommand):
     help = (
-        "Update categories from categories.yaml. "
+        "Update categories from common/data/categories.py. "
         "Listings in a removed category move onto the broader parent category. "
         "Items are never deleted."
     )
@@ -88,44 +88,26 @@ def sync_categories():
 
 
 def load_records(clashes):
-    path = DATA_DIR / "categories.yaml"
-    try:
-        import yaml
-        with open(path, encoding="utf-8") as file:
-            catalog = yaml.safe_load(file)
-    except Exception as error:
-        clashes.append(f"could not read {path.name}: {error}")
-        return None
-
-    if not isinstance(catalog, list) or not catalog:
-        clashes.append(f"{path.name} is empty, existing categories were left untouched")
+    if not CATEGORIES:
+        clashes.append("CATEGORIES is empty, existing categories were left untouched")
         return None
 
     records = []
     seen = set()
-    collect_records(catalog, None, None, False, records, seen, clashes)
+    collect_records(CATEGORIES, None, None, False, records, seen, clashes)
     if not records:
-        clashes.append(f"{path.name} has no usable categories, existing categories were left untouched")
+        clashes.append("CATEGORIES has no usable categories, existing categories were left untouched")
         return None
     return records
 
 
 def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, clashes):
-    if not isinstance(nodes, list):
-        clashes.append(f"children of {parent_id or 'the root'} are not a list")
-        return
-
     for index, node in enumerate(nodes):
-        if not isinstance(node, dict):
-            clashes.append(f"skipped a non-mapping category under {parent_id or 'the root'}")
-            continue
-
-        category_id = node.get("id")
-        label = node.get("name") or parent_id or "the root"
-        if not isinstance(category_id, str) or not category_id.strip():
+        category_id = node.id.strip() if isinstance(node.id, str) else ""
+        label = node.name if isinstance(node.name, str) and node.name.strip() else parent_id or "the root"
+        if not category_id:
             clashes.append(f"skipped {label!r}: id must be a string")
             continue
-        category_id = category_id.strip()
         if len(category_id) > 64:
             clashes.append(f"skipped {category_id!r}: id is longer than 64 characters")
             continue
@@ -133,16 +115,15 @@ def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, 
             clashes.append(f"skipped duplicate id {category_id}")
             continue
 
-        name = node.get("name")
-        if not isinstance(name, str) or not name.strip():
+        name = node.name.strip() if isinstance(node.name, str) else ""
+        if not name:
             clashes.append(f"skipped {category_id}: name is missing")
             continue
-        name = name.strip()
         if len(name) > 255:
             clashes.append(f"{category_id}: name is longer than 255 characters")
             name = name[:255]
 
-        icon = node.get("icon") or ""
+        icon = node.icon or ""
         if not isinstance(icon, str):
             clashes.append(f"{category_id}: icon is not text")
             icon = ""
@@ -150,15 +131,15 @@ def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, 
             clashes.append(f"{category_id}: icon is longer than 255 characters")
             icon = icon[:255]
 
-        description = node.get("description") or ""
+        description = node.description or ""
         if not isinstance(description, str):
             clashes.append(f"{category_id}: description is not text")
             description = ""
 
-        if "is_global" in node:
-            is_global = bool(node["is_global"])
-        else:
+        if node.is_global is None:
             is_global = inherited_global
+        else:
+            is_global = bool(node.is_global)
 
         seen.add(category_id)
         records.append({
@@ -174,7 +155,7 @@ def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, 
             },
         })
         collect_records(
-            node.get("children") or [],
+            node.children,
             category_id,
             root_id or category_id,
             is_global,
@@ -233,7 +214,7 @@ def retire_category(category, desired_ids, moved_item_ids, notes, clashes):
 
 
 def broader_category(category, desired_ids):
-    """Parent to keep the listings on. Prefer a category that is still in the file."""
+    """Parent to keep the listings on. Prefer a category that is still in the catalog."""
     fallback = None
     current = category
     seen = set()

@@ -21,6 +21,7 @@ from django.db import connection  # noqa: E402
 from django.utils import timezone  # noqa: E402
 
 from categories.models import Category  # noqa: E402
+from common.data.geo import GEO  # noqa: E402
 
 USERS = [
     ("anna-kovaleva", "Анна Ковалёва", "Берлин", "Германия", "Продакт. Собираю врачей, кафе и нормальные сервисы."),
@@ -577,19 +578,24 @@ PHONES = {
     None: "+49 151 700{n:04d}",
 }
 
-CITIES = [
-    ("de", "berlin"),
-    ("de", "munich"),
-    ("de", "hamburg"),
-    ("rs", "belgrade"),
-    ("rs", "novi-sad"),
-    ("rs", "nis"),
-    ("ge", "tbilisi"),
-    ("ge", "batumi"),
-    ("ge", "kutaisi"),
-]
-
-COUNTRIES = ["de", "rs", "ge"]
+DEMO_CITY_IDS = (
+    "berlin",
+    "munich",
+    "hamburg",
+    "belgrade",
+    "novi-sad",
+    "nis",
+    "tbilisi",
+    "batumi",
+    "kutaisi",
+)
+CITY_COUNTRY = {
+    city.id: country.id
+    for country in GEO
+    for city in country.cities
+}
+CITIES = [(CITY_COUNTRY[city_id], city_id) for city_id in DEMO_CITY_IDS]
+COUNTRIES = list(dict.fromkeys(country_id for country_id, city_id in CITIES))
 
 COMMENTS = [
     "Ходил на прошлой неделе, всё как написано. Спасибо.",
