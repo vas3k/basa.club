@@ -39,7 +39,7 @@ async def command_start(update: Update, context: CallbackContext) -> None:
         await update.effective_chat.send_message(
             text,
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("Открыть сайт", url=url),
+                InlineKeyboardButton("Войти в Базу", url=url),
             ]]),
         )
     finally:
@@ -69,7 +69,7 @@ async def confirm_callback(update: Update, context: CallbackContext) -> None:
         await query.edit_message_text(
             text,
             reply_markup=InlineKeyboardMarkup([[
-                InlineKeyboardButton("Открыть сайт", url=url),
+                InlineKeyboardButton("Войти в Базу", url=url),
             ]]),
         )
     finally:

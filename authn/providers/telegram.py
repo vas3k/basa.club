@@ -61,10 +61,10 @@ def confirm(code, data):
         if not user.contact and payload.get("username"):
             user.contact = f"@{payload['username']}"[:256]
         user.save()
-        text = "Готово. Откройте сайт, чтобы войти."
+        text = "Бот узнал вас. Нажмите кнопку ниже, чтобы войти."
     elif account:
         auth_code.user = account
-        text = "Готово. Откройте сайт, чтобы войти."
+        text = "Бот узнал вас. Нажмите кнопку ниже, чтобы войти."
     else:
         text = "Telegram подтверждён. На сайте останется короткая анкета."
 

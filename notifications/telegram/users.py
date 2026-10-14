@@ -4,6 +4,13 @@ from notifications.telegram.common import render_html_message, send_telegram_mes
 from users.models import User
 
 
+def send_telegram_user_logged_in(user_id):
+    user = User.objects.filter(pk=user_id).first()
+    if not user or not user.telegram_id:
+        return
+    send_telegram_message(user.telegram_id, "✅ <b>Ура! Вы успешно вошли в Базу</b>")
+
+
 def send_telegram_user_banned(user_id, reason, comment, until, is_permanent):
     user = User.objects.filter(pk=user_id).first()
     if not user or not user.telegram_id:

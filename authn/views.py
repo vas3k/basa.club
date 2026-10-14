@@ -14,6 +14,7 @@ from requests import HTTPError
 
 from authn.helpers import start_session
 from authn.providers import club, telegram
+from notifications import notification
 from authn.providers.club import oauth
 from users.models import User
 from vas3k_base.exceptions import RateLimitException
@@ -147,4 +148,7 @@ def telegram_continue(request):
     if not isinstance(user, User):
         return user
 
-    return start_session(request, user, new_user=getattr(user, "just_created", False))
+    response = start_session(request, user, new_user=getattr(user, "just_created", False))
+    if not user.is_banned:
+        notification.user_logged_in(user)
+    return response

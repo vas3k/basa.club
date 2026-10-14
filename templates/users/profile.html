@@ -9,23 +9,25 @@
     {% include "users/widgets/profile_header.html" %}
 
     <div class="profile-feed">
-        <div class="block-header block-header-with-button">Посты</div>
-        <section class="content-items">
-            {% for item in active_items %}
-                {% if request.user.pk == profile_user.pk %}
-                    {% include "items/list/default.html" with show_owner_actions=True %}
-                {% else %}
-                    {% include "items/list/default.html" %}
-                {% endif %}
-            {% empty %}
-                <div class="block">
-                    Пока ничего нет.
-                </div>
-            {% endfor %}
-        </section>
-        {% paginator active_items %}
+        {% if active_items %}
+            <div class="block-header block-header-with-button">Посты</div>
+            <section class="content-items">
+                {% for item in active_items %}
+                    {% if request.user.pk == profile_user.pk %}
+                        {% include "items/list/default.html" with show_owner_actions=True %}
+                    {% else %}
+                        {% include "items/list/default.html" %}
+                    {% endif %}
+                {% empty %}
+                    <div class="block">
+                        Пока ничего нет.
+                    </div>
+                {% endfor %}
+            </section>
+            {% paginator active_items %}
+        {% endif %}
 
-        {% if request.user.pk == profile_user.pk and inactive_items.paginator.count %}
+        {% if inactive_items and request.user.pk == profile_user.pk and inactive_items.paginator.count %}
             <div class="block-header block-header-with-button">Не в общей ленте</div>
             <section class="content-items">
                 {% for item in inactive_items %}
@@ -35,14 +37,14 @@
             {% paginator inactive_items "inactive_page" %}
         {% endif %}
 
-        <div class="block-header block-header-with-button">Комментарии</div>
-        <section class="content-items">
-            {% for comment in comments %}
-                {% include "comments/profile_comment.html" %}
-            {% empty %}
-                <div class="block">Комментариев пока нет.</div>
-            {% endfor %}
-        </section>
-        {% paginator comments "comments_page" %}
+        {% if comments %}
+            <div class="block-header block-header-with-button">Комментарии</div>
+            <section class="content-items">
+                {% for comment in comments %}
+                    {% include "comments/profile_comment.html" %}
+                {% endfor %}
+            </section>
+            {% paginator comments "comments_page" %}
+        {% endif %}
     </div>
 {% endblock %}
