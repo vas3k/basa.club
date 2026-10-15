@@ -1,5 +1,7 @@
 🚩 <b>{{ flag.get_reason_display }}</b>
-{% if flag.comment %}{{ flag.comment }}
+{% if flag.comment %}
+{{ flag.comment }}
 {% endif %}
-Пост: <a href="{{ settings.APP_HOST }}{{ flag.item.get_absolute_url }}">{{ flag.item.title }}</a>
-Жалоба от: <a href="{{ settings.APP_HOST }}{{ flag.user.get_absolute_url }}">{{ flag.user.full_name|default:flag.user.slug }}</a>
+
+<b>Пост:</b> <a href="{{ settings.APP_HOST }}{{ flag.item.get_absolute_url }}">{{ flag.item.title }}</a>
+<b>Жалоба от:</b> <a href="{{ settings.APP_HOST }}{{ flag.user.get_absolute_url }}">{{ flag.user.full_name|default:flag.user.slug }}</a>
