@@ -17,7 +17,7 @@
                 {% for item in world_items %}
                     {% include "items/list/card.html" %}
                 {% endfor %}
-                <a class="index-card-more" href="/everywhere/everywhere/" data-behavior="geo-link" data-country="everywhere" data-city="everywhere">Все ▶︎</a>
+                <a class="index-card-more" href="/everywhere/everywhere/">Все ▶︎</a>
             </div>
         </section>
     {% endif %}
@@ -30,7 +30,7 @@
                     {% for item in country_items %}
                         {% include "items/list/card.html" %}
                     {% endfor %}
-                    <a class="index-card-more" href="{% url "listing" current_country.id "everywhere" %}" data-behavior="geo-link" data-country="{{ current_country.id }}" data-city="everywhere">Все ▶︎</a>
+                    <a class="index-card-more" href="{% url "listing" current_country.id "everywhere" %}">Все ▶︎</a>
                 </div>
             {% else %}
                 <div class="block feed-empty">
@@ -54,7 +54,7 @@
                 {% for item in subscription.index_items %}
                     {% include "items/list/card.html" %}
                 {% endfor %}
-                <a class="index-card-more" href="{{ subscription.listing_url }}" data-behavior="geo-link" data-country="{{ subscription.country_id|default:'everywhere' }}" data-city="{{ subscription.city_id|default:'everywhere' }}">Все ▶︎</a>
+                <a class="index-card-more" href="{{ subscription.listing_url }}">Все ▶︎</a>
             </div>
         </section>
     {% endfor %}
@@ -66,7 +66,7 @@
                 {% for item in all_items %}
                     {% include "items/list/card.html" %}
                 {% endfor %}
-                <a class="index-card-more" href="/everywhere/everywhere/" data-behavior="geo-link" data-country="everywhere" data-city="everywhere">Все ▶︎</a>
+                <a class="index-card-more" href="/everywhere/everywhere/">Все ▶︎</a>
             </div>
         </section>
     {% endif %}

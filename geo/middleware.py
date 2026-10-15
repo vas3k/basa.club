@@ -1,14 +1,14 @@
-class GeoCookieMiddleware:
-    def __init__(self, get_response):
-        self.get_response = get_response
+from django.utils.deprecation import MiddlewareMixin
 
-    def __call__(self, request):
-        request.country_id = request.COOKIES.get("country") or "everywhere"
-        request.city_id = request.COOKIES.get("city") or "everywhere"
 
-        response = self.get_response(request)
+class GeoMiddleware(MiddlewareMixin):
+    def process_view(self, request, view_func, view_args, view_kwargs):
+        request.country_id = view_kwargs.get("country") or "everywhere"
+        request.city_id = view_kwargs.get("city") or "everywhere"
 
-        if "country" not in request.COOKIES:
-            response.set_cookie("country", request.country_id, max_age=365 * 24 * 60 * 60, samesite="Lax", path="/")
-            response.set_cookie("city", request.city_id, max_age=365 * 24 * 60 * 60, samesite="Lax", path="/")
+    def process_response(self, request, response):
+        if "country" in request.COOKIES:
+            response.delete_cookie("country", path="/", samesite="Lax")
+        if "city" in request.COOKIES:
+            response.delete_cookie("city", path="/", samesite="Lax")
         return response

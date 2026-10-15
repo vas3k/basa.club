@@ -1,7 +1,3 @@
-import { setCookie } from "../lib/cookies";
-
-const YEAR = 31536000;
-
 export default function geoSelect(form: HTMLElement) {
     const countrySelect = form.querySelector<HTMLSelectElement>("[data-geo=country]");
     const citySelect = form.querySelector<HTMLSelectElement>("[data-geo=city]");
@@ -10,8 +6,6 @@ export default function geoSelect(form: HTMLElement) {
         select.addEventListener("change", (event) => {
             const country = countrySelect?.value || "everywhere";
             const city = select.dataset.geo === "country" ? "everywhere" : citySelect?.value || "everywhere";
-            setCookie("country", country, YEAR);
-            setCookie("city", city, YEAR);
             event.stopPropagation();
             window.location.assign(placePath(country, city));
         });

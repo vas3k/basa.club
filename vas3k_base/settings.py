@@ -62,7 +62,7 @@ MIDDLEWARE = [
     "authn.middleware.AuthSessionMiddleware",
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
-    "geo.middleware.GeoCookieMiddleware",
+    "geo.middleware.GeoMiddleware",
     "vas3k_base.middleware.ExceptionMiddleware",
 ]
 

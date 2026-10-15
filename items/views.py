@@ -11,7 +11,7 @@ from comments.forms import CommentForm, ReplyForm
 from comments.models import Comment
 from counters import counters
 from common.contacts import CONTACT_EDITOR_FIELDS
-from geo.models import GeoCountry
+from geo.models import GeoCity, GeoCountry
 from items.forms import ItemForm
 from items.models import Item
 from notifications import notification
@@ -96,27 +96,21 @@ def index_page(request, country=None):
                 with_items.append(subscription)
         subscriptions = with_items
 
-    response = render(request, "index.html", {
+    return render(request, "index.html", {
         "country_items": country_items,
         "world_items": world_items,
         "all_items": all_items,
         "subscriptions": subscriptions,
         "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not world_items and not all_items and not subscriptions else [],
     })
-    if country:
-        max_age = 365 * 24 * 60 * 60
-        response.set_cookie("country", request.country_id, max_age=max_age, samesite="Lax", path="/")
-        response.set_cookie("city", "everywhere", max_age=max_age, samesite="Lax", path="/")
-    return response
 
 
 def listing_page(request, country, city, category=None, subcategory=None):
     if response := anonymous_search_redirect(request):
         return response
 
-    if "country" not in request.COOKIES:
-        request.country_id = country
-        request.city_id = city
+    request.country_id = country
+    request.city_id = city
 
     current_category = None
     if subcategory:
@@ -237,15 +231,19 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 
     Item.objects.filter(pk=item.pk).update(view_count=F("view_count") + 1)
 
+    request.country_id = item.country_id or "everywhere"
+    request.city_id = item.city_id or "everywhere"
     return render_item_page(request, item)
 
 
 @login_required
 @require_http_methods(["GET", "POST"])
 def create_item(request):
+    country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
+    city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
     initial = {
-        "country": request.country_id,
-        "city": request.city_id if request.city_id != "everywhere" else None,
+        "country": country.id if country else "everywhere",
+        "city": city.id if city else None,
     }
     if request.method == "GET":
         initial = ItemForm.initial_from_query(request.GET, initial)
