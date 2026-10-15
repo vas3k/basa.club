@@ -12,6 +12,17 @@
             Давайте начнем с заполнения небольшого профиля. Нам всегда приятно видеть живых настоящих людей, а анонимные аккаунты у нас не вызывают особого доверия.
         </div>
 
+        <div class="welcome-links">
+            <a class="button" href="{% url "about" %}" target="_blank" rel="noopener noreferrer">
+                <i class="fas fa-book-open"></i>
+                Правила Базы
+            </a>
+            <a class="button button-blue" href="{{ settings.TELEGRAM_PUBLIC_CHAT_URL }}" target="_blank" rel="noopener noreferrer">
+                <i class="fab fa-telegram"></i>
+                Общий чат
+            </a>
+        </div>
+
         <form class="profile-form" method="post" action="{% url "welcome" %}">
             {% csrf_token %}
             {% include "users/widgets/profile_fields.html" %}

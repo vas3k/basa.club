@@ -120,3 +120,11 @@ class User(SoftDeleteMixin, AbstractBaseUser, PermissionsMixin):
         if self.membership_started_at and self.membership_started_at > now:
             return False
         return True
+
+    def get_metadata_value(self, key, default=None):
+        return (self.metadata or {}).get(key, default)
+
+    def set_metadata_value(self, key, value):
+        metadata = dict(self.metadata or {})
+        metadata[key] = value
+        self.metadata = metadata

@@ -32,7 +32,7 @@ class AuthSessionMiddleware:
                 if not request.path.startswith(PUBLIC_PREFIXES):
                     return redirect("banned")
 
-            if (request.user.metadata or {}).get("welcome_completed") is False:
+            if not request.user.get_metadata_value("is_onboarded"):
                 if not request.path.startswith(WELCOME_PREFIXES):
                     return redirect("welcome")
 

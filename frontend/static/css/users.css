@@ -105,6 +105,14 @@
     padding-top: 8px;
 }
 
+.welcome-links {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin: 8px 0 36px;
+}
+
 .welcome-agreements {
     display: flex;
     flex-direction: column;

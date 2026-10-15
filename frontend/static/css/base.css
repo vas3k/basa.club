@@ -206,9 +206,9 @@
 }
 
 .button-blue:hover {
-    background-color: #0077b3;
-    border-color: #0077b3;
-    color: #fff;
+    color: #0088cc;
+    background-color: var(--button-hover-bg-color);
+    border: solid 2px #0088cc;
 }
 
 .button-black {

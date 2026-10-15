@@ -15,9 +15,6 @@ from notifications.subscriptions import subscribe_to_geo
 
 @login_required
 def profile_page(request, slug):
-    if (request.user.metadata or {}).get("welcome_completed") is False:
-        return redirect("welcome")
-
     if not request.user.telegram_id:
         return redirect("bot")
 
@@ -99,7 +96,7 @@ def edit_profile(request, slug):
 @login_required
 @require_http_methods(["GET", "POST"])
 def welcome(request):
-    if (request.user.metadata or {}).get("welcome_completed") is not False:
+    if request.user.get_metadata_value("is_onboarded"):
         return redirect("user_profile", slug=request.user.slug)
 
     user = request.user
@@ -115,9 +112,7 @@ def welcome(request):
 
     if request.method == "POST" and form.is_valid():
         user = form.save(commit=False)
-        metadata = dict(user.metadata or {})
-        metadata["welcome_completed"] = True
-        user.metadata = metadata
+        user.set_metadata_value("is_onboarded", True)
         user.save()
 
         subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])

@@ -27,12 +27,8 @@ def start_session(request, user, *, new_user=False):
         return render(request, "error.html", {
             "title": "Вам сюда нельзя", "message": "Аккаунт заблокирован",
         }, status=403)
+        
     login(request, user)
-    if new_user:
-        # False sends the user through /welcome/. A missing key is an older account.
-        metadata = dict(user.metadata or {})
-        metadata["welcome_completed"] = False
-        user.metadata = metadata
     request.session.set_expiry(settings.SESSION_COOKIE_AGE)
     user.last_activity_at = timezone.now()
     user.save(update_fields=["last_activity_at", "metadata"])
