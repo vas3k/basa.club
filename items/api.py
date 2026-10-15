@@ -31,7 +31,7 @@ def upvote_item(request, item_id):
     if created:
         counters.item_upvoted(item)
 
-    return JsonResponse({"rating": format_rating(item.rating), "voted": True})
+    return JsonResponse({"rating": format_rating(item.rating + (1 if created else 0)), "voted": True})
 
 
 @api_login_required
@@ -46,4 +46,4 @@ def retract_item_vote(request, item_id):
     if deleted:
         counters.item_unvoted(item)
 
-    return JsonResponse({"rating": format_rating(item.rating), "voted": False})
+    return JsonResponse({"rating": format_rating(item.rating - (1 if deleted else 0)), "voted": False})
