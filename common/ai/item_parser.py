@@ -1,6 +1,6 @@
 from dataclasses import dataclass, field
 
-from common.ai.core import OPENAI_MODEL_DUMB, llm_request_structured, schema_from
+from common.ai.core import OPENAI_MODEL_DUMB, ask_llm_structured, schema_from
 from common.contacts import CONTACTS
 from common.data.categories import CATEGORIES
 from items.models import Item
@@ -88,6 +88,6 @@ def parse_item(text, model=OPENAI_MODEL_DUMB):
     if not message:
         raise ValueError("Empty item text")
 
-    data = llm_request_structured(ITEM_PARSER_PROMPT, message, ITEM_SCHEMA, model=model)
+    data = ask_llm_structured(ITEM_PARSER_PROMPT, message, ITEM_SCHEMA, model=model)
     data["contacts"] = [ParsedContact(**row) for row in data["contacts"]]
     return ParsedItem(**data)

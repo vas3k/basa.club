@@ -42,7 +42,7 @@ def schema_from(cls):
     }
 
 
-def llm_request_structured(instructions, text, schema, model=OPENAI_MODEL_DUMB):
+def ask_llm_structured(instructions, text, schema, model=OPENAI_MODEL_DUMB):
     response = openai_client().responses.create(
         model=model,
         reasoning={"effort": "low"},

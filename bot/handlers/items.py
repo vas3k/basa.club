@@ -1,3 +1,4 @@
+import asyncio
 import logging
 
 from django.conf import settings
@@ -14,6 +15,7 @@ from geo.models import GeoCity, GeoCountry
 from items.models import Item
 from notifications import notification
 from search import search
+from telegram.error import TimedOut
 from users.models import User
 
 log = logging.getLogger(__name__)
@@ -169,17 +171,21 @@ def publish_parsed_item(author, parsed):
 
 
 def add_listing(author, text):
-    try:
-        parsed = parse_item(text, model=OPENAI_MODEL_SMART)
-    except Exception:
-        log.exception("item parse failed")
-        return None, "Не получилось разобрать сообщение. Попробуйте ещё раз."
-
     close_old_connections()
-    reason = rejection(parsed, author)
-    if reason:
-        return None, reason
-    return publish_parsed_item(author, parsed), ""
+    try:
+        try:
+            parsed = parse_item(text, model=OPENAI_MODEL_SMART)
+        except Exception:
+            log.exception("item parse failed")
+            return None, "Не получилось разобрать сообщение. Попробуйте ещё раз."
+
+        close_old_connections()
+        reason = rejection(parsed, author)
+        if reason:
+            return None, reason
+        return publish_parsed_item(author, parsed), ""
+    finally:
+        close_old_connections()
 
 
 def item_url(item):
@@ -237,12 +243,23 @@ async def answer_listing(message, text):
             f"{BOT_PAGE_URL}"
         )
         return
+
     if author.is_banned:
-        await message.reply_text("Вы не можете добавлять объявления.")
+        await message.reply_text("Вы забанены и не можете добавлять объявления.")
         return
 
-    item, error = add_listing(author, text)
+    await message.reply_chat_action("typing")
+    await reply(message, "Посмотрим, парсю сообщение...")
+
+    item, error = await asyncio.to_thread(add_listing, author, text)
     if error:
-        await message.reply_text(error[:4096])
+        await reply(message, error[:4096])
         return
-    await message.reply_text(f"Добавил в Базу: {item.title}\n{item_url(item)}")
+    await reply(message, f"Добавил в Базу: {item.title}\n{item_url(item)}")
+
+
+async def reply(message, text):
+    try:
+        await message.reply_text(text)
+    except TimedOut:
+        await message.reply_text(text)
