@@ -119,12 +119,21 @@ DATABASES = {
     }
 }
 
+REDIS_HOST = os.getenv("REDIS_HOST") or "127.0.0.1"
+REDIS_PORT = int(os.getenv("REDIS_PORT") or 6379)
+
 CACHES = {
     "default": {
         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
         "LOCATION": "vas3k-base",
         "TIMEOUT": 60 * 60 * 24,
-    }
+    },
+    # DB 1: cache.clear() must not flush the django-q queue, which uses DB 0.
+    "redis_cache": {
+        "BACKEND": "django.core.cache.backends.redis.RedisCache",
+        "LOCATION": f"redis://{REDIS_HOST}:{REDIS_PORT}/1",
+        "TIMEOUT": None,
+    },
 }
 
 if os.getenv("POSTGRES_USE_POOLING", "").lower() in {"1", "true"}:
@@ -152,8 +161,8 @@ Q_CLUSTER = {
     "queue_limit": 200,
     "save_limit": 50,
     "redis": {
-        "host": os.getenv("REDIS_HOST") or "127.0.0.1",
-        "port": int(os.getenv("REDIS_PORT") or 6379),
+        "host": REDIS_HOST,
+        "port": REDIS_PORT,
     },
 }
 

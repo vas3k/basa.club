@@ -1,28 +1,21 @@
-import tempfile
-import time
-from pathlib import Path
-
-from django.core.cache import cache
+from django.core.cache import caches
 from django.db.models import Count
 
 from items.models import Item
 
 # Counts for one root category and all of its subcategories, for one country and city.
-# The version file is shared by every process, so a management command or an item
-# change can drop the in-memory cache of the running server.
 TIMEOUT = 60 * 60 * 24
-VERSION_PATH = Path(tempfile.gettempdir()) / "vas3k-base-category-counts"
+VERSION_KEY = "category_counts:version"
+
+cache = caches["redis_cache"]
 
 
 def counts(root_id, country_id="everywhere", city_id="everywhere"):
     country_id = country_id or "everywhere"
     city_id = city_id or "everywhere"
-    try:
-        version = VERSION_PATH.read_text().strip() or "0"
-    except OSError:
-        version = "0"
+    version = cache.get(VERSION_KEY) or 0
 
-    key = f"category-counts:{version}:{country_id}:{city_id}:{root_id}"
+    key = f"category_counts:{version}:{country_id}:{city_id}:{root_id}"
     cached = cache.get(key)
     if cached is not None:
         return cached
@@ -34,14 +27,14 @@ def counts(root_id, country_id="everywhere", city_id="everywhere"):
 def invalidate(root_id):
     # One item is counted in its city, its country, and the whole-world view.
     if root_id:
-        VERSION_PATH.write_text(str(time.time()))
+        bump_version()
 
 
 def refresh_all():
     """Drop every process's category cache and return whole-world root totals."""
     from categories.models import Category
 
-    VERSION_PATH.write_text(str(time.time()))
+    bump_version()
     totals = {}
     for root_id in Category.objects.filter(parent__isnull=True).values_list("id", flat=True):
         fresh = calculate(root_id, "everywhere", "everywhere")
@@ -69,3 +62,12 @@ def calculate(root_id, country_id="everywhere", city_id="everywhere"):
         if row["subcategory_id"]:
             result[row["subcategory_id"]] = row["n"]
     return result
+
+
+def bump_version():
+    # incr fails when the key is missing; add is the race-safe first write.
+    try:
+        cache.incr(VERSION_KEY)
+    except ValueError:
+        if not cache.add(VERSION_KEY, 1):
+            cache.incr(VERSION_KEY)
