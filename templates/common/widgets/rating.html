@@ -1,4 +1,2 @@
 {# {% include "common/widgets/rating.html" with rating=item.rating %} #}
-{% if rating %}
-    <div class="rating-big {% if rating > 0 %}rating-positive{% else %}rating-negative{% endif %}" title="Рейтинг">{{ rating|rating }}</div>
-{% endif %}
+<div class="rating-big {% if rating > 0 %}rating-positive{% elif rating < 0 %}rating-negative{% else %}rating-zero{% endif %}" title="Рейтинг">{{ rating|rating }}</div>

@@ -44,10 +44,20 @@ export default function ItemUpvote({ rating, voted, upvoteUrl, retractUrl, login
         }
     }
 
+    const shown = Number.parseFloat(state.rating);
+    let tone = "rating-zero";
+    if (shown > 0) {
+        tone = "rating-positive";
+    } else if (shown < 0) {
+        tone = "rating-negative";
+    }
+
+    const className = state.voted ? `item-upvote ${tone} is-voted` : `item-upvote ${tone}`;
+
     return (
         <button
             type="button"
-            className={state.voted ? "item-upvote is-voted" : "item-upvote"}
+            className={className}
             disabled={!canToggle || isPending}
             aria-pressed={state.voted}
             title={!canToggle ? "Рейтинг" : state.voted ? "Забрать голос" : "Проголосовать"}

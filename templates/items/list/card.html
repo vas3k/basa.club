@@ -24,7 +24,7 @@
     </div>
     <div class="index-card-footer">
         {% include "users/widgets/user_tiny.html" with user=item.author %}
-        <span class="item-upvote index-card-rating{% if item.upvoted_at %} is-voted{% endif %}" title="{% if item.upvoted_at %}Вы голосовали{% else %}Рейтинг{% endif %}">
+        <span class="item-upvote index-card-rating {% if item.rating > 0 %}rating-positive{% elif item.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}{% if item.upvoted_at %} is-voted{% endif %}" title="{% if item.upvoted_at %}Вы голосовали{% else %}Рейтинг{% endif %}">
             <span class="item-upvote-rating">{{ item.rating|rating }}</span>
         </span>
     </div>

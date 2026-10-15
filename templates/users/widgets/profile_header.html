@@ -29,9 +29,9 @@
 
         <div class="profile-stats">
             {% if request.user.id == profile_user.id or request.user.is_moderator %}
-                <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="История изменений рейтинга">{{ profile_user.rating|rating }}</a>
+                <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}" title="История изменений рейтинга">{{ profile_user.rating|rating }}</a>
             {% else %}
-                <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
+                <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>
             {% endif %}
             <div class="profile-stat">Регистрация: {{ profile_user.created_at|date:"F Y" }}</div>
             <div class="profile-stat">Активность: {{ profile_user.last_activity_at|timesince }} назад</div>

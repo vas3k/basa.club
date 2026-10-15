@@ -185,10 +185,10 @@
     margin-left: auto;
     height: 40px;
     padding: 0 12px;
-    border: 2px solid #1f8a4c;
+    border: 2px solid #000;
     border-radius: var(--button-border-radius);
     background: var(--block-bg-color);
-    color: #1f8a4c;
+    color: #000;
     font-family: inherit;
     font-size: 132%;
     font-weight: 700;
@@ -202,17 +202,47 @@
     font-weight: 800;
 }
 
-.item-upvote:hover:not(:disabled) {
+.item-upvote.rating-positive {
+    border-color: #1f8a4c;
+    color: #1f8a4c;
+}
+
+.item-upvote.rating-negative {
+    border-color: #ff1917;
+    color: #ff1917;
+}
+
+.item-upvote.rating-zero {
+    border-color: #000;
+    color: #000;
+}
+
+.item-upvote.rating-positive:hover:not(:disabled) {
     background: #e7f6ee;
 }
 
-.item-upvote.is-voted {
+.item-upvote.rating-negative:hover:not(:disabled) {
+    background: #fdecec;
+}
+
+.item-upvote.rating-positive.is-voted,
+.item-upvote.rating-positive.is-voted:hover:not(:disabled) {
     background: #1f8a4c;
+    border-color: #1f8a4c;
     color: #fff;
 }
 
-.item-upvote.is-voted:hover:not(:disabled) {
-    background: #187a42;
+.item-upvote.rating-negative.is-voted,
+.item-upvote.rating-negative.is-voted:hover:not(:disabled) {
+    background: #ff1917;
+    border-color: #ff1917;
+    color: #fff;
+}
+
+.item-upvote.rating-zero.is-voted,
+.item-upvote.rating-zero.is-voted:hover:not(:disabled) {
+    background: #000;
+    border-color: #000;
     color: #fff;
 }
 
