@@ -5,6 +5,51 @@ from django.conf import settings
 
 log = logging.getLogger(__name__)
 
+IMAGE_KINDS = {
+    "jpg": "jpeg",
+    "jpeg": "jpeg",
+    "png": "png",
+    "gif": "gif",
+    "webp": "webp",
+}
+IMAGE_CONTENT_TYPES = {
+    "jpeg": {"image/jpeg", "image/jpg"},
+    "png": {"image/png"},
+    "gif": {"image/gif"},
+    "webp": {"image/webp"},
+}
+
+
+def supported_image(filename, uploaded):
+    extension = ""
+    if filename and "." in filename:
+        extension = filename.rsplit(".", 1)[-1].lower()
+    kind = IMAGE_KINDS.get(extension)
+    if not kind:
+        return False
+
+    content_type = (getattr(uploaded, "content_type", "") or "").split(";", 1)[0].strip().lower()
+    allowed = IMAGE_CONTENT_TYPES[kind]
+    if content_type and content_type not in allowed and content_type != "application/octet-stream":
+        return False
+
+    try:
+        header = uploaded.read(16) or b""
+    except OSError:
+        return False
+    try:
+        uploaded.seek(0)
+    except OSError:
+        return False
+
+    if kind == "jpeg":
+        return header.startswith(b"\xff\xd8\xff")
+    if kind == "png":
+        return header.startswith(b"\x89PNG\r\n\x1a\n")
+    if kind == "gif":
+        return header.startswith((b"GIF87a", b"GIF89a"))
+    return len(header) >= 12 and header[:4] == b"RIFF" and header[8:12] == b"WEBP"
+
 
 def upload_image_multipart(filename, data):
     """Forward a file to Pepic and trust the returned media URL."""

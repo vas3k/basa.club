@@ -38,7 +38,9 @@ class TelegramSignupForm(forms.ModelForm):
     avatar = forms.URLField(
         label="Аватар",
         required=False,
+        max_length=200,
         assume_scheme="https",
+        error_messages={"max_length": "Слишком длинное значение"},
     )
     contact = forms.CharField(
         label="Контакт",

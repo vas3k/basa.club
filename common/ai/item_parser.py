@@ -14,7 +14,6 @@ CATEGORY_CATALOG = "; ".join(category_parts)
 PREFIX_CHOICES = ", ".join(f"{value} ({label})" for value, label in Item.PREFIXES)
 CONTACT_TYPE_CHOICES = ", ".join(f"{row['type']} ({row['label']})" for row in CONTACTS)
 TITLE_MAX = Item._meta.get_field("title").max_length
-LOCATION_MAX = Item._meta.get_field("location").max_length
 PROMO_CODE_MAX = Item._meta.get_field("promo_code").max_length
 
 
@@ -24,8 +23,8 @@ class ParsedContact:
         "description": f"Одно из: {CONTACT_TYPE_CHOICES}",
         "enum": [row["type"] for row in CONTACTS],
     })
-    text: str = field(metadata={"description": "Номер, ник или ссылка"})
-    comment: str = field(metadata={"description": "Короткое пояснение. Имя можно. Пустая строка, если пояснения нет"})
+    text: str = field(metadata={"description": "Номер, ник или ссылка, до 256 символов"})
+    comment: str = field(metadata={"description": "Короткое пояснение, до 256 символов. Имя можно. Пустая строка, если пояснения нет"})
 
 
 @dataclass
@@ -44,12 +43,12 @@ class ParsedItem:
         "Имя человека/компании можно, район города или другой ориентир можно. Адреса, телефоны, ссылки и промокоды и любые приватные данные никогда не добавляй сюда."
     )})
     description: str = field(metadata={"description": (
-        "Комментарий, опыт, отзыв или пояснение лично автора. "
+        "Комментарий, опыт, отзыв или пояснение лично автора, до 5000 символов. "
         "Пустая строка, если их нет. Не копируй сюда никакие контакты или приватные данные."
     )})
-    location: str = field(metadata={"description": f"Точный адрес или ссылка на карту, до {LOCATION_MAX} символов. Пустая строка, если адреса нет"})
+    location: str = field(metadata={"description": "Точный адрес или ссылка на карту, до 512 символов. Пустая строка, если адреса нет"})
     contacts: list[ParsedContact] = field(metadata={
-        "description": "Найденные контакты. Пустой список, если их нет",
+        "description": "Найденные контакты, не больше 15. Пустой список, если их нет",
         "items": ParsedContact,
     })
     promo_code: str = field(metadata={"description": f"Промокод как в тексте, до {PROMO_CODE_MAX} символов. Пустая строка, если его нет"})

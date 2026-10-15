@@ -1,6 +1,6 @@
 import { useRef, useState } from "react";
 
-import { uploadImage } from "../lib/upload";
+import { imageAccept, uploadImage } from "../lib/upload";
 
 type Props = {
   name: string;
@@ -42,6 +42,7 @@ export default function ImageUpload({ name, value = "" }: Props) {
         <input
           ref={input}
           type="file"
+          accept={imageAccept}
           onChange={onChange}
         />
         {busy ? "Загружаю…" : null}

@@ -27,11 +27,12 @@ type Props = {
     addLabel?: string;
     fields: Field[];
     records?: unknown;
+    maxCount?: number;
 };
 
 let nextId = 1;
 
-export default function RecordList({ name, label, addLabel = "Добавить", fields, records }: Props) {
+export default function RecordList({ name, label, addLabel = "Добавить", fields, records, maxCount = 15 }: Props) {
     const defaults: Record<string, string> = {};
     for (const field of fields) {
         const options = field.options ?? [];
@@ -121,13 +122,24 @@ export default function RecordList({ name, label, addLabel = "Добавить",
                     </button>
                 </div>
             ))}
-            <button
-                type="button"
-                className="button button-inverted button-small record-list-add"
-                onClick={() => setRows((current) => [...current, { id: nextId++, values: { ...defaults } }])}
-            >
-                {addLabel}
-            </button>
+            {rows.length < maxCount && (
+                <button
+                    type="button"
+                    className="button button-inverted button-small record-list-add"
+                    onClick={() =>
+                        setRows((current) =>
+                            current.length >= maxCount
+                                ? current
+                                : [...current, { id: nextId++, values: { ...defaults } }],
+                        )
+                    }
+                >
+                    {addLabel}
+                </button>
+            )}
+            {rows.length > maxCount && (
+                <div className="form-error">Можно добавить не больше {maxCount} контактов</div>
+            )}
         </div>
     );
 }

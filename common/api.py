@@ -3,7 +3,7 @@ from django.http import JsonResponse
 from django.views.decorators.http import require_POST
 
 from authn.helpers import api_login_required
-from common.images import upload_image_multipart
+from common.images import supported_image, upload_image_multipart
 
 
 @api_login_required
@@ -12,6 +12,8 @@ def upload_image(request):
     upload = request.FILES.get("media")
     if not upload:
         return JsonResponse({"error": "Выберите файл"}, status=400)
+    if not supported_image(upload.name, upload):
+        return JsonResponse({"error": "Можно загрузить только картинки JPG, PNG, GIF или WebP"}, status=400)
 
     if not settings.MEDIA_UPLOAD_CODE:
         return JsonResponse({"error": "Загрузка картинок не настроена"}, status=503)

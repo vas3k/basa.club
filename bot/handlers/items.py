@@ -107,8 +107,8 @@ def prepare_listing(author, text):
         fields = {
             "prefix": prefix,
             "title": parsed.title.strip()[:Item._meta.get_field("title").max_length],
-            "description": (parsed.description or "").strip(),
-            "location": location[:Item._meta.get_field("location").max_length],
+            "description": (parsed.description or "").strip()[:5000],
+            "location": location[:512],
             "contacts": cleaned,
             "promo_code": promo_code[:Item._meta.get_field("promo_code").max_length],
             "category_id": category.id,

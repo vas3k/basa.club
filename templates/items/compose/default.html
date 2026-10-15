@@ -18,7 +18,7 @@
         {% if form.title.errors %}<div class="form-error">{{ form.title.errors }}</div>{% endif %}
     </div>
 
-    {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" %}
+    {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" max_length=form.description.field.max_length %}
     {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
 
     <div class="form-optionals">
@@ -26,7 +26,7 @@
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-images" {% if form.images.errors or form.images.value and form.images.value != "[]" and form.images.value != "null" %}hidden{% endif %}>+ Добавить картинки</button>
             <div class="block form-section" id="item-images" {% if not form.images.errors and not form.images.value or not form.images.errors and form.images.value == "[]" or not form.images.errors and form.images.value == "null" %}hidden{% endif %}>
                 <div class="form-section-title">🖼️ Картинки</div>
-                {% island "ImageList" name="images" images=form.images.value %}
+                {% island "ImageList" name="images" images=form.images.value max_count=15 %}
                 {% if form.images.errors %}<div class="form-error">{{ form.images.errors }}</div>{% endif %}
             </div>
         </div>
@@ -45,7 +45,7 @@
         <div class="form-optional form-optional-contacts">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-contacts" {% if form.contacts.errors or form.contacts.value and form.contacts.value != "[]" and form.contacts.value != "null" %}hidden{% endif %}>+ Добавить контакты и ссылки</button>
             <div class="block form-section" id="item-contacts" {% if not form.contacts.errors and not form.contacts.value or not form.contacts.errors and form.contacts.value == "[]" or not form.contacts.errors and form.contacts.value == "null" %}hidden{% endif %}>
-                {% island "RecordList" name="contacts" label="💬 Контакты и ссылки" add_label="Добавить контакт" fields=contact_fields records=form.contacts.value %}
+                {% island "RecordList" name="contacts" label="💬 Контакты и ссылки" add_label="Добавить контакт" fields=contact_fields records=form.contacts.value max_count=15 %}
                 {% if form.contacts.errors %}<div class="form-error">{{ form.contacts.errors }}</div>{% endif %}
             </div>
         </div>

@@ -15,7 +15,7 @@ import {
 } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
-import { uploadImage } from "../lib/upload";
+import { imageAccept, imageTypeError, isSupportedImage, uploadImage } from "../lib/upload";
 
 type ImageRow = {
     id: string;
@@ -26,6 +26,7 @@ type ImageRow = {
 type Props = {
     name: string;
     images?: unknown;
+    maxCount?: number;
 };
 
 let nextId = 1;
@@ -64,7 +65,7 @@ function SortableImage({ row, onRemove }: { row: ImageRow; onRemove: (id: string
     );
 }
 
-export default function ImageList({ name, images }: Props) {
+export default function ImageList({ name, images, maxCount = 15 }: Props) {
     const input = useRef<HTMLInputElement>(null);
     const [rows, setRows] = useState<ImageRow[]>(() => {
         let source = images;
@@ -104,7 +105,26 @@ export default function ImageList({ name, images }: Props) {
         setError("");
         if (!files.length) return;
 
-        const pending = files.map((file) => ({
+        const images = files.filter((file) => isSupportedImage(file));
+        if (!images.length) {
+            setError(imageTypeError);
+            return;
+        }
+        if (images.length < files.length) {
+            setError(imageTypeError);
+        }
+
+        const room = maxCount - rows.length;
+        if (room <= 0) {
+            setError(`Можно добавить не больше ${maxCount} картинок`);
+            return;
+        }
+        const accepted = images.slice(0, room);
+        if (accepted.length < images.length) {
+            setError(`Можно добавить не больше ${maxCount} картинок`);
+        }
+
+        const pending = accepted.map((file) => ({
             id: `image-${++nextId}`,
             image: URL.createObjectURL(file),
             uploading: true,
@@ -154,6 +174,7 @@ export default function ImageList({ name, images }: Props) {
             <input
                 ref={input}
                 type="file"
+                accept={imageAccept}
                 multiple
                 onChange={() => {
                     const files = [...(input.current?.files ?? [])];

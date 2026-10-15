@@ -16,7 +16,7 @@ def delete_author_index(user):
 
 
 def filter_items(queryset, query):
-    query = (query or "").strip()
+    query = (query or "").strip()[:200]
     if not query:
         return queryset
     matches = SearchIndex.search(query).order_by().filter(item_id=OuterRef("pk"))
@@ -26,7 +26,7 @@ def filter_items(queryset, query):
 
 
 def item_matches(item, query):
-    query = (query or "").strip()
+    query = (query or "").strip()[:200]
     if not query:
         return True
     return SearchIndex.search(query).filter(item_id=item.pk).exists()

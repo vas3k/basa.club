@@ -48,7 +48,7 @@
             {% if show_global_param %}
                 <input type="hidden" name="show_global" value="{{ show_global_param }}">
             {% endif %}
-            <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" value="{{ request.GET.query }}">
+            <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" maxlength="200" value="{{ request.GET.query|slice:":200" }}">
 
             <button type="submit" class="button subheader-search-button" aria-label="Искать"><i class="fas fa-search"></i></button>
         </form>

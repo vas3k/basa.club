@@ -22,19 +22,30 @@ class ProfileForm(forms.ModelForm):
     avatar = forms.URLField(
         label="Аватар",
         required=False,
+        max_length=200,
         assume_scheme="https",
+        error_messages={"max_length": "Слишком длинное значение"},
     )
     bio = forms.CharField(
-        label="Расскажите о себе",
+        label="Пара слов о себе",
         required=False,
-        min_length=10,
+        max_length=5000,
         strip=True,
         widget=forms.Textarea(attrs={"rows": 3}),
-        error_messages={"min_length": "Слишком короткий текст"},
+        error_messages={"max_length": "Слишком длинное значение"},
     )
-    # The picker submits geo IDs, but the profile stores country and city names.
-    country = forms.CharField(required=False, widget=forms.HiddenInput())
-    city = forms.CharField(required=False, widget=forms.HiddenInput())
+    country = forms.CharField(
+        required=False,
+        max_length=64,
+        widget=forms.HiddenInput(),
+        error_messages={"max_length": "Слишком длинное значение"},
+    )
+    city = forms.CharField(
+        required=False,
+        max_length=64,
+        widget=forms.HiddenInput(),
+        error_messages={"max_length": "Слишком длинное значение"},
+    )
 
     class Meta:
         model = User
@@ -47,7 +58,7 @@ class ProfileForm(forms.ModelForm):
     def clean_country(self):
         country_id = self.cleaned_data["country"].strip()
         if not country_id:
-            raise forms.ValidationError("Выберите страну или «Весь мир»")
+            raise forms.ValidationError("Выберите страну")
         if country_id == EVERYWHERE:
             self.cleaned_data["country_id"] = EVERYWHERE
             return ""
@@ -76,7 +87,7 @@ class ProfileForm(forms.ModelForm):
 
 class WelcomeForm(ProfileForm):
     full_name = forms.CharField(
-        label="Ваше имя",
+        label="Как вас зовут?",
         min_length=5,
         max_length=64,
         required=True,
@@ -89,12 +100,12 @@ class WelcomeForm(ProfileForm):
         },
     )
     bio = forms.CharField(
-        label="Расскажите о себе",
+        label="Пара слов о себе",
         required=False,
-        min_length=10,
+        max_length=5000,
         strip=True,
         widget=forms.Textarea(attrs={"rows": 5}),
-        error_messages={"min_length": "Слишком короткий текст"},
+        error_messages={"max_length": "Слишком длинное значение"},
     )
     agree_data = forms.BooleanField(
         required=True,

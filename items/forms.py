@@ -6,7 +6,7 @@ from django import forms
 from django.utils import formats, timezone
 
 from categories.models import Category
-from common.contacts import CONTACT_MAX_COUNT, CONTACT_MAX_LENGTH, CONTACT_TYPES
+from common.contacts import CONTACT_TYPES
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
 
@@ -24,7 +24,9 @@ class ItemForm(forms.ModelForm):
     country = forms.CharField(
         label="Страна",
         required=False,
+        max_length=100,
         widget=forms.HiddenInput(),
+        error_messages={"max_length": "Слишком длинное значение"},
     )
     city = forms.ModelChoiceField(
         label="Город",
@@ -64,14 +66,16 @@ class ItemForm(forms.ModelForm):
     description = forms.CharField(
         label="Описание",
         required=False,
+        max_length=5000,
         strip=True,
         widget=forms.Textarea(),
+        error_messages={"max_length": "Слишком длинное описание"},
     )
     location = forms.CharField(
         label="Место",
         required=False,
         strip=True,
-        max_length=Item._meta.get_field("location").max_length,
+        max_length=512,
         widget=forms.TextInput(attrs={"placeholder": "Адрес или ссылка на карту", "minlength": 5}),
         error_messages={
             "min_length": "Слишком короткое место",
@@ -90,7 +94,7 @@ class ItemForm(forms.ModelForm):
         label="Промокод",
         required=False,
         strip=True,
-        max_length=Item._meta.get_field("promo_code").max_length,
+        max_length=128,
         widget=forms.TextInput(attrs={
             "placeholder": "Например, SUMMER",
             "autocomplete": "off",
@@ -197,7 +201,7 @@ class ItemForm(forms.ModelForm):
         raw = self.cleaned_data.get("contacts") or []
         if not isinstance(raw, list):
             raise forms.ValidationError("Неверный список контактов")
-        if len(raw) > CONTACT_MAX_COUNT:
+        if len(raw) > 15:
             raise forms.ValidationError("Слишком много контактов")
 
         cleaned = []
@@ -218,8 +222,10 @@ class ItemForm(forms.ModelForm):
                 raise forms.ValidationError("У контакта нет значения")
             if len(text) < 3:
                 raise forms.ValidationError("Слишком короткий контакт")
-            if len(contact_type) > CONTACT_MAX_LENGTH or len(text) > CONTACT_MAX_LENGTH or len(comment) > CONTACT_MAX_LENGTH:
-                raise forms.ValidationError("Контакт длиннее 128 символов")
+            if len(text) > 256 or len(comment) > 256:
+                raise forms.ValidationError("Контакт длиннее 256 символов")
+            if len(contact_type) > 32:
+                raise forms.ValidationError("Неверный контакт")
             if contact_type not in CONTACT_TYPES:
                 contact_type = "custom"
             cleaned.append({"type": contact_type, "text": text, "comment": comment})
@@ -229,6 +235,8 @@ class ItemForm(forms.ModelForm):
         raw = self.cleaned_data.get("images") or []
         if not isinstance(raw, list):
             raise forms.ValidationError("Неверный список картинок")
+        if len(raw) > 15:
+            raise forms.ValidationError("Слишком много картинок")
 
         cleaned = []
         for row in raw:
@@ -237,7 +245,12 @@ class ItemForm(forms.ModelForm):
             url = row.get("image")
             if not isinstance(url, str):
                 raise forms.ValidationError("Неверная картинка")
-            cleaned.append({"image": url.strip()})
+            url = url.strip()
+            if not url:
+                continue
+            if len(url) > 2048:
+                raise forms.ValidationError("Слишком длинная ссылка на картинку")
+            cleaned.append({"image": url})
         return cleaned
 
     def clean(self):

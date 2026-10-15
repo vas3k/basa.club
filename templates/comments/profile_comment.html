@@ -13,7 +13,13 @@
         </div>
     </div>
 
-    <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
+    {% if comment.text|length >= 1500 %}
+        <div class="comment-text comment-text-long markdown-text">{{ comment.text|markdown }}</div>
+    {% elif comment.text|length >= 250 %}
+        <div class="comment-text comment-text-medium markdown-text">{{ comment.text|markdown }}</div>
+    {% else %}
+        <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
+    {% endif %}
 
     <div class="comment-footer">
         <a class="comment-date" href="{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>

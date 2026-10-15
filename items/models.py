@@ -37,7 +37,7 @@ class Item(SoftDeleteMixin, models.Model):
     description = models.TextField(blank=True, default="")
     location = models.CharField(max_length=4000, blank=True, default="")
     contacts = models.JSONField(blank=True, default=list)
-    promo_code = models.CharField(max_length=32, blank=True, default="")
+    promo_code = models.CharField(max_length=128, blank=True, default="")
     images = models.JSONField(blank=True, default=list)
     category = models.ForeignKey(
         "categories.Category",

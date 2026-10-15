@@ -10,7 +10,13 @@
         </div>
     </div>
 
-    <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
+    {% if comment.text|length >= 1500 %}
+        <div class="comment-text comment-text-long markdown-text">{{ comment.text|markdown }}</div>
+    {% elif comment.text|length >= 250 %}
+        <div class="comment-text comment-text-medium markdown-text">{{ comment.text|markdown }}</div>
+    {% else %}
+        <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
+    {% endif %}
 
     <div class="comment-footer">
         <div class="comment-actions">
@@ -49,7 +55,7 @@
                 {% if reply_form.reply_to.errors %}<div class="form-error">{{ reply_form.reply_to.errors }}</div>{% endif %}
                 {% if reply_form.non_field_errors %}<div class="form-error">{{ reply_form.non_field_errors }}</div>{% endif %}
             {% else %}
-                <input type="text" name="{{ reply_form.text.html_name }}" placeholder="{{ reply_form.fields.text.widget.attrs.placeholder }}" maxlength="3000" required>
+                <input type="text" name="{{ reply_form.text.html_name }}" placeholder="{{ reply_form.fields.text.widget.attrs.placeholder }}" maxlength="{{ reply_form.fields.text.max_length }}" required>
             {% endif %}
             <button type="submit" class="button button-small">Ответить</button>
         </form>

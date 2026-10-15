@@ -13,13 +13,13 @@ class CommentForm(forms.ModelForm):
     )
     text = forms.CharField(
         label="Комментарий",
+        max_length=5000,
         widget=forms.Textarea(attrs={
             "placeholder": "Расскажите, как всё прошло",
-            "maxlength": 3000,
         }),
         error_messages={
             "required": "Комментарий пустой",
-            "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
+            "max_length": "Слишком длинный комментарий (максимум 5000 символов)",
         },
     )
 
@@ -30,12 +30,6 @@ class CommentForm(forms.ModelForm):
     def __init__(self, *args, item, **kwargs):
         self.item = item
         super().__init__(*args, **kwargs)
-
-    def clean_text(self):
-        text = self.cleaned_data["text"]
-        if len(text) > 3000:
-            raise forms.ValidationError(self.fields["text"].error_messages["max_length"], code="max_length")
-        return text
 
     def save(self, *, author, request, commit=True):
         comment = super().save(commit=False)
@@ -51,13 +45,13 @@ class CommentForm(forms.ModelForm):
 class ReplyForm(forms.ModelForm):
     text = forms.CharField(
         label="Ответ",
+        max_length=5000,
         widget=forms.TextInput(attrs={
             "placeholder": "Ваш ответ",
-            "maxlength": 3000,
         }),
         error_messages={
             "required": "Комментарий пустой",
-            "max_length": "Слишком длинный комментарий (максимум 3000 символов)",
+            "max_length": "Слишком длинный комментарий (максимум 5000 символов)",
         },
     )
     reply_to = forms.ModelChoiceField(
@@ -81,12 +75,6 @@ class ReplyForm(forms.ModelForm):
             item=item,
             reply_to__isnull=True,
         )
-
-    def clean_text(self):
-        text = self.cleaned_data["text"]
-        if len(text) > 3000:
-            raise forms.ValidationError(self.fields["text"].error_messages["max_length"], code="max_length")
-        return text
 
     def save(self, *, author, request, commit=True):
         comment = super().save(commit=False)

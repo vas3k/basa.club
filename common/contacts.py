@@ -1,7 +1,7 @@
 import re
 
-CONTACT_MAX_LENGTH = 128
-CONTACT_MAX_COUNT = 100
+CONTACT_MAX_LENGTH = 256
+CONTACT_MAX_COUNT = 15
 
 CONTACTS = [
     {"type": "phone", "label": "Телефон", "icon": "📞"},
