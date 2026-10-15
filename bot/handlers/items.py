@@ -52,29 +52,30 @@ def prepare_listing(author, text):
         title = parsed.title.strip()
         category = Category.objects.filter(pk=parsed.category.strip(), parent__isnull=True).first()
         subcategory = Category.objects.filter(pk=parsed.subcategory.strip(), parent__isnull=False).first()
-        country_name = parsed.country.strip() or author.country
         country = None
-        if country_name:
-            country = (
-                GeoCountry.objects.filter(name__iexact=country_name).first()
-                or GeoCountry.objects.filter(pk__iexact=country_name).first()
-            )
+        if parsed.country is not None:
+            country_name = parsed.country.strip() or author.country
+            if country_name:
+                country = (
+                    GeoCountry.objects.filter(name__iexact=country_name).first()
+                    or GeoCountry.objects.filter(pk__iexact=country_name).first()
+                )
 
         missing = []
         if len(title) < TITLE_MIN_LENGTH:
             missing.append("что именно рекомендуете")
         if category is None or subcategory is None or subcategory.root_id != category.id:
             missing.append("категорию")
-        if country is None and parsed.country.strip() and not missing:
+        if parsed.country is not None and country is None and parsed.country.strip() and not missing:
             return None, f"Не нашёл страну «{parsed.country.strip()}» в Базе."
-        if country is None:
+        if parsed.country is not None and country is None:
             missing.append("страну")
         if missing:
             return None, "Не хватает данных: " + ", ".join(missing) + "."
 
-        city_name = parsed.city.strip()
+        city_name = (parsed.city or "").strip()
         city = None
-        if city_name:
+        if country is not None and parsed.city is not None and city_name:
             city = (
                 GeoCity.objects.filter(country=country, name__iexact=city_name).first()
                 or GeoCity.objects.filter(country=country, pk__iexact=city_name).first()
@@ -112,7 +113,7 @@ def prepare_listing(author, text):
             "promo_code": promo_code[:Item._meta.get_field("promo_code").max_length],
             "category_id": category.id,
             "subcategory_id": subcategory.id,
-            "country_id": country.id,
+            "country_id": country.id if country else "",
             "city_id": city.id if city else "",
         }
 
@@ -123,7 +124,11 @@ def prepare_listing(author, text):
             "item_id": str(uuid4()),
             "fields": fields,
         }, DRAFT_TIMEOUT)
-        item = Item(**{**fields, "city_id": fields["city_id"] or None})
+        item = Item(**{
+            **fields,
+            "country_id": fields["country_id"] or None,
+            "city_id": fields["city_id"] or None,
+        })
         item.author = author
         item.category = category
         item.subcategory = subcategory
@@ -157,11 +162,13 @@ def publish_draft(token):
         fields = stored["fields"]
         category = Category.objects.filter(pk=fields["category_id"], parent__isnull=True).first()
         subcategory = Category.objects.filter(pk=fields["subcategory_id"], parent__isnull=False).first()
-        country = GeoCountry.objects.filter(pk=fields["country_id"]).first()
+        country = GeoCountry.objects.filter(pk=fields["country_id"]).first() if fields["country_id"] else None
         city = None
         if fields["city_id"] and country is not None:
             city = GeoCity.objects.filter(pk=fields["city_id"], country=country).first()
-        if author is None or author.is_banned or category is None or subcategory is None or country is None:
+        if author is None or author.is_banned or category is None or subcategory is None:
+            return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
+        if fields["country_id"] and country is None:
             return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
         if str(author.telegram_id) != stored["telegram_id"] or subcategory.root_id != category.id:
             return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
@@ -174,6 +181,7 @@ def publish_draft(token):
                 defaults={
                     **fields,
                     "prefix": fields["prefix"] or None,
+                    "country_id": country.pk if country else None,
                     "city_id": city.pk if city else None,
                     "author": author,
                     "visibility": Item.VISIBILITY_VISIBLE,
