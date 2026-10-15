@@ -3,6 +3,8 @@ from django.core.paginator import Paginator
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
+from comments.models import Comment
+from counters import counters
 from godmode.config import ADMIN, ITEMS_PER_PAGE
 from godmode.filters import FILTER_OPERATORS, apply_filters, get_filterable_fields
 from items.models import Item
@@ -65,7 +67,7 @@ def godmode_list_model(request, model_name):
         sort_direction,
     )
     if not queryset.ordered:
-        queryset = queryset.order_by("pk")
+        queryset = queryset.order_by("id")
     paginator = Paginator(queryset, ITEMS_PER_PAGE)
     try:
         page_obj = paginator.page(page)
@@ -88,7 +90,7 @@ def godmode_list_model(request, model_name):
             "field": sort_field,
             "direction": sort_direction,
         },
-        "primary_key_field": admin_model.model._meta.pk.name,
+        "primary_key_field": "id",
         "show_create_button": admin_model.has_create_access(request.user),
     })
 
@@ -110,7 +112,7 @@ def godmode_edit_model(request, model_name, item_id):
             "message": f"Редактировать «{admin_model.title}» могут только администраторы.",
         })
 
-    primary_key_field = admin_model.model._meta.pk.name
+    primary_key_field = "id"
     item = get_object_or_404(admin_queryset(admin_model.model), **{primary_key_field: item_id})
     edit_form_class = admin_model.get_form_class()
 
@@ -157,7 +159,7 @@ def godmode_delete_model(request, model_name, item_id):
             "message": "Пользователей нельзя удалять из базы." if admin_model.model is User else f"Удалять из «{admin_model.title}» могут только администраторы.",
         })
 
-    primary_key_field = admin_model.model._meta.pk.name
+    primary_key_field = "id"
     item = get_object_or_404(admin_queryset(admin_model.model), **{primary_key_field: item_id})
 
     if request.method != "POST":
@@ -168,9 +170,12 @@ def godmode_delete_model(request, model_name, item_id):
             "button": "Да, удаляем",
         })
 
+    already_deleted = isinstance(item, Comment) and item.deleted_at
     item.delete()
     if admin_model.model is Item:
         search.delete_item_index(item)
+    elif isinstance(item, Comment) and not already_deleted:
+        counters.comment_deleted(item)
     return redirect("godmode_list_model", model_name=model_name)
 
 
@@ -255,7 +260,7 @@ def godmode_action(request, model_name, item_id, action_code):
             "message": f"Действие «{admin_action.title}» доступно только администраторам.",
         })
 
-    primary_key_field = admin_model.model._meta.pk.name
+    primary_key_field = "id"
     item = get_object_or_404(admin_queryset(admin_model.model), **{primary_key_field: item_id})
     context = dict(
         admin=ADMIN,

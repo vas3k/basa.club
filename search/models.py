@@ -29,7 +29,7 @@ class SearchIndex(models.Model):
         ]
 
     def __str__(self):
-        return self.item.title if self.item_id else str(self.pk)
+        return self.item.title if self.item_id else str(self.id)
 
     @classmethod
     def search(cls, query):
@@ -46,7 +46,7 @@ class SearchIndex(models.Model):
 
     @classmethod
     def update_item_index(cls, item):
-        author = User.all_objects.filter(pk=item.author_id).first()
+        author = User.all_objects.filter(id=item.author_id).first()
         if item.deleted_at or not item.is_listed or not author or author.deleted_at or author.is_banned:
             cls.objects.filter(item=item).delete()
             return False
@@ -76,7 +76,7 @@ class SearchIndex(models.Model):
         cls.objects.update_or_create(
             item=item,
             defaults={
-                "index": Item.objects.annotate(vector=vector).filter(pk=item.pk).values_list("vector", flat=True).first(),
+                "index": Item.objects.annotate(vector=vector).filter(id=item.id).values_list("vector", flat=True).first(),
             },
         )
         return True

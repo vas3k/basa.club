@@ -16,7 +16,7 @@ from notifications import notification
 @login_required
 @require_POST
 def create_comment(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
+    item = get_object_or_404(Item, id=item_id)
     is_reply = bool(request.POST.get("reply_to"))
     form = ReplyForm(request.POST, item=item) if is_reply else CommentForm(request.POST, item=item)
 
@@ -41,9 +41,9 @@ def create_comment(request, item_id):
 def edit_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author", "reply_to"),
-        pk=comment_id,
+        id=comment_id,
     )
-    if comment.author_id != request.user.pk:
+    if comment.author_id != request.user.id:
         raise Http404()
 
     is_reply = bool(comment.reply_to_id)
@@ -72,9 +72,9 @@ def edit_comment(request, comment_id):
 def delete_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),
-        pk=comment_id,
+        id=comment_id,
     )
-    if comment.author_id != request.user.pk:
+    if comment.author_id != request.user.id:
         raise Http404()
 
     comment.delete(by=request.user)

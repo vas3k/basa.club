@@ -142,10 +142,10 @@ class ClubAdminModel:
 
                     if isinstance(model_field, models.ForeignKey):
                         form_field.widget = forms.TextInput()
-                        if self.instance and self.instance.pk:
+                        if self.instance and self.instance.id:
                             related_obj = getattr(self.instance, field_name, None)
                             if related_obj:
-                                form_field.initial = related_obj.pk
+                                form_field.initial = related_obj.id
 
                     if isinstance(model_field, PostgresArrayField):
                         form_field = self.fields[field_name] = SimpleArrayField(

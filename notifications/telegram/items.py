@@ -14,13 +14,13 @@ from notifications.telegram.common import (
 def send_telegram_user_new_item(item_id, subscription_ids):
     item = Item.objects.select_related(
         "category", "subcategory", "country", "city", "author",
-    ).filter(pk=item_id).first()
+    ).filter(id=item_id).first()
     if not item or not item.is_listed or not subscription_ids:
         return
 
     subscriptions = Subscription.objects.select_related(
         "user", "country", "city", "category",
-    ).filter(pk__in=subscription_ids)
+    ).filter(id__in=subscription_ids)
 
     url = settings.APP_HOST.rstrip("/") + item.get_absolute_url()
     images = item.images or []

@@ -59,9 +59,9 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
     items = getattr(Item, "all_objects", Item.objects)
     users = getattr(User, "all_objects", User.objects)
 
-    old = GeoCountry.objects.filter(pk="False").first()
+    old = GeoCountry.objects.filter(id="False").first()
     if old:
-        new = GeoCountry.objects.filter(pk="no").first()
+        new = GeoCountry.objects.filter(id="no").first()
         if new is None:
             GeoCountry.objects.create(
                 id="no",
@@ -70,7 +70,7 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
                 items_count=old.items_count,
             )
         else:
-            GeoCountry.objects.filter(pk="no").update(items_count=new.items_count + old.items_count)
+            GeoCountry.objects.filter(id="no").update(items_count=new.items_count + old.items_count)
         GeoCity.objects.filter(country_id="False").update(country_id="no")
         items.filter(country_id="False").update(country_id="no")
         Subscription.objects.filter(country_id="False").update(country_id="no")
@@ -91,12 +91,12 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
 
     renamed_city_ids = []
     for country_id, old_name in previous_countries.items():
-        country = GeoCountry.objects.filter(pk=country_id).first()
+        country = GeoCountry.objects.filter(id=country_id).first()
         if country and country.name != old_name:
             users.filter(country=old_name).update(country=country.name)
 
     for city_id, (old_country_id, old_country_name, old_city_name) in previous_cities.items():
-        city = GeoCity.objects.select_related("country").filter(pk=city_id).first()
+        city = GeoCity.objects.select_related("country").filter(id=city_id).first()
         if not city:
             continue
         if city.country_id != old_country_id:
@@ -112,12 +112,12 @@ def sync_geo(GeoCountry, GeoCity, Item, Subscription, User):
             )
 
     if renamed_city_ids:
-        item_ids = list(items.filter(city_id__in=renamed_city_ids).values_list("pk", flat=True))
+        item_ids = list(items.filter(city_id__in=renamed_city_ids).values_list("id", flat=True))
         if item_ids:
             from items.models import Item as CurrentItem
             from search.models import SearchIndex
 
-            for item in CurrentItem.all_objects.filter(pk__in=item_ids):
+            for item in CurrentItem.all_objects.filter(id__in=item_ids):
                 SearchIndex.update_item_index(item)
 
     keep_cities = set(city_ids)

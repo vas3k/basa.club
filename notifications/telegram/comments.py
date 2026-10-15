@@ -7,7 +7,7 @@ BODY_LIMIT = TEXT_LIMIT - 800
 def send_telegram_user_new_comment(comment_id):
     comment = Comment.objects.select_related(
         "author", "item", "item__author", "reply_to", "reply_to__author",
-    ).filter(pk=comment_id).first()
+    ).filter(id=comment_id).first()
     if not comment:
         return
 
@@ -26,7 +26,7 @@ def send_telegram_user_new_comment(comment_id):
 
     seen = {comment.author_id}
     for user in recipients:
-        if not user or not user.telegram_id or user.pk in seen:
+        if not user or not user.telegram_id or user.id in seen:
             continue
-        seen.add(user.pk)
+        seen.add(user.id)
         send_telegram_message(user.telegram_id, text)

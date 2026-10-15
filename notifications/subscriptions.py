@@ -43,7 +43,7 @@ def subscribe_to_geo(user, country_id, city_id):
         )
     log.info(
         "geo subscription user=%s country=%s city=%s",
-        user.pk,
+        user.id,
         country_id,
         city_id,
     )
@@ -59,16 +59,16 @@ def toggle_subscription(user, country_id, city_id, category_id, query, with_glob
     query = (query or "").strip()[:Subscription.QUERY_MAX_LENGTH]
 
     if country_id:
-        country = GeoCountry.objects.filter(pk=country_id).first()
+        country = GeoCountry.objects.filter(id=country_id).first()
         if not country:
             raise InvalidSubscription(country_id)
     if city_id:
-        city = GeoCity.objects.filter(pk=city_id, country=country).first() if country else None
+        city = GeoCity.objects.filter(id=city_id, country=country).first() if country else None
         if not city:
             raise InvalidSubscription(city_id)
     category_id = (category_id or "").strip()
     if category_id:
-        category = Category.objects.filter(pk=category_id).first()
+        category = Category.objects.filter(id=category_id).first()
         if not category:
             raise InvalidSubscription(category_id)
 
@@ -103,7 +103,7 @@ def unsubscribe(subscription_id, telegram_id):
     Returns "removed", "missing", or "forbidden". Other subscriptions stay.
     """
     try:
-        subscription = Subscription.objects.select_related("user").get(pk=subscription_id)
+        subscription = Subscription.objects.select_related("user").get(id=subscription_id)
     except (Subscription.DoesNotExist, ValueError, ValidationError):
         return "missing"
     if str(subscription.user.telegram_id or "") != str(telegram_id):

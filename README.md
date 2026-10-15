@@ -172,5 +172,6 @@ docker compose -f docker-compose.production.yml exec app python manage.py create
 ```
 
 Useful commands include `recalculate_counters`, `update_search_index`,
-`delete_expired_codes` and `clearsessions`. The latter three run on the schedules
-in `etc/crontab`. Rating rules live in `counters/`.
+`delete_expired_codes` and `clearsessions`. They run on the schedules in
+`etc/crontab`. `recalculate_counters` rebuilds ratings every night at 03:30 UTC.
+Rating rules live in `counters/`.

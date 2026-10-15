@@ -12,9 +12,9 @@
             <a href="{% url "godmode_list_model" admin_model.name %}" class="godmode-title">{{ admin_model.title }}</a>
             <span>→</span>
             {% if admin_model.title_field %}
-                <a href="{% url "godmode_edit_model" admin_model.name item.pk %}" class="godmode-id">{{ item|get_attr:admin_model.title_field }}</a>
+                <a href="{% url "godmode_edit_model" admin_model.name item.id %}" class="godmode-id">{{ item|get_attr:admin_model.title_field }}</a>
             {% else %}
-                <a href="{% url "godmode_edit_model" admin_model.name item.pk %}" class="godmode-id">ID: {{ item.pk }}</a>
+                <a href="{% url "godmode_edit_model" admin_model.name item.id %}" class="godmode-id">ID: {{ item.id }}</a>
             {% endif %}
             <span>→</span>
             <span class="godmode-title">{{ admin_action.title }}</span>

@@ -40,7 +40,7 @@ def index_page(request, country=None):
         return response
 
     if country:
-        country = get_object_or_404(GeoCountry, pk=country)
+        country = get_object_or_404(GeoCountry, id=country)
         request.country_id = country.id
         request.city_id = "everywhere"
 
@@ -114,9 +114,9 @@ def listing_page(request, country, city, category=None, subcategory=None):
 
     current_category = None
     if subcategory:
-        current_category = get_object_or_404(Category, pk=subcategory, root_id=category)
+        current_category = get_object_or_404(Category, id=subcategory, root_id=category)
     elif category:
-        current_category = get_object_or_404(Category, pk=category, parent__isnull=True)
+        current_category = get_object_or_404(Category, id=category, parent__isnull=True)
 
     items = Item.objects_for_user(request.user)
     if subcategory:
@@ -167,7 +167,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
 
 
 def render_item_page(request, item, *, comment_form=None, reply_form=None, status=200):
-    is_owner = request.user.is_authenticated and request.user.pk == item.author_id
+    is_owner = request.user.is_authenticated and request.user.id == item.author_id
     is_admin = request.user.is_authenticated and request.user.is_moderator
 
     comments_tree = []
@@ -218,18 +218,18 @@ def item_page(request, country, city, category, item_id, subcategory=None):
     try:
         item = Item.fetch(
             user=request.user,
-            pk=item_id,
+            id=item_id,
             category_id=category,
             subcategory_id=subcategory,
         )
     except Item.DoesNotExist:
         raise Http404()
-    is_owner = request.user.is_authenticated and request.user.pk == item.author_id
+    is_owner = request.user.is_authenticated and request.user.id == item.author_id
     is_public = item.visibility in (Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY) and not item.is_expired
     if not is_public and not is_owner and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
 
-    Item.objects.filter(pk=item.pk).update(view_count=F("view_count") + 1)
+    Item.objects.filter(id=item.id).update(view_count=F("view_count") + 1)
 
     request.country_id = item.country_id or "everywhere"
     request.city_id = item.city_id or "everywhere"
@@ -298,10 +298,10 @@ def create_item(request):
 @login_required
 @require_http_methods(["GET", "POST"])
 def edit_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
+    item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
+    if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
-    old = Item.objects.get(pk=item.pk)
+    old = Item.objects.get(id=item.id)
     form = ItemForm(request.POST or None, instance=item)
 
     if request.method == "POST" and form.is_valid():
@@ -359,10 +359,10 @@ def edit_item(request, item_id):
 @login_required
 @require_POST
 def hide_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
+    item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
+    if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
-    old = Item.objects.get(pk=item.pk)
+    old = Item.objects.get(id=item.id)
     item.visibility = Item.VISIBILITY_DRAFT
     item.published_at = None
     item.save(update_fields=["visibility", "published_at", "updated_at"])
@@ -375,11 +375,11 @@ def hide_item(request, item_id):
 @login_required
 @require_POST
 def delete_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), pk=item_id)
-    if item.author_id != request.user.pk and not (request.user.is_authenticated and request.user.is_moderator):
+    item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
+    if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):
         raise Http404()
     was_listed = item.is_listed
-    is_owner = item.author_id == request.user.pk
+    is_owner = item.author_id == request.user.id
     item.delete(by=request.user)
     search.delete_item_index(item)
     if was_listed:

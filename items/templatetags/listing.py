@@ -126,7 +126,7 @@ def item_url(item):
 def item_upvote(context, item):
     """{% item_upvote item %} — item.upvoted_at comes from Item.objects_for_user"""
     user = context["request"].user
-    is_own = user.is_authenticated and user.pk == item.author_id
+    is_own = user.is_authenticated and user.id == item.author_id
     voted = bool(getattr(item, "upvoted_at", None))
     return island(
         "ItemUpvote",

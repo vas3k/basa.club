@@ -11,7 +11,7 @@ RATINGS_LIMIT = 100
 @login_required
 def user_ratings(request, slug):
     profile_user = get_user_or_404(request, slug)
-    if profile_user.pk != request.user.pk and not request.user.is_moderator:
+    if profile_user.id != request.user.id and not request.user.is_moderator:
         raise Http404()
 
     ratings = list(

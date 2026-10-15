@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    {% if request.user.pk == profile_user.pk %}Мой рейтинг{% else %}Рейтинг {% firstof profile_user.full_name profile_user.slug %}{% endif %} — {{ block.super }}
+    {% if request.user.id == profile_user.id %}Мой рейтинг{% else %}Рейтинг {% firstof profile_user.full_name profile_user.slug %}{% endif %} — {{ block.super }}
 {% endblock %}
-{% block og_title %}{% if request.user.pk == profile_user.pk %}Мой рейтинг{% else %}Рейтинг {% firstof profile_user.full_name profile_user.slug %}{% endif %} — {{ block.super }}{% endblock %}
+{% block og_title %}{% if request.user.id == profile_user.id %}Мой рейтинг{% else %}Рейтинг {% firstof profile_user.full_name profile_user.slug %}{% endif %} — {{ block.super }}{% endblock %}
 
 {% block content %}
     {% include "users/widgets/profile_header.html" %}

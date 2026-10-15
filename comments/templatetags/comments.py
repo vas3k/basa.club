@@ -17,7 +17,7 @@ def comment_upvote(context, comment, variant="inline"):
         upvote_url=reverse("comment_upvote", args=[comment.id]),
         retract_url=reverse("comment_retract_vote", args=[comment.id]),
         login_url=None if user.is_authenticated else reverse("login"),
-        disabled=user.is_authenticated and user.pk == comment.author_id,
+        disabled=user.is_authenticated and user.id == comment.author_id,
         variant=variant,
         label="Полезно:" if variant == "inline" else None,
     )

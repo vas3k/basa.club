@@ -12,8 +12,8 @@ from items.models import Item
 @api_login_required
 @require_POST
 def toggle_item_bookmark(request, item_id):
-    item = get_object_or_404(Item, pk=item_id)
-    if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.pk:
+    item = get_object_or_404(Item, id=item_id)
+    if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.id:
         raise Http404()
 
     deleted, _ = Bookmark.objects.filter(user=request.user, item=item).delete()

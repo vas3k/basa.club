@@ -25,9 +25,9 @@ def profile_page(request, slug):
         settings.PROFILE_POSTS_PAGE_SIZE,
     )
     inactive_items = Item.objects.none()
-    if request.user.pk == profile_user.pk:
-        visible_ids = Item.visible_objects().filter(author=profile_user).values("pk")
-        inactive_items = Item.for_author(profile_user).exclude(pk__in=visible_ids)
+    if request.user.id == profile_user.id:
+        visible_ids = Item.visible_objects().filter(author=profile_user).values("id")
+        inactive_items = Item.for_author(profile_user).exclude(id__in=visible_ids)
         inactive_items = Item.objects_for_user(request.user, inactive_items)
 
     inactive_items = paginate(
@@ -58,7 +58,7 @@ def profile_page(request, slug):
 @require_http_methods(["GET", "POST"])
 def edit_profile(request, slug):
     user = get_user_or_404(request, slug)
-    if user.pk != request.user.pk:
+    if user.id != request.user.id:
         raise Http404()
 
     country = GeoCountry.objects.filter(name=user.country).first() if user.country else None

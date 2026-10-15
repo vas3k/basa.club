@@ -188,7 +188,7 @@ def removal_order(categories):
 def retire_category(category, desired_ids, moved_item_ids, notes, clashes):
     items = Item.all_objects.filter(Q(category_id=category.id) | Q(subcategory_id=category.id))
     destination = broader_category(category, desired_ids)
-    item_ids = list(items.values_list("pk", flat=True))
+    item_ids = list(items.values_list("id", flat=True))
 
     if item_ids and destination is None:
         clashes.append(f"kept {category.id}: {len(item_ids)} items have no broader category")
@@ -201,7 +201,7 @@ def retire_category(category, desired_ids, moved_item_ids, notes, clashes):
 
     move_subscriptions(category, destination, clashes)
 
-    if Category.objects.filter(Q(parent_id=category.id) | Q(root_id=category.id)).exclude(pk=category.id).exists():
+    if Category.objects.filter(Q(parent_id=category.id) | Q(root_id=category.id)).exclude(id=category.id).exists():
         clashes.append(f"kept {category.id}: other categories still point at it")
         return 0
 
@@ -220,7 +220,7 @@ def broader_category(category, desired_ids):
     seen = set()
     while current.parent_id and current.parent_id not in seen:
         seen.add(current.id)
-        parent = Category.objects.filter(pk=current.parent_id).first()
+        parent = Category.objects.filter(id=current.parent_id).first()
         if parent is None:
             break
         fallback = parent
@@ -248,7 +248,7 @@ def move_subscriptions(category, destination, clashes):
         except IntegrityError:
             where = target_id or "every category"
             clashes.append(
-                f"subscription {subscription.pk} already covers {where}; dropped the duplicate"
+                f"subscription {subscription.id} already covers {where}; dropped the duplicate"
             )
             subscription.delete()
 
@@ -261,10 +261,10 @@ def reindex_items(moved_item_ids, renamed_ids, clashes):
 
     if renamed_ids:
         queryset = Item.all_objects.filter(
-            Q(pk__in=moved_item_ids) | Q(category_id__in=renamed_ids) | Q(subcategory_id__in=renamed_ids)
+            Q(id__in=moved_item_ids) | Q(category_id__in=renamed_ids) | Q(subcategory_id__in=renamed_ids)
         )
     else:
-        queryset = Item.all_objects.filter(pk__in=moved_item_ids)
+        queryset = Item.all_objects.filter(id__in=moved_item_ids)
 
     try:
         for item in queryset.iterator():

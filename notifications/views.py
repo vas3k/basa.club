@@ -34,7 +34,7 @@ def toggle_listing_subscription(request):
 @login_required
 @require_POST
 def remove_subscription(request, subscription_id):
-    Subscription.objects.filter(user=request.user, pk=subscription_id).delete()
+    Subscription.objects.filter(user=request.user, id=subscription_id).delete()
 
     target = request.POST.get("next") or ""
     if not (target == "/bookmarks" or target.startswith(("/bookmarks?", "/bookmarks/"))):

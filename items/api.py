@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
@@ -14,10 +15,10 @@ from items.models import Item, ItemVote
 def upvote_item(request, item_id):
     item = get_object_or_404(
         Item.objects.select_related("author"),
-        pk=item_id,
+        id=item_id,
         visibility__in=[Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY],
     )
-    if item.author_id == request.user.pk:
+    if item.author_id == request.user.id:
         return JsonResponse({"error": "Нельзя голосовать за свое"}, status=403)
 
     _, created = ItemVote.objects.get_or_create(
@@ -31,7 +32,8 @@ def upvote_item(request, item_id):
     if created:
         counters.item_upvoted(item)
 
-    return JsonResponse({"rating": format_rating(item.rating + (1 if created else 0)), "voted": True})
+    item.refresh_from_db(fields=["rating"])
+    return JsonResponse({"rating": format_rating(item.rating), "voted": True})
 
 
 @api_login_required
@@ -39,11 +41,14 @@ def upvote_item(request, item_id):
 def retract_item_vote(request, item_id):
     item = get_object_or_404(
         Item.objects.select_related("author"),
-        pk=item_id,
+        id=item_id,
         visibility__in=[Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY],
     )
     deleted, _ = ItemVote.objects.filter(user=request.user, item=item).delete()
-    if deleted:
+    if deleted and item.author_id == request.user.id:
+        Item.objects.filter(id=item.id).update(upvotes=F("upvotes") - 1)
+    elif deleted:
         counters.item_unvoted(item)
 
-    return JsonResponse({"rating": format_rating(item.rating - (1 if deleted else 0)), "voted": False})
+    item.refresh_from_db(fields=["rating"])
+    return JsonResponse({"rating": format_rating(item.rating), "voted": False})

@@ -5,8 +5,8 @@ from django.db.models import Count, F
 
 from bookmarks.models import Bookmark
 from comments.models import Comment, CommentVote
-from counters import counters
 from counters.categories import refresh_all
+from counters.defaults import COMMENT_UPVOTE, ITEM_UPVOTE, VIBE_BAD, VIBE_GOOD
 from geo.models import GeoCity, GeoCountry
 from items.models import Item, ItemVote
 from users.models import User
@@ -24,102 +24,118 @@ class Command(BaseCommand):
         users, items, comments = Counter(), Counter(), Counter()
         user_upvotes = Counter()
 
-        for row in ItemVote.objects.filter(item__deleted_at__isnull=True).values("item_id", "item__author_id").annotate(n=Count("pk")).order_by():
-            items[row["item_id"]] += row["n"]
-            users[row["item__author_id"]] += row["n"]
+        for row in ItemVote.objects.filter(item__deleted_at__isnull=True).exclude(
+            user_id__isnull=False,
+            user_id=F("item__author_id"),
+        ).values("item_id", "item__author_id").annotate(n=Count("id")).order_by():
+            items[row["item_id"]] += row["n"] * ITEM_UPVOTE
+            users[row["item__author_id"]] += row["n"] * ITEM_UPVOTE
             if row["item__author_id"]:
                 user_upvotes[row["item__author_id"]] += row["n"]
 
         for row in Comment.objects.filter(
-            vibe__in=list(counters.VIBE_SIGNS),
+            vibe__in=[Comment.VIBE_GOOD, Comment.VIBE_BAD],
             item__deleted_at__isnull=True,
         ).exclude(
             author_id=F("item__author_id"),
-        ).values("author_id", "item_id", "vibe").annotate(n=Count("pk")).order_by():
-            points = row["n"] * counters.VIBE_SIGNS.get(row["vibe"], 0) * counters.VIBE_POINTS
-            users[row["author_id"]] += points
-            items[row["item_id"]] += points
+        ).values("author_id", "item_id", "vibe").annotate(n=Count("id")).order_by():
+            if row["vibe"] == Comment.VIBE_GOOD:
+                users[row["author_id"]] += row["n"] * VIBE_GOOD
+                items[row["item_id"]] += row["n"] * VIBE_GOOD
+            elif row["vibe"] == Comment.VIBE_BAD:
+                users[row["author_id"]] -= row["n"] * VIBE_BAD
+                items[row["item_id"]] -= row["n"] * VIBE_BAD
 
         for row in CommentVote.objects.filter(
             comment__deleted_at__isnull=True,
             comment__item__deleted_at__isnull=True,
         ).exclude(
             comment__author_id=F("comment__item__author_id"),
+        ).exclude(
+            user_id__isnull=False,
+            user_id=F("comment__author_id"),
+        ).exclude(
+            user_id__isnull=False,
+            user_id=F("comment__item__author_id"),
         ).values(
             "comment_id", "comment__author_id", "comment__item_id", "comment__vibe",
-        ).annotate(n=Count("pk")).order_by():
-            users[row["comment__author_id"]] += row["n"]
-            comments[row["comment_id"]] += row["n"]
-            items[row["comment__item_id"]] += row["n"] * counters.VIBE_SIGNS.get(row["comment__vibe"], 0)
+        ).annotate(n=Count("id")).order_by():
+            weight = row["n"] * COMMENT_UPVOTE
+            users[row["comment__author_id"]] += weight
+            comments[row["comment_id"]] += weight
+            if row["comment__vibe"] == Comment.VIBE_GOOD:
+                items[row["comment__item_id"]] += weight
+            elif row["comment__vibe"] == Comment.VIBE_BAD:
+                items[row["comment__item_id"]] -= weight
             if row["comment__author_id"]:
                 user_upvotes[row["comment__author_id"]] += row["n"]
 
         for model, values in ((User, users), (Item, items), (Comment, comments)):
             model.objects.exclude(rating=0).update(rating=0)
-            objects = [model(pk=pk, rating=rating) for pk, rating in values.items() if pk and rating]
+            objects = [model(id=pk, rating=rating) for pk, rating in values.items() if pk and rating]
             if objects:
                 model.objects.bulk_update(objects, ["rating"], batch_size=500)
 
         item_upvotes = {
             row["item_id"]: row["n"]
-            for row in ItemVote.objects.filter(item__deleted_at__isnull=True).values("item_id").annotate(n=Count("pk")).order_by()
+            for row in ItemVote.objects.filter(item__deleted_at__isnull=True).values("item_id").annotate(n=Count("id")).order_by()
         }
         comment_upvotes = {
             row["comment_id"]: row["n"]
             for row in CommentVote.objects.filter(comment__deleted_at__isnull=True)
-            .values("comment_id").annotate(n=Count("pk")).order_by()
+            .values("comment_id").annotate(n=Count("id")).order_by()
         }
 
         Item.objects.exclude(upvotes=0).update(upvotes=0)
-        objects = [Item(pk=pk, upvotes=n) for pk, n in item_upvotes.items() if pk and n]
+        objects = [Item(id=pk, upvotes=n) for pk, n in item_upvotes.items() if pk and n]
         if objects:
             Item.objects.bulk_update(objects, ["upvotes"], batch_size=500)
 
         Comment.objects.exclude(upvotes=0).update(upvotes=0)
-        objects = [Comment(pk=pk, upvotes=n) for pk, n in comment_upvotes.items() if pk and n]
+        objects = [Comment(id=pk, upvotes=n) for pk, n in comment_upvotes.items() if pk and n]
         if objects:
             Comment.objects.bulk_update(objects, ["upvotes"], batch_size=500)
 
         User.objects.exclude(upvotes=0).update(upvotes=0)
-        objects = [User(pk=pk, upvotes=n) for pk, n in user_upvotes.items() if pk and n]
+        objects = [User(id=pk, upvotes=n) for pk, n in user_upvotes.items() if pk and n]
         if objects:
             User.objects.bulk_update(objects, ["upvotes"], batch_size=500)
 
         comment_counts = {
             row["item_id"]: row["n"]
             for row in Comment.objects.filter(reply_to__isnull=True)
-            .values("item_id").annotate(n=Count("pk")).order_by()
+            .values("item_id").annotate(n=Count("id")).order_by()
         }
         Item.objects.exclude(comment_count=0).update(comment_count=0)
-        objects = [Item(pk=pk, comment_count=n) for pk, n in comment_counts.items() if pk and n]
+        objects = [Item(id=pk, comment_count=n) for pk, n in comment_counts.items() if pk and n]
         if objects:
             Item.objects.bulk_update(objects, ["comment_count"], batch_size=500)
 
         bookmark_counts = {
             row["item_id"]: row["n"]
-            for row in Bookmark.objects.values("item_id").annotate(n=Count("pk")).order_by()
+            for row in Bookmark.objects.values("item_id").annotate(n=Count("id")).order_by()
         }
         Item.objects.exclude(bookmark_count=0).update(bookmark_count=0)
-        objects = [Item(pk=pk, bookmark_count=n) for pk, n in bookmark_counts.items() if pk and n]
+        objects = [Item(id=pk, bookmark_count=n) for pk, n in bookmark_counts.items() if pk and n]
         if objects:
             Item.objects.bulk_update(objects, ["bookmark_count"], batch_size=500)
 
         user_items = {
             row["author_id"]: row["n"]
-            for row in Item.visible_objects().order_by().values("author_id").annotate(n=Count("pk"))
+            for row in Item.visible_objects().order_by().values("author_id").annotate(n=Count("id"))
         }
         user_comments = {
             row["author_id"]: row["n"]
             for row in Comment.objects.filter(author_id__isnull=False)
-            .values("author_id").annotate(n=Count("pk")).order_by()
+            .values("author_id").annotate(n=Count("id")).order_by()
         }
         User.objects.exclude(items_count=0, comments_count=0).update(items_count=0, comments_count=0)
         objects = []
-        for user in User.objects.all().only("pk"):
-            items_count = user_items.get(user.pk, 0)
-            comments_count = user_comments.get(user.pk, 0)
+        for user in User.objects.all().only("id"):
+            items_count = user_items.get(user.id, 0)
+            comments_count = user_comments.get(user.id, 0)
             if items_count or comments_count:
-                objects.append(User(pk=user.pk, items_count=items_count, comments_count=comments_count))
+                objects.append(User(id=user.id, items_count=items_count, comments_count=comments_count))
         if objects:
             User.objects.bulk_update(objects, ["items_count", "comments_count"], batch_size=500)
 
@@ -127,7 +143,7 @@ class Command(BaseCommand):
         worldwide = visible.filter(country__isnull=True).count()
         country_counts = {
             row["country_id"]: row["n"]
-            for row in visible.exclude(country__isnull=True).values("country_id").annotate(n=Count("pk"))
+            for row in visible.exclude(country__isnull=True).values("country_id").annotate(n=Count("id"))
         }
         countries = list(GeoCountry.objects.all())
         for country in countries:
@@ -137,7 +153,7 @@ class Command(BaseCommand):
 
         city_counts = {
             row["city_id"]: row["n"]
-            for row in visible.exclude(city__isnull=True).values("city_id").annotate(n=Count("pk"))
+            for row in visible.exclude(city__isnull=True).values("city_id").annotate(n=Count("id"))
         }
         cities = list(GeoCity.objects.all())
         for city in cities:

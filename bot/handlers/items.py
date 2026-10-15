@@ -50,15 +50,15 @@ def prepare_listing(author, text):
             return None, parsed.error.strip()
 
         title = parsed.title.strip()
-        category = Category.objects.filter(pk=parsed.category.strip(), parent__isnull=True).first()
-        subcategory = Category.objects.filter(pk=parsed.subcategory.strip(), parent__isnull=False).first()
+        category = Category.objects.filter(id=parsed.category.strip(), parent__isnull=True).first()
+        subcategory = Category.objects.filter(id=parsed.subcategory.strip(), parent__isnull=False).first()
         country = None
         if parsed.country is not None:
             country_name = parsed.country.strip() or author.country
             if country_name:
                 country = (
                     GeoCountry.objects.filter(name__iexact=country_name).first()
-                    or GeoCountry.objects.filter(pk__iexact=country_name).first()
+                    or GeoCountry.objects.filter(id__iexact=country_name).first()
                 )
 
         missing = []
@@ -78,7 +78,7 @@ def prepare_listing(author, text):
         if country is not None and parsed.city is not None and city_name:
             city = (
                 GeoCity.objects.filter(country=country, name__iexact=city_name).first()
-                or GeoCity.objects.filter(country=country, pk__iexact=city_name).first()
+                or GeoCity.objects.filter(country=country, id__iexact=city_name).first()
             )
 
         location = (parsed.location or "").strip()
@@ -120,7 +120,7 @@ def prepare_listing(author, text):
         token = secrets.token_hex(8)
         cache.set(f"bot-item-draft:{token}", {
             "telegram_id": str(author.telegram_id),
-            "user_id": str(author.pk),
+            "user_id": str(author.id),
             "item_id": str(uuid4()),
             "fields": fields,
         }, DRAFT_TIMEOUT)
@@ -158,14 +158,14 @@ def publish_draft(token):
         return None, "Это предложение уже не действует.", False
 
     try:
-        author = User.objects.filter(pk=stored["user_id"]).first()
+        author = User.objects.filter(id=stored["user_id"]).first()
         fields = stored["fields"]
-        category = Category.objects.filter(pk=fields["category_id"], parent__isnull=True).first()
-        subcategory = Category.objects.filter(pk=fields["subcategory_id"], parent__isnull=False).first()
-        country = GeoCountry.objects.filter(pk=fields["country_id"]).first() if fields["country_id"] else None
+        category = Category.objects.filter(id=fields["category_id"], parent__isnull=True).first()
+        subcategory = Category.objects.filter(id=fields["subcategory_id"], parent__isnull=False).first()
+        country = GeoCountry.objects.filter(id=fields["country_id"]).first() if fields["country_id"] else None
         city = None
         if fields["city_id"] and country is not None:
-            city = GeoCity.objects.filter(pk=fields["city_id"], country=country).first()
+            city = GeoCity.objects.filter(id=fields["city_id"], country=country).first()
         if author is None or author.is_banned or category is None or subcategory is None:
             return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
         if fields["country_id"] and country is None:
@@ -177,12 +177,12 @@ def publish_draft(token):
         # A stable ID makes retries safe after an ambiguous database failure.
         with transaction.atomic():
             item, created = Item.objects.get_or_create(
-                pk=stored["item_id"],
+                id=stored["item_id"],
                 defaults={
                     **fields,
                     "prefix": fields["prefix"] or None,
-                    "country_id": country.pk if country else None,
-                    "city_id": city.pk if city else None,
+                    "country_id": country.id if country else None,
+                    "city_id": city.id if city else None,
                     "author": author,
                     "visibility": Item.VISIBILITY_VISIBLE,
                     "published_at": timezone.now(),
@@ -195,7 +195,7 @@ def publish_draft(token):
             try:
                 notification.item_created(item)
             except Exception:
-                log.exception("item %s published, but notifications failed", item.pk)
+                log.exception("item %s published, but notifications failed", item.id)
         cache.delete(key)
         return item, "", False
     except Exception:

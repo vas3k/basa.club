@@ -38,7 +38,7 @@ class AuthSessionMiddleware:
 
             now = timezone.now()
             if not request.user.last_activity_at or request.user.last_activity_at < now - timedelta(minutes=5):
-                User.objects.filter(pk=request.user.pk).update(last_activity_at=now)
+                User.objects.filter(id=request.user.id).update(last_activity_at=now)
                 request.session.set_expiry(settings.SESSION_COOKIE_AGE)
 
         return self.get_response(request)

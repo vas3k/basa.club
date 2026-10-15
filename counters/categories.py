@@ -56,7 +56,7 @@ def calculate(root_id, country_id="everywhere", city_id="everywhere"):
         .filter(category_id=root_id)
         .order_by()
         .values("subcategory_id")
-        .annotate(n=Count("pk"))
+        .annotate(n=Count("id"))
     )
     result = {root_id: 0}
     for row in grouped:

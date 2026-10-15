@@ -1,8 +1,8 @@
 {% if not request.user.is_authenticated %}
     <div class="block join-block">
         <div class="block-description block-description-center">
-            <p>Контакты, комментарии и скрытый текст доступны только участникам Базы.</p>
-            <a href="{% url "login" %}" class="button">Присоединиться к Базе</a>
+            <p>Контакты, комментарии и промокоды доступны только участникам Базы.</p>
+            <a href="{% url "login" %}" class="button">Войти</a>
         </div>
     </div>
 {% endif %}

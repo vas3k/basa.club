@@ -8,7 +8,7 @@
                     {% if profile_user.club_slug %}
                         <a class="profile-club" href="{{ settings.CLUB_BASE_URL }}/user/{{ profile_user.club_slug }}/" target="_blank" rel="noopener noreferrer" title="Профиль в Вастрик Клубе" aria-label="Профиль в Вастрик Клубе">✖︎</a>
                     {% endif %}
-                    {% if request.user.pk == profile_user.pk %}
+                    {% if request.user.id == profile_user.id %}
                         <a href="{% url "user_profile_edit" profile_user.slug %}" class="profile-edit" title="Редактировать" aria-label="Редактировать">
                             <i class="fas fa-edit"></i>
                         </a>
@@ -28,7 +28,7 @@
         </div>
 
         <div class="profile-stats">
-            {% if request.user.pk == profile_user.pk or request.user.is_moderator %}
+            {% if request.user.id == profile_user.id or request.user.is_moderator %}
                 <a href="{% url "user_ratings" profile_user.slug %}" class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="История изменений рейтинга">{{ profile_user.rating|rating }}</a>
             {% else %}
                 <div class="profile-stat-rating {% if profile_user.rating > 0 %}rating-positive{% elif profile_user.rating < 0 %}rating-negative{% endif %}" title="Рейтинг">{{ profile_user.rating|rating }}</div>

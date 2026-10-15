@@ -14,8 +14,8 @@ from users.models import User
 class CommentQuerySet(SoftDeleteQuerySet):
     def delete(self, by=None):
         now = timezone.now()
-        pks = list(self.values_list("pk", flat=True))
-        count = self.model.all_objects.filter(Q(pk__in=pks) | Q(reply_to_id__in=pks)).update(
+        pks = list(self.values_list("id", flat=True))
+        count = self.model.all_objects.filter(Q(id__in=pks) | Q(reply_to_id__in=pks)).update(
             deleted_at=now,
             deleted_by=by,
         )
@@ -59,7 +59,7 @@ class Comment(SoftDeleteMixin, models.Model):
 
     def save(self, *args, **kwargs):
         if self.reply_to_id:
-            parent = Comment.objects.filter(pk=self.reply_to_id).first()
+            parent = Comment.objects.filter(id=self.reply_to_id).first()
             if not parent or parent.item_id != self.item_id:
                 raise ValidationError("Этот комментарий не существует")
 
@@ -90,7 +90,7 @@ class Comment(SoftDeleteMixin, models.Model):
         if not user or not user.is_authenticated:
             return queryset
 
-        vote_qs = CommentVote.objects.filter(comment=OuterRef("pk"), user=user)
+        vote_qs = CommentVote.objects.filter(comment=OuterRef("id"), user=user)
         return queryset.annotate(
             upvoted_at=Subquery(
                 vote_qs.annotate(

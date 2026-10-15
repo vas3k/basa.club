@@ -63,7 +63,7 @@ class ProfileForm(forms.ModelForm):
             self.cleaned_data["country_id"] = EVERYWHERE
             return ""
 
-        country = GeoCountry.objects.filter(pk=country_id).first()
+        country = GeoCountry.objects.filter(id=country_id).first()
         if not country:
             raise forms.ValidationError("Выберите страну из списка")
 
@@ -77,7 +77,7 @@ class ProfileForm(forms.ModelForm):
             self.cleaned_data["city_id"] = EVERYWHERE
             return ""
 
-        city = GeoCity.objects.filter(pk=city_id, country_id=country_id).first()
+        city = GeoCity.objects.filter(id=city_id, country_id=country_id).first()
         if not city:
             raise forms.ValidationError("Выберите город из списка")
 

@@ -9,10 +9,10 @@ class Command(BaseCommand):
     help = "Rebuild the full-text index for every item. No other models are indexed."
 
     def handle(self, *args, **options):
-        ids = list(Item.all_objects.values_list("pk", flat=True))
+        ids = list(Item.all_objects.values_list("id", flat=True))
         indexed = 0
         for start in range(0, len(ids), 200):
-            batch = Item.all_objects.filter(pk__in=ids[start:start + 200])
+            batch = Item.all_objects.filter(id__in=ids[start:start + 200])
             for item in batch:
                 if search.update_item_index(item):
                     indexed += 1

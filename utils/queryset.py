@@ -1,19 +1,19 @@
 def chunked_queryset(queryset, chunk_size=1000):
     start_pk = 0
-    queryset = queryset.order_by("pk")
+    queryset = queryset.order_by("id")
 
     while True:
         # no entries left
-        if not queryset.filter(pk__gt=start_pk).exists():
+        if not queryset.filter(id__gt=start_pk).exists():
             break
 
         try:
             # fetch chunk_size entries
-            end_pk = queryset.filter(pk__gt=start_pk).values_list("pk", flat=True)[chunk_size - 1]
+            end_pk = queryset.filter(id__gt=start_pk).values_list("id", flat=True)[chunk_size - 1]
         except IndexError:
             # fetch rest entries if less than chunk_size left
-            end_pk = queryset.values_list("pk", flat=True).last()
+            end_pk = queryset.values_list("id", flat=True).last()
 
-        yield queryset.filter(pk__gt=start_pk).filter(pk__lte=end_pk)
+        yield queryset.filter(id__gt=start_pk).filter(id__lte=end_pk)
 
         start_pk = end_pk

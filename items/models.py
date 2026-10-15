@@ -112,7 +112,7 @@ class Item(SoftDeleteMixin, models.Model):
         if not user or not user.is_authenticated:
             return queryset
 
-        vote_qs = ItemVote.objects.filter(item=OuterRef("pk"), user=user)
+        vote_qs = ItemVote.objects.filter(item=OuterRef("id"), user=user)
         return queryset.annotate(
             upvoted_at=Subquery(
                 vote_qs.annotate(

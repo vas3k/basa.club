@@ -40,7 +40,7 @@ def remove_bookmark(request, item_id):
     deleted, _ = Bookmark.objects.filter(user=request.user, item_id=item_id).delete()
 
     if deleted:
-        item = Item.objects.filter(pk=item_id).first()
+        item = Item.objects.filter(id=item_id).first()
         if item:
             counters.item_unbookmarked(item)
 

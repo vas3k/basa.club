@@ -49,7 +49,7 @@ def confirm(code, data):
 
     account = User.objects.filter(telegram_id=telegram_id).first()
     if auth_code.user_id:
-        if account and account.pk != auth_code.user_id:
+        if account and account.id != auth_code.user_id:
             raise TelegramAuthError("Этот Telegram уже привязан к другому профилю.")
         user = auth_code.user
         user.telegram_id = telegram_id
@@ -87,7 +87,7 @@ def finish(request):
 
     account = User.objects.filter(telegram_id=telegram_id).first()
     if auth_code.user_id:
-        if not account or account.pk != auth_code.user_id:
+        if not account or account.id != auth_code.user_id:
             return render(request, "error.html", {
                 "title": "Ссылка не сработала",
                 "message": "Откройте бота ещё раз со страницы входа. Эта ссылка уже не действует.",
@@ -104,7 +104,7 @@ def finish(request):
         return render(request, "authn/signup.html", {"code": code, "form": form})
 
     with transaction.atomic():
-        auth_code = Code.objects.select_for_update(of=("self",)).filter(pk=auth_code.pk).first()
+        auth_code = Code.objects.select_for_update(of=("self",)).filter(id=auth_code.id).first()
         if not auth_code or auth_code.user_id or str((auth_code.telegram_data or {}).get("id") or "") != telegram_id:
             return render(request, "error.html", {
                 "title": "Ссылка не сработала",

@@ -1,3 +1,4 @@
+from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
@@ -13,9 +14,9 @@ from common.request import parse_ip_address, parse_useragent
 def upvote_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),
-        pk=comment_id,
+        id=comment_id,
     )
-    if comment.author_id == request.user.pk:
+    if comment.author_id == request.user.id:
         return JsonResponse({"error": "Нельзя голосовать за свое"}, status=403)
 
     _, created = CommentVote.objects.get_or_create(
@@ -27,10 +28,13 @@ def upvote_comment(request, comment_id):
             "useragent": parse_useragent(request),
         },
     )
-    if created:
+    if created and comment.item.author_id == request.user.id:
+        Comment.objects.filter(id=comment.id).update(upvotes=F("upvotes") + 1)
+    elif created:
         counters.comment_upvoted(comment)
 
-    return JsonResponse({"upvotes": comment.upvotes + (1 if created else 0), "voted": True})
+    comment.refresh_from_db(fields=["upvotes"])
+    return JsonResponse({"upvotes": comment.upvotes, "voted": True})
 
 
 @api_login_required
@@ -38,10 +42,13 @@ def upvote_comment(request, comment_id):
 def retract_comment_vote(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),
-        pk=comment_id,
+        id=comment_id,
     )
     deleted, _ = CommentVote.objects.filter(user=request.user, comment=comment).delete()
-    if deleted:
+    if deleted and request.user.id in {comment.author_id, comment.item.author_id}:
+        Comment.objects.filter(id=comment.id).update(upvotes=F("upvotes") - 1)
+    elif deleted:
         counters.comment_unvoted(comment)
 
-    return JsonResponse({"upvotes": comment.upvotes - (1 if deleted else 0), "voted": False})
+    comment.refresh_from_db(fields=["upvotes"])
+    return JsonResponse({"upvotes": comment.upvotes, "voted": False})

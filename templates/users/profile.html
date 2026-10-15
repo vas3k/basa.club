@@ -1,9 +1,9 @@
 {% extends "layout.html" %}
 
 {% block title %}
-    {% if request.user.pk == profile_user.pk %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}
+    {% if request.user.id == profile_user.id %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}
 {% endblock %}
-{% block og_title %}{% if request.user.pk == profile_user.pk %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}{% endblock %}
+{% block og_title %}{% if request.user.id == profile_user.id %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}{% endblock %}
 
 {% block content %}
     {% include "users/widgets/profile_header.html" %}
@@ -13,7 +13,7 @@
             <div class="block-header block-header-with-button">Посты</div>
             <section class="content-items">
                 {% for item in active_items %}
-                    {% if request.user.pk == profile_user.pk %}
+                    {% if request.user.id == profile_user.id %}
                         {% include "items/list/default.html" with show_owner_actions=True %}
                     {% else %}
                         {% include "items/list/default.html" %}
@@ -27,7 +27,7 @@
             {% paginator active_items %}
         {% endif %}
 
-        {% if inactive_items and request.user.pk == profile_user.pk and inactive_items.paginator.count %}
+        {% if inactive_items and request.user.id == profile_user.id and inactive_items.paginator.count %}
             <div class="block-header block-header-with-button">Не в общей ленте</div>
             <section class="content-items">
                 {% for item in inactive_items %}

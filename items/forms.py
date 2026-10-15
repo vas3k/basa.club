@@ -171,7 +171,7 @@ class ItemForm(forms.ModelForm):
             raise forms.ValidationError("Выберите страну или «Весь мир»")
         if raw == "everywhere":
             return None
-        country = GeoCountry.objects.filter(pk=raw).first()
+        country = GeoCountry.objects.filter(id=raw).first()
         if not country:
             raise forms.ValidationError("Нет такой страны")
         return country

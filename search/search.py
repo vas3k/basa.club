@@ -12,14 +12,14 @@ def delete_item_index(item):
 
 
 def delete_author_index(user):
-    SearchIndex.objects.filter(item__author_id=user.pk).delete()
+    SearchIndex.objects.filter(item__author_id=user.id).delete()
 
 
 def filter_items(queryset, query):
     query = (query or "").strip()[:200]
     if not query:
         return queryset
-    matches = SearchIndex.search(query).order_by().filter(item_id=OuterRef("pk"))
+    matches = SearchIndex.search(query).order_by().filter(item_id=OuterRef("id"))
     return queryset.annotate(
         search_rank=Subquery(matches.values("rank")[:1], output_field=FloatField()),
     ).filter(search_rank__gt=0)
@@ -29,4 +29,4 @@ def item_matches(item, query):
     query = (query or "").strip()[:200]
     if not query:
         return True
-    return SearchIndex.search(query).filter(item_id=item.pk).exists()
+    return SearchIndex.search(query).filter(item_id=item.id).exists()

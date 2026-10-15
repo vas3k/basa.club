@@ -6,7 +6,7 @@ from users.models import User
 
 
 def send_telegram_user_logged_in(user_id):
-    user = User.objects.filter(pk=user_id).first()
+    user = User.objects.filter(id=user_id).first()
     if not user or not user.telegram_id:
         return
     send_telegram_message(
@@ -16,7 +16,7 @@ def send_telegram_user_logged_in(user_id):
 
 
 def send_telegram_user_banned(user_id, reason, comment, until, is_permanent):
-    user = User.objects.filter(pk=user_id).first()
+    user = User.objects.filter(id=user_id).first()
     if not user or not user.telegram_id:
         return
     left = until - timezone.now()
