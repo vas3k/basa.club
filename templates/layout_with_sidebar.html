@@ -29,16 +29,18 @@
                 {% endfor %}
             </select>
 
-            <select class="subheader-search-geo" data-geo="city" aria-label="Город">
-                <option value="everywhere" {% if not current_city %}selected{% endif %}>
-                    Везде
-                </option>
-                {% for city in cities %}
-                    <option value="{{ city.id }}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
-                        {% if city.icon %}{{ city.icon|safe }} {% endif %}{{ city.name }}{% if city.items_count %} ({{ city.items_count }}){% endif %}
+            {% if current_country %}
+                <select class="subheader-search-geo" data-geo="city" aria-label="Город">
+                    <option value="everywhere" {% if not current_city %}selected{% endif %}>
+                        Везде
                     </option>
-                {% endfor %}
-            </select>
+                    {% for city in cities %}
+                        <option value="{{ city.id }}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
+                            {% if city.icon %}{{ city.icon|safe }} {% endif %}{{ city.name }}{% if city.items_count %} ({{ city.items_count }}){% endif %}
+                        </option>
+                    {% endfor %}
+                </select>
+            {% endif %}
 
             {% if feed_sort and feed_sort != "standard" %}
                 <input type="hidden" name="sort" value="{{ feed_sort }}">

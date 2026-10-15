@@ -130,27 +130,32 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         items = items.filter(category_id=category)
 
-    raw = (request.GET.get("show_global") or "").lower()
-    show_global_param = None
-    show_global = bool(current_category and current_category.is_global)
-    if raw in {"1", "true", "on", "yes"}:
-        show_global_param = "1"
+    requested = request.GET.get("show_global")
+    if requested == "1":
         show_global = True
-    elif raw in {"0", "false", "off", "no"}:
-        show_global_param = "0"
+        show_global_param = "1"
+    elif requested == "0":
         show_global = False
+        show_global_param = "0"
+    else:
+        show_global = bool(current_category and current_category.is_global)
+        show_global_param = None
 
-    if request.city_id != "everywhere":
-        items = items.filter(city_id=request.city_id)
-    elif request.country_id != "everywhere":
-        items = items.filter(country_id=request.country_id)
+    if request.country_id == "everywhere":
+        items = items.filter(country__isnull=True)
+    else:
+        if request.city_id != "everywhere":
+            here = Q(city_id=request.city_id)
+        else:
+            here = Q(country_id=request.country_id)
+        if show_global:
+            items = items.filter(here | Q(country__isnull=True))
+        else:
+            items = items.filter(here)
 
     query = (request.GET.get("query") or "").strip()
     if query and request.user.is_authenticated:
         items = search.filter_items(items, query)
-
-    if not show_global:
-        items = items.exclude(country__isnull=True)
 
     sort = request.GET.get("sort")
     ordering = list(FEED_SORTS.get(sort, FEED_SORTS["standard"]))

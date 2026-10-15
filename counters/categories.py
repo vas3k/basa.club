@@ -25,13 +25,13 @@ def counts(root_id, country_id="everywhere", city_id="everywhere"):
 
 
 def invalidate(root_id):
-    # One item is counted in its city, its country, and the whole-world view.
+    # One item is counted in its city, its country, or the everywhere bucket.
     if root_id:
         bump_version()
 
 
 def refresh_all():
-    """Drop every process's category cache and return whole-world root totals."""
+    """Drop the category cache and return root totals for items with no country."""
     from categories.models import Category
 
     bump_version()
@@ -44,9 +44,11 @@ def refresh_all():
 
 def calculate(root_id, country_id="everywhere", city_id="everywhere"):
     items = Item.visible_objects()
-    if city_id and city_id != "everywhere":
+    if country_id == "everywhere":
+        items = items.filter(country__isnull=True)
+    elif city_id and city_id != "everywhere":
         items = items.filter(city_id=city_id)
-    elif country_id and country_id != "everywhere":
+    else:
         items = items.filter(country_id=country_id)
 
     grouped = (

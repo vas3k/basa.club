@@ -117,7 +117,7 @@ class SearchIndexTests(TestCase):
         reader = User.objects.create_user(email="reader@example.com", slug="reader", password="secret")
         self.client.force_login(reader)
 
-        listing = self.client.get("/everywhere/everywhere/?query=квартиры&show_global=1")
+        listing = self.client.get("/serbia/belgrade/?query=квартиры")
         self.assertEqual(listing.status_code, 200)
         self.assertEqual([item.title for item in listing.context["items"]], ["Квартира на два месяца"])
 
