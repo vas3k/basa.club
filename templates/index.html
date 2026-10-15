@@ -12,7 +12,7 @@
 
     {% if world_items %}
         <section class="index-section">
-            <h2 class="index-section-title">Новое 🌍 во всём мире</h2>
+            <h2 class="index-section-title">Новое 🌍 везде</h2>
             <div class="index-cards">
                 {% for item in world_items %}
                     {% include "items/list/card.html" %}
@@ -61,7 +61,7 @@
 
     {% if all_items %}
         <section class="index-section">
-            <h2 class="index-section-title">Новое 🌍 во всём мире</h2>
+            <h2 class="index-section-title">Новое 🌍 везде</h2>
             <div class="index-cards">
                 {% for item in all_items %}
                     {% include "items/list/card.html" %}
@@ -84,9 +84,9 @@
             {% if subscribers %}
                 <p class="feed-empty-subscribers">
                     Новых постов в эту категорию {% if subscribers|length == 1 %}ждет{% else %}ждут{% endif %} еще {{ subscribers|length }} {{ subscribers|length|pluralize:"человек,человека,человек" }}:
-                    {% for user in subscribers %}
-                        <a href="{{ user.get_absolute_url }}">{% firstof user.full_name user.slug %}</a>{% if not forloop.last %}, {% endif %}
-                    {% endfor %}
+                        {% for user in subscribers|slice:":5" %}
+                            <a href="{{ user.get_absolute_url }}">{% firstof user.full_name user.slug %}</a>{% if not forloop.last %}, {% elif subscribers|length > 5 %}...{% endif %}
+                        {% endfor %}
                 </p>
             {% endif %}
         </div>
