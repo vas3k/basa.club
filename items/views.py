@@ -238,10 +238,13 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 @login_required
 @require_http_methods(["GET", "POST"])
 def create_item(request):
-    form = ItemForm(request.POST or None, initial={
+    initial = {
         "country": request.country_id,
         "city": request.city_id if request.city_id != "everywhere" else None,
-    })
+    }
+    if request.method == "GET":
+        initial = ItemForm.initial_from_query(request.GET, initial)
+    form = ItemForm(request.POST or None, initial=initial)
 
     if request.method == "POST" and form.is_valid():
         action = request.POST.get("action") or "publish"

@@ -1,0 +1,10 @@
+{% load telegram %}{% if item.prefix %}<b>{{ item.get_prefix_display }}</b> {% endif %}<b>{{ item.title }}</b>
+
+{% if item.city %}{% if item.city.icon and "<" not in item.city.icon %}{{ item.city.icon }} {% endif %}{{ item.city.name }}{% if item.country %}, {{ item.country.name }}{% endif %}{% elif item.country %}{% if item.country.icon and "<" not in item.country.icon %}{{ item.country.icon }} {% endif %}{{ item.country.name }}{% else %}Весь мир{% endif %}
+{% if item.category.icon and "<" not in item.category.icon %}{{ item.category.icon }} {% endif %}{% if item.subcategory %}{{ item.subcategory.name }} · {% endif %}{{ item.category.name }}
+{% if item.description %}{% render_tg item.description %}{% endif %}
+{% if item.location %}📍 {{ item.location }}
+{% endif %}{% for contact in item.contact_links %}
+{{ contact.icon }} {% if contact.external %}<a href="{{ contact.href }}">{{ contact.text }}</a>{% else %}{{ contact.text }}{% endif %}{% if contact.comment %} — {{ contact.comment }}{% endif %}
+{% endfor %}{% if item.promo_code %}
+🎁 Промокод: <code>{{ item.promo_code }}</code>{% endif %}

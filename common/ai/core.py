@@ -19,10 +19,7 @@ def openai_client():
 def schema_from(cls):
     properties = {}
     for item in fields(cls):
-        try:
-            spec = dict(item.metadata)
-        except AttributeError:
-            spec = {"description": "".join(item.metadata)}
+        spec = dict(item.metadata)
 
         description = spec.pop("description", "")
         if "items" in spec and is_dataclass(spec["items"]):

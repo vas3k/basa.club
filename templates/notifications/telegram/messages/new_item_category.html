@@ -1,3 +1,3 @@
 <b>Новое в «{{ subscription.category.name }}»</b>{% if subscription.city %}, {{ subscription.city.name }}{% elif subscription.country %}, {{ subscription.country.name }}{% else %}, весь мир{% endif %}
 
-{% include "notifications/telegram/messages/_item.html" %}
+{% include "notifications/telegram/messages/_item_small.html" %}

@@ -1,4 +1,5 @@
 import calendar
+import json
 from datetime import timedelta
 
 from django import forms
@@ -114,6 +115,37 @@ class ItemForm(forms.ModelForm):
             "country", "city", "category", "subcategory",
             "prefix", "title", "description", "images", "location", "contacts", "promo_code",
         )
+
+    QUERY_FIELDS = (
+        "country", "city", "category", "subcategory",
+        "prefix", "title", "description", "location", "contacts", "promo_code",
+    )
+
+    @classmethod
+    def initial_from_query(cls, params, initial):
+        result = dict(initial)
+        if "country" in params:
+            result["country"] = (params.get("country") or "").strip() or "everywhere"
+            if "city" not in params:
+                result["city"] = None
+        if "city" in params:
+            city = (params.get("city") or "").strip()
+            result["city"] = None if city in {"", "everywhere"} else city
+        for name in ("category", "subcategory", "title", "description", "location", "promo_code"):
+            if name in params:
+                result[name] = params.get(name) or ""
+        if "prefix" in params:
+            prefix = (params.get("prefix") or "").strip()
+            result["prefix"] = prefix if prefix in dict(Item.PREFIXES) else ""
+        if "contacts" in params:
+            raw = params.get("contacts") or ""
+            try:
+                parsed = json.loads(raw) if raw else []
+            except (TypeError, ValueError):
+                parsed = None
+            if isinstance(parsed, list):
+                result["contacts"] = parsed
+        return result
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)

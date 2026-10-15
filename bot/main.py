@@ -26,13 +26,15 @@ def main() -> None:
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", auth.command_start, filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("help", help.command_help, filters.ChatType.PRIVATE))
-    application.add_handler(CommandHandler("add", items.command_add))
+    application.add_handler(CommandHandler("add", items.command_add, block=False))
     application.add_handler(MessageHandler(
         filters.ChatType.PRIVATE & (filters.TEXT | filters.CAPTION) & ~filters.COMMAND,
         items.private_message,
+        block=False,
     ))
     application.add_handler(CallbackQueryHandler(auth.confirm_callback, pattern=r"^link:.+"))
     application.add_handler(CallbackQueryHandler(notifications.unsubscribe_callback, pattern=r"^unsub:"))
+    application.add_handler(CallbackQueryHandler(items.draft_callback, pattern=r"^add:(post|cancel):[0-9a-f]+$"))
     if settings.DEBUG:
         application.run_polling()
     else:
