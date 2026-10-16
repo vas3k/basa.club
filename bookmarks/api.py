@@ -27,4 +27,4 @@ def toggle_item_bookmark(request, item_id):
         else:
             counters.item_bookmarked(item)
 
-    return JsonResponse({"bookmark_count": item.bookmark_count})
+    return JsonResponse({"bookmark_count": item.bookmark_count -1 if deleted else item.bookmark_count + 1})

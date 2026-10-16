@@ -964,14 +964,14 @@ WHERE i.id = src.item_id;
 UPDATE users u
 SET rating = u.upvotes + coalesce(src.points, 0)
 FROM (
-    SELECT c.author_id,
+    SELECT it.author_id,
            sum(CASE c.vibe WHEN 'good' THEN 5 WHEN 'bad' THEN -5 ELSE 0 END)::int AS points
     FROM comments c
     JOIN items it ON it.id = c.item_id
     WHERE c.deleted_at IS NULL
       AND c.reply_to_id IS NULL
       AND c.author_id IS DISTINCT FROM it.author_id
-    GROUP BY c.author_id
+    GROUP BY it.author_id
 ) src
 WHERE u.id = src.author_id;
 

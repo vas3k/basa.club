@@ -78,14 +78,14 @@ def comment_created(comment):
 
     title = (comment.item.title or "пост").strip()
     if comment.vibe == Comment.VIBE_GOOD:
-        if comment.author_id:
-            User.objects.filter(id=comment.author_id).update(rating=F("rating") + VIBE_GOOD)
-            Rating.objects.create(user_id=comment.author_id, change=VIBE_GOOD, reason=f"Положительный отзыв к «{title}»")
+        if comment.item.author_id:
+            User.objects.filter(id=comment.item.author_id).update(rating=F("rating") + VIBE_GOOD)
+            Rating.objects.create(user_id=comment.item.author_id, change=VIBE_GOOD, reason=f"Положительный отзыв к «{title}»")
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") + VIBE_GOOD)
     elif comment.vibe == Comment.VIBE_BAD:
-        if comment.author_id:
-            User.objects.filter(id=comment.author_id).update(rating=F("rating") - VIBE_BAD)
-            Rating.objects.create(user_id=comment.author_id, change=-VIBE_BAD, reason=f"Отрицательный отзыв к «{title}»")
+        if comment.item.author_id:
+            User.objects.filter(id=comment.item.author_id).update(rating=F("rating") - VIBE_BAD)
+            Rating.objects.create(user_id=comment.item.author_id, change=-VIBE_BAD, reason=f"Отрицательный отзыв к «{title}»")
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") - VIBE_BAD)
 
 
@@ -114,19 +114,19 @@ def decline_comment_rating(comment):
         return
 
     if comment.vibe == Comment.VIBE_GOOD:
-        if comment.author_id:
-            User.objects.filter(id=comment.author_id).update(rating=F("rating") - VIBE_GOOD)
+        if comment.item.author_id:
+            User.objects.filter(id=comment.item.author_id).update(rating=F("rating") - VIBE_GOOD)
             Rating.objects.create(
-                user_id=comment.author_id,
+                user_id=comment.item.author_id,
                 change=-VIBE_GOOD,
                 reason=f"Удалили отзыв к «{title}»",
             )
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") - VIBE_GOOD)
     elif comment.vibe == Comment.VIBE_BAD:
-        if comment.author_id:
-            User.objects.filter(id=comment.author_id).update(rating=F("rating") + VIBE_BAD)
+        if comment.item.author_id:
+            User.objects.filter(id=comment.item.author_id).update(rating=F("rating") + VIBE_BAD)
             Rating.objects.create(
-                user_id=comment.author_id,
+                user_id=comment.item.author_id,
                 change=VIBE_BAD,
                 reason=f"Удалили отзыв к «{title}»",
             )
