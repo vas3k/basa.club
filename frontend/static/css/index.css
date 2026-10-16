@@ -80,10 +80,10 @@
         width: auto;
         min-width: 0;
         max-width: var(--sidebar-width);
-        padding: 10px 30px 10px 10px;
-        font-size: 1rem;
+        padding-top: calc(14px - 0.07em / 1.1);
+        padding-bottom: calc(14px - 0.07em / 1.1);
+        font-size: calc(var(--input-font-size) * 1.1);
         font-weight: 600;
-        background-position: right 10px center;
     }
 
     .subheader-search-find {
@@ -98,16 +98,17 @@
         flex: 1 1 auto;
         width: auto;
         min-width: 0;
-        padding-top: 10px;
-        padding-bottom: 10px;
+        padding-top: calc(14px - 0.07em / 1.1);
+        padding-bottom: calc(14px - 0.07em / 1.1);
+        font-size: calc(var(--input-font-size) * 1.1);
         font-weight: 500;
     }
 
     .subheader-search .button {
         flex: 0 0 auto;
         gap: 8px;
-        padding: 10px 18px;
-        font-size: var(--input-font-size);
+        padding: calc(14px - 0.05em / 1.1) 22px;
+        font-size: calc(var(--input-font-size) * 1.1);
     }
 
 .sidebar {
