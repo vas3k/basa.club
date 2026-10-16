@@ -1,11 +1,4 @@
-{% load telegram %}
-{% if vibe_label %}
-<b>{{ vibe_label }}{% if is_reply %} · ответ{% endif %}</b>
-{% endif %}
-{% if comment.author %}
-<a href="{{ settings.APP_HOST }}{{ comment.author.get_absolute_url }}">{{ comment.author.full_name|default:comment.author.slug }}</a>
-{% endif %}
-
+{% load telegram %}{% if vibe_label %}{{ vibe_label }}{% if is_reply %} · ответ{% endif %}
+{% endif %}{% if comment.author %}<a href="{{ settings.APP_HOST }}{{ comment.author.get_absolute_url }}">{{ comment.author.full_name|default:comment.author.slug }}</a>{% endif %}
 {% render_tg comment.text text_limit %}
-
 ➜ <a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.item.title }}</a>

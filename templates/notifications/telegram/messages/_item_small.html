@@ -1,21 +1,6 @@
-{% load telegram %}
-{% if item.category.icon and "<" not in item.category.icon %}{{ item.category.icon }} {% endif %}<b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title }}</a></b>
-
-{% if item.subcategory %}{{ item.subcategory.name }} · {% endif %}{{ item.category.name }}
-{% if item.city %}
-{% if item.city.icon %}{{ item.city.icon }} {% endif %}{{ item.city.name }}
-{% elif item.country %}
-{% if item.country.icon %}{{ item.country.icon }} {% endif %}{{ item.country.name }}
-{% else %}
-Весь мир
-{% endif %}
-{% if item.author %}
-{{ item.author.full_name|default:item.author.slug }}
-{% endif %}
-{% if item.promo_code %}
-Промокод: <code>{{ item.promo_code }}</code>
-{% endif %}
-{% if item.description %}
-{% render_tg item.description 400 %}
-{% endif %}
+{% load telegram %}{% if item.category.icon and "<" not in item.category.icon %}{{ item.category.icon }} {% endif %}<b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title }}</a></b>
+{% if item.subcategory %}{{ item.subcategory.name }} · {% endif %}{{ item.category.name }}{% if item.city %} · {% if item.city.icon %}{{ item.city.icon }} {% endif %}{{ item.city.name }}{% elif item.country %} · {% if item.country.icon %}{{ item.country.icon }} {% endif %}{{ item.country.name }}{% else %} · весь мир{% endif %}
+{% if item.author %}{{ item.author.full_name|default:item.author.slug }}{% endif %}
+{% if item.promo_code %}Промокод: <code>{{ item.promo_code }}</code>
+{% endif %}{% if item.description %}{% render_tg item.description 400 %}{% endif %}
 ➜ {{ settings.APP_HOST }}{{ item.get_absolute_url }}
