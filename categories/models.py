@@ -20,6 +20,7 @@ class Category(models.Model):
         blank=True,
         related_name="descendants",
     )
+    metadata = models.JSONField(default=dict, blank=True)
     sort_order = models.PositiveIntegerField(default=0)
     created_at = models.DateTimeField(auto_now_add=True)
 

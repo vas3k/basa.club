@@ -125,7 +125,14 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         items = items.filter(category_id=category)
 
-    include_online = request.GET.get(settings.INCLUDE_ONLINE_PARAM) == "1"
+    include_online = False
+    if current_category:
+        root = current_category.root or current_category
+        include_online = current_category.metadata.get("include_online", root.metadata.get("include_online", False))
+    include_online_param = request.GET.get(settings.INCLUDE_ONLINE_PARAM)
+    if include_online_param in {"0", "1"}:
+        include_online = include_online_param == "1"
+    request.include_online = include_online
     if country != "everywhere":
         get_object_or_404(GeoCountry, id=country)
         here = Q(country_id=country)
@@ -150,6 +157,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
         "items": items,
         "feed_sort": sort if sort in FEED_SORTS else "standard",
         "include_online": include_online,
+        "include_online_param": include_online_param if include_online_param in {"0", "1"} else None,
         "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
     })
 

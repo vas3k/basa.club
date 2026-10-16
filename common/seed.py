@@ -13,6 +13,8 @@ def seed_categories(Category):
                 "root": root,
                 "sort_order": index,
             }
+            if any(field.name == "metadata" for field in Category._meta.fields):
+                defaults["metadata"] = node.metadata
             category, _ = Category.objects.update_or_create(
                 id=node.id,
                 defaults=defaults,

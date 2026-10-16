@@ -52,8 +52,9 @@ def feed_querystring(request):
     sort = request.GET.get("sort")
     if sort in {"date", "rating"}:
         params["sort"] = sort
-    if request.GET.get(settings.INCLUDE_ONLINE_PARAM) == "1":
-        params[settings.INCLUDE_ONLINE_PARAM] = "1"
+    include_online = request.GET.get(settings.INCLUDE_ONLINE_PARAM)
+    if include_online in {"0", "1"}:
+        params[settings.INCLUDE_ONLINE_PARAM] = include_online
     return urlencode(params)
 
 

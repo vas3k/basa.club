@@ -162,6 +162,7 @@ ADMIN = ClubAdmin(
                         "name",
                         "id",
                         "parent",
+                        "metadata",
                         "sort_order",
                     ],
                 ),

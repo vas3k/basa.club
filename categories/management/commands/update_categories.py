@@ -146,6 +146,7 @@ def collect_records(nodes, parent_id, root_id, records, seen, clashes):
                 "parent_id": parent_id,
                 "root_id": root_id,
                 "sort_order": index,
+                "metadata": node.metadata,
             },
         })
         collect_records(

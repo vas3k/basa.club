@@ -51,8 +51,8 @@
             {% if feed_sort and feed_sort != "standard" %}
                 <input type="hidden" name="sort" value="{{ feed_sort }}">
             {% endif %}
-            {% if include_online %}
-                <input type="hidden" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="1">
+            {% if include_online_param %}
+                <input type="hidden" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="{{ include_online_param }}">
             {% endif %}
             <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" maxlength="200" value="{{ request.GET.query|slice:":200" }}">
 

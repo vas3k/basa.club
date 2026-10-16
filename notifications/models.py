@@ -99,8 +99,7 @@ class Subscription(models.Model):
         params = {}
         if self.query:
             params["query"] = self.query
-        if self.include_online:
-            params[settings.INCLUDE_ONLINE_PARAM] = "1"
+        params[settings.INCLUDE_ONLINE_PARAM] = "1" if self.include_online else "0"
         if params:
             return f"{path}?{urlencode(params)}"
         return path

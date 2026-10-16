@@ -8,6 +8,7 @@ class Category:
     icon: str = ""
     children: list = field(default_factory=list)
     description: str = ""
+    metadata: dict = field(default_factory=dict)
 
 
 CATEGORIES = [
@@ -47,5 +48,6 @@ CATEGORIES = [
             Category("fun", "Развлечения", '<i class="fas fa-ticket-alt"></i>'),
             Category("other", "Другое", '<i class="fas fa-ellipsis-h"></i>'),
         ],
+        metadata={"include_online": True},
     ),
 ]
