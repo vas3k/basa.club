@@ -84,7 +84,7 @@
             {% endblock %}
         </aside>
 
-        <section class="content">
+        <section class="content" {% block content_attributes %}{% endblock %}>
             {% block content %}{% endblock %}
         </section>
     </section>

@@ -1,5 +1,6 @@
 {% item_url item as url %}
-<article class="index-card block block-clickable">
+<article class="index-card block block-clickable" data-published-at="{{ item.published_at|date:"c" }}">
+    <span class="index-card-new" hidden>Новое</span>
     <a class="index-card-cover" href="{{ url }}" aria-label="{{ item.title_with_prefix }}"></a>
     <div class="index-card-category">
         <span>
@@ -23,7 +24,6 @@
         {% endif %}
     </div>
     <div class="index-card-footer">
-        {% include "users/widgets/user_tiny.html" with user=item.author %}
         <span class="item-upvote index-card-rating {% if item.rating > 0 or item.upvoted_at and item.rating < 0 %}rating-positive{% elif item.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}{% if item.upvoted_at %} is-voted{% endif %}" title="{% if item.upvoted_at %}Вы голосовали{% else %}Рейтинг{% endif %}">
             <span class="item-upvote-rating">{{ item.rating|rating }}</span>
         </span>

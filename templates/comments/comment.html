@@ -1,6 +1,11 @@
 {# {% include "comments/comment.html" with comment=node.comment replies=node.replies %} #}
-{% with open_reply_to=reply_form.reply_to.value %}
 <div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
+    {% if show_source %}
+        <a class="profile-comment-source" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">
+            {% if item.city %}{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}{% elif item.country %}{% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}{% else %}🌍 Весь мир{% endif %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% if item.subcategory %}{% if item.subcategory.icon %}{{ item.subcategory.icon|safe }} {% endif %}{{ item.subcategory.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}{{ item.title }}
+        </a>
+    {% endif %}
+
     <div class="comment-header">
         {% if comment.author %}
             {% include "users/widgets/user_small.html" with user=comment.author %}
@@ -10,13 +15,7 @@
         </div>
     </div>
 
-    {% if comment.text|length >= 1500 %}
-        <div class="comment-text comment-text-long markdown-text">{{ comment.text|markdown }}</div>
-    {% elif comment.text|length >= 250 %}
-        <div class="comment-text comment-text-medium markdown-text">{{ comment.text|markdown }}</div>
-    {% else %}
-        <div class="comment-text markdown-text">{{ comment.text|markdown }}</div>
-    {% endif %}
+    <div class="comment-text markdown-text text-size{% if comment.text|length >= 1500 %} text-size-long{% elif comment.text|length >= 250 %} text-size-medium{% endif %}">{{ comment.text|markdown }}</div>
 
     <div class="comment-footer">
         <div class="comment-actions">
@@ -42,23 +41,33 @@
     {% endif %}
 
     {% if request.user.is_authenticated %}
-        <form method="post"
-              action="{% url "item_comment" item.id %}"
-              class="comment-reply-form"
-              id="reply-form-{{ comment.id }}"
-              {% if open_reply_to != comment.id|stringformat:"s" %}hidden{% endif %}>
-            {% csrf_token %}
-            <input type="hidden" name="{{ reply_form.reply_to.html_name }}" value="{{ comment.id }}">
-            {% if open_reply_to == comment.id|stringformat:"s" %}
-                {{ reply_form.text }}
-                {% if reply_form.text.errors %}<div class="form-error">{{ reply_form.text.errors }}</div>{% endif %}
-                {% if reply_form.reply_to.errors %}<div class="form-error">{{ reply_form.reply_to.errors }}</div>{% endif %}
-                {% if reply_form.non_field_errors %}<div class="form-error">{{ reply_form.non_field_errors }}</div>{% endif %}
-            {% else %}
-                <input type="text" name="{{ reply_form.text.html_name }}" placeholder="{{ reply_form.fields.text.widget.attrs.placeholder }}" maxlength="{{ reply_form.fields.text.max_length }}" required>
-            {% endif %}
-            <button type="submit" class="button button-small">Ответить</button>
-        </form>
+        {% if reply_form %}
+            {% with open_reply_to=reply_form.reply_to.value %}
+                <form method="post"
+                      action="{% url "item_comment" item.id %}"
+                      class="comment-reply-form"
+                      id="reply-form-{{ comment.id }}"
+                      {% if open_reply_to != comment.id|stringformat:"s" %}hidden{% endif %}>
+                    {% csrf_token %}
+                    <input type="hidden" name="{{ reply_form.reply_to.html_name }}" value="{{ comment.id }}">
+                    {% if open_reply_to == comment.id|stringformat:"s" %}
+                        {{ reply_form.text }}
+                        {% if reply_form.text.errors %}<div class="form-error">{{ reply_form.text.errors }}</div>{% endif %}
+                        {% if reply_form.reply_to.errors %}<div class="form-error">{{ reply_form.reply_to.errors }}</div>{% endif %}
+                        {% if reply_form.non_field_errors %}<div class="form-error">{{ reply_form.non_field_errors }}</div>{% endif %}
+                    {% else %}
+                        <input type="text" name="{{ reply_form.text.html_name }}" placeholder="{{ reply_form.fields.text.widget.attrs.placeholder }}" maxlength="{{ reply_form.fields.text.max_length }}" required>
+                    {% endif %}
+                    <button type="submit" class="button button-small">Ответить</button>
+                </form>
+            {% endwith %}
+        {% else %}
+            <form method="post" action="{% url "item_comment" item.id %}" class="comment-reply-form" id="reply-form-{{ comment.id }}" hidden>
+                {% csrf_token %}
+                <input type="hidden" name="reply_to" value="{{ comment.id }}">
+                <input type="text" name="text" placeholder="Ваш ответ" maxlength="5000" required>
+                <button type="submit" class="button button-small">Ответить</button>
+            </form>
+        {% endif %}
     {% endif %}
 </div>
-{% endwith %}

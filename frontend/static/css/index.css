@@ -231,6 +231,26 @@
     text-decoration: none;
 }
 
+.index-card.is-new {
+    background-color: var(--promo-bg);
+}
+
+.index-card.is-new .index-card-category {
+    padding-right: 55px;
+}
+
+.index-card-new {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    padding: 3px 7px;
+    border-radius: 6px;
+    background-color: var(--badge-color);
+    font-size: 75%;
+    font-weight: 700;
+    line-height: 1.2;
+}
+
 .index-card-cover {
     position: absolute;
     inset: 0;
@@ -285,16 +305,10 @@
     margin-top: auto;
 }
 
-.index-card-footer .user-tiny {
-    position: relative;
-    z-index: 2;
-    min-width: 0;
-}
-
 .index-card .index-card-rating {
     position: relative;
     z-index: 2;
-    margin-left: auto;
+    margin-left: 0;
     height: 26px;
     padding: 0 7px;
     border-width: 1.6px;

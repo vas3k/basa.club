@@ -49,7 +49,7 @@ def profile_page(request, slug):
         request,
         Comment.objects_for_user(request.user)
         .filter(author=profile_user, reply_to__isnull=True, item__in=Item.objects_for_user(request.user))
-        .select_related("item", "item__city", "item__subcategory")
+        .select_related("item", "item__city", "item__country", "item__subcategory")
         .order_by("-created_at"),
         settings.PROFILE_COMMENTS_PAGE_SIZE,
         "comments_page",

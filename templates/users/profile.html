@@ -51,7 +51,7 @@
             <div class="block-header block-header-with-button">Комментарии</div>
             <section class="content-items">
                 {% for comment in comments %}
-                    {% include "comments/profile_comment.html" %}
+                    {% include "comments/comment.html" with item=comment.item show_source=True %}
                 {% endfor %}
             </section>
             {% paginator comments "comments_page" %}

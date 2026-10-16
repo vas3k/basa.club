@@ -5,6 +5,8 @@
 {% block meta_description %}{% geo_title %}{{ block.super }}{% endblock %}
 {% block og_description %}{% geo_title %}{{ block.super }}{% endblock %}
 
+{% block content_attributes %}data-behavior="index-new-items"{% endblock %}
+
 {% block content %}
     {% if not request.COOKIES.is_welcome_read and not request.user.metadata.is_welcome_read %}
         {% include "index/welcome.html" %}
@@ -66,7 +68,7 @@
 
     {% include "common/widgets/join.html" %}
 
-    {% if not current_country and not all_items %}
+    {% if not country_items and not all_items %}
         <div class="block feed-empty">
             <p>Тут пока ничего нет</p>
             <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>

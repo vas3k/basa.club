@@ -557,6 +557,26 @@ img.emoji {
 }
 
 
+/* Text size by content length */
+
+.text-size {
+    font-size: 140%;
+    line-height: 1.5;
+}
+
+.text-size.text-size-medium {
+    font-size: 112%;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.text-size.text-size-long {
+    font-size: 100%;
+    font-weight: 400;
+    line-height: 1.42;
+}
+
+
 /* Markdown */
 
 .markdown-text {

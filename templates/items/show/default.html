@@ -26,9 +26,9 @@
 
                 {% if item.description %}
                     {% if request.user.is_authenticated %}
-                        <div class="item-show-description markdown-text">{{ item.description|markdown }}</div>
+                        <div class="item-show-description markdown-text text-size{% if item.description|length >= 1500 %} text-size-long{% elif item.description|length >= 250 %} text-size-medium{% endif %}">{{ item.description|markdown }}</div>
                     {% else %}
-                        <div class="item-show-description">{{ item.description|public_preview }}</div>
+                        <div class="item-show-description text-size{% if item.description|length >= 1500 %} text-size-long{% elif item.description|length >= 250 %} text-size-medium{% endif %}">{{ item.description|public_preview }}</div>
                         {% if item.description|public_preview_cut %}
                             <a class="item-description-more" href="{% url "login" %}">Читать дальше</a>
                         {% endif %}
