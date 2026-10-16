@@ -7,6 +7,18 @@
     {% include "users/widgets/profile_header.html" %}
 
     <div class="profile-feed">
+        {% if request.user.id == profile_user.id or request.user.is_moderator %}
+            {% if draft_items %}
+                <div class="block-header block-header-with-button">Черновики</div>
+                <section class="content-items">
+                    {% for item in draft_items %}
+                        {% include "items/list/default.html" with show_owner_actions=True %}
+                    {% endfor %}
+                </section>
+                {% paginator draft_items "drafts_page" %}
+            {% endif %}
+        {% endif %}
+
         {% if active_items %}
             <div class="block-header block-header-with-button">Посты</div>
             <section class="content-items">

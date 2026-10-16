@@ -3,6 +3,7 @@ from complaints.models import Flag
 from categories.models import Category
 from comments.models import Comment
 from geo.models import GeoCity, GeoCountry
+from godmode.actions.item_moderate import get_moderate_action, post_moderate_action
 from godmode.actions.item_view import view_item_action
 from godmode.actions.user_ban import get_ban_action, post_ban_action
 from godmode.actions.user_profile import view_profile_action
@@ -82,6 +83,7 @@ ADMIN = ClubAdmin(
                         "comment_count",
                         "bookmark_count",
                         "published_at",
+                        "updated_at",
                         "expires_at",
                         "deleted_at",
                     ],
@@ -90,6 +92,11 @@ ADMIN = ClubAdmin(
                         "open": ClubAdminAction(
                             title="📝 Открыть",
                             get=view_item_action,
+                        ),
+                        "moderate": ClubAdminAction(
+                            title="⛔ Модерировать",
+                            get=get_moderate_action,
+                            post=post_moderate_action,
                         ),
                         "ban": ClubAdminAction(
                             title="💣 Забанить автора",

@@ -22,9 +22,8 @@ from comments.views import create_comment, delete_comment, edit_comment
 from common.api import upload_image
 from items.api import retract_item_vote, upvote_item
 from items.views import (
-    create_item,
+    compose_item,
     delete_item,
-    edit_item,
     hide_item,
     index_page,
     item_page,
@@ -61,8 +60,8 @@ urlpatterns = [
     path("bookmarks/subscriptions/<uuid:subscription_id>/remove/", remove_subscription, name="subscription_remove"),
     path("bookmarks/<uuid:item_id>/remove/", remove_bookmark, name="bookmark_remove"),
  
-    path("items/new/", create_item, name="item_create"),
-    path("items/<uuid:item_id>/edit/", edit_item, name="item_edit"),
+    path("items/new/", compose_item, name="item_create"),
+    path("items/<uuid:item_id>/edit/", compose_item, name="item_edit"),
     path("items/<uuid:item_id>/hide/", hide_item, name="item_hide"),
     path("items/<uuid:item_id>/delete/", delete_item, name="item_delete"),
     path("items/<uuid:item_id>/comments/", create_comment, name="item_comment"),

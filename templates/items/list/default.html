@@ -1,5 +1,5 @@
 {% item_url item as url %}
-<article class="block item-card{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+<article class="block item-card{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
     <div class="item-header">
         {% include "items/widgets/tags.html" %}
     </div>

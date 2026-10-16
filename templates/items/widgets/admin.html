@@ -2,25 +2,19 @@
     <div class="item-manage-title">Админить</div>
 
     <div class="item-manage-actions">
+        {% if item.visibility == "draft" %}
+            <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+                <i class="fas fa-paper-plane"></i> Опубликовать
+            </a>
+        {% endif %}
+
         <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
             <i class="fas fa-pen"></i> Редактировать
         </a>
 
-        {% if item.visibility != "draft" %}
-            <form method="post" action="{% url "item_hide" item.id %}">
-                {% csrf_token %}
-                <button type="submit" class="button item-manage-button">
-                    <i class="fas fa-eye-slash"></i> Скрыть
-                </button>
-            </form>
-        {% endif %}
-
-        <form method="post" action="{% url "item_delete" item.id %}" data-behavior="confirm" data-confirm="Удалить? Это нельзя отменить.">
-            {% csrf_token %}
-            <button type="submit" class="button item-manage-button">
-                <i class="fas fa-trash-alt"></i> Удалить
-            </button>
-        </form>
+        <a href="{% url "godmode_action" "items" item.id "moderate" %}" class="button item-manage-button">
+            <i class="fas fa-flag"></i> Модерировать
+        </a>
 
         <a href="{% url "godmode_edit_model" "items" item.id %}" class="button item-manage-button">
             <i class="fas fa-bomb"></i> Открыть в админке

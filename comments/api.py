@@ -6,6 +6,7 @@ from django.views.decorators.http import require_POST
 
 from authn.helpers import api_login_required
 from comments.models import Comment, CommentVote
+from items.models import Item
 from counters import counters
 from common.request import parse_ip_address, parse_useragent
 
@@ -16,6 +17,7 @@ def upvote_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),
         id=comment_id,
+        item__in=Item.objects_for_user(request.user),
     )
     if comment.author_id == request.user.id:
         return JsonResponse({"error": "Нельзя голосовать за свое"}, status=403)
@@ -50,6 +52,7 @@ def retract_comment_vote(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),
         id=comment_id,
+        item__in=Item.objects_for_user(request.user),
     )
     vote = CommentVote.objects.filter(user=request.user, comment=comment).first()
     if vote and not vote.is_retractable():

@@ -270,17 +270,8 @@ class ItemForm(forms.ModelForm):
 
         return cleaned_data
 
-    def save(self, *, author=None, is_draft=False, keep_visibility=False, commit=True):
+    def save(self, commit=True):
         item = super().save(commit=False)
-        if author is not None:
-            item.author = author
-
-        if not keep_visibility:
-            item.visibility = Item.VISIBILITY_DRAFT if is_draft else Item.VISIBILITY_VISIBLE
-            if is_draft:
-                item.published_at = None
-            elif not item.published_at:
-                item.published_at = timezone.now()
 
         choice = self.cleaned_data.get("expires_in") or "never"
         now = timezone.now()

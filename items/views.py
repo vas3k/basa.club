@@ -1,9 +1,13 @@
+from copy import copy
+
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.db.models import F, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
+from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
 from categories.models import Category
@@ -50,13 +54,13 @@ def index_page(request, country=None):
 
     country_items = []
     if request.country_id != "everywhere":
-        country_items = Item.objects_for_user(request.user).filter(country_id=request.country_id)
+        country_items = Item.objects_for_user(request.user, Item.visible_objects()).filter(country_id=request.country_id)
         country_items = search.filter_items(country_items, page_query).order_by(*ordering)
         country_items = list(country_items[:20])
 
     world_items = []
     all_items = []
-    feed = search.filter_items(Item.objects_for_user(request.user), page_query).order_by(*ordering)
+    feed = search.filter_items(Item.objects_for_user(request.user, Item.visible_objects()), page_query).order_by(*ordering)
     if request.country_id == "everywhere":
         world_items = list(feed[:10])
     elif country_items:
@@ -79,7 +83,7 @@ def index_page(request, country=None):
         subscriptions = list(subscriptions[:5])
         with_items = []
         for subscription in subscriptions:
-            items = Item.objects_for_user(request.user)
+            items = Item.objects_for_user(request.user, Item.visible_objects())
             if subscription.city_id:
                 items = items.filter(city_id=subscription.city_id)
             elif subscription.country_id:
@@ -119,7 +123,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         current_category = get_object_or_404(Category, id=category, parent__isnull=True)
 
-    items = Item.objects_for_user(request.user)
+    items = Item.objects_for_user(request.user, Item.visible_objects())
     if subcategory:
         items = items.filter(subcategory_id=subcategory)
     elif category:
@@ -216,19 +220,12 @@ def item_page(request, country, city, category, item_id, subcategory=None):
     if response := anonymous_search_redirect(request):
         return response
 
-    try:
-        item = Item.fetch(
-            user=request.user,
-            id=item_id,
-            category_id=category,
-            subcategory_id=subcategory,
-        )
-    except Item.DoesNotExist:
-        raise Http404()
-    is_owner = request.user.is_authenticated and request.user.id == item.author_id
-    is_public = item.visibility in (Item.VISIBILITY_VISIBLE, Item.VISIBILITY_LINK_ONLY) and not item.is_expired
-    if not is_public and not is_owner and not (request.user.is_authenticated and request.user.is_moderator):
-        raise Http404()
+    item = get_object_or_404(
+        Item.objects_for_user(request.user),
+        id=item_id,
+        category_id=category,
+        subcategory_id=subcategory,
+    )
 
     Item.objects.filter(id=item.id).update(view_count=F("view_count") + 1)
 
@@ -239,35 +236,52 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 
 @login_required
 @require_http_methods(["GET", "POST"])
-def create_item(request):
-    country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
-    city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
-    initial = {
-        "country": country.id if country else "everywhere",
-        "city": city.id if city else None,
-    }
-    if request.method == "GET":
-        initial = ItemForm.initial_from_query(request.GET, initial)
-    form = ItemForm(request.POST or None, initial=initial)
+@transaction.atomic
+def compose_item(request, item_id=None):
+    item = Item(author=request.user, visibility=Item.VISIBILITY_DRAFT)
+    if item_id:
+        item = get_object_or_404(Item.objects.select_for_update(), id=item_id)
+        if item.author_id != request.user.id and not request.user.is_moderator:
+            raise Http404()
+    old = copy(item)
 
+    initial = {}
+    if not item_id:
+        country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
+        city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
+        initial = {"country": country.id if country else "everywhere", "city": city.id if city else None}
+        initial = ItemForm.initial_from_query(request.GET, initial)
+    form = ItemForm(request.POST if request.method == "POST" else None, instance=item, initial=initial)
+
+    action = request.POST.get("action", "save")
+    publishing = old.visibility == Item.VISIBILITY_DRAFT and action == "publish"
+    first_publication = publishing and not old.published_at
     if request.method == "POST" and form.is_valid():
-        action = request.POST.get("action") or "publish"
-        publishing = action not in {"draft", "preview"}
-        if publishing and not Item.check_rate_limits(request.user):
+        if first_publication and not Item.check_rate_limits(item.author):
             form.add_error(None, f"Можно опубликовать не больше {settings.ITEM_RATE_LIMIT} постов за сутки")
         else:
-            item = form.save(
-                author=request.user,
-                is_draft=not publishing,
-                commit=False,
-            )
+            item = form.save(commit=False)
+            if publishing:
+                item.visibility = Item.VISIBILITY_VISIBLE
+                item.moderator_comment = None
+                if first_publication:
+                    item.published_at = timezone.now()
+            elif old.visibility != Item.VISIBILITY_DRAFT:
+                item.updated_at = timezone.now()
             item.save()
+
             search.update_item_index(item)
-            if item.is_listed:
+            if old.is_listed and item.is_listed:
+                counters.item_updated(item, old)
+            elif old.is_listed:
+                counters.item_hidden(old)
+            elif item.is_listed:
                 counters.item_created(item)
-                notification.item_created(item)
+            if first_publication:
+                transaction.on_commit(lambda: notification.item_created(item))
+
             if action == "draft":
-                return redirect("user_profile", slug=request.user.slug)
+                return redirect("user_profile", slug=item.author.slug)
             return redirect(item.get_absolute_url())
 
     countries = [
@@ -291,70 +305,9 @@ def create_item(request):
 
     return render(request, "items/compose/default.html", {
         "form": form,
-        "form_title": "Добавить пост в Базу",
-        "form_url": reverse("item_create"),
-        "is_new": True,
-        "countries_options": countries,
-        "categories_options": categories,
-        "contact_fields": CONTACT_EDITOR_FIELDS,
-    })
-
-
-@login_required
-@require_http_methods(["GET", "POST"])
-def edit_item(request, item_id):
-    item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
-    if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):
-        raise Http404()
-    old = Item.objects.get(id=item.id)
-    form = ItemForm(request.POST or None, instance=item)
-
-    if request.method == "POST" and form.is_valid():
-        action = request.POST.get("action") or "save"
-        if action == "hide":
-            item = form.save(is_draft=True, commit=False)
-        elif action == "publish":
-            item = form.save(is_draft=False, commit=False)
-        elif action in {"draft", "preview"}:
-            item = form.save(is_draft=True, commit=False)
-        else:
-            item = form.save(keep_visibility=True, commit=False)
-        item.save()
-        search.update_item_index(item)
-        if old.is_listed and item.is_listed:
-            counters.item_updated(item, old)
-        elif old.is_listed:
-            counters.item_hidden(old)
-        elif item.is_listed:
-            counters.item_created(item)
-            notification.item_created(item)
-        if action == "draft":
-            return redirect("user_profile", slug=request.user.slug)
-        return redirect(item.get_absolute_url())
-
-    countries = [
-        {
-            "id": country.id,
-            "name": country.name,
-            "icon": country.icon,
-            "cities": [{"id": city.id, "name": city.name, "icon": city.icon} for city in country.cities.all()],
-        }
-        for country in GeoCountry.objects.prefetch_related("cities")
-    ]
-    categories = [
-        {
-            "id": category.id,
-            "name": category.name,
-            "icon": category.icon,
-            "children": [{"id": child.id, "name": child.name} for child in category.children.all()],
-        }
-        for category in Category.objects.filter(parent__isnull=True).prefetch_related("children")
-    ]
-    return render(request, "items/compose/default.html", {
-        "form": form,
-        "form_title": "Редактируем",
-        "form_url": reverse("item_edit", args=[item.id]),
-        "is_new": False,
+        "form_title": "Редактируем" if item_id else "Добавить пост в Базу",
+        "form_url": reverse("item_edit", args=[item_id]) if item_id else reverse("item_create"),
+        "is_new": not item_id,
         "countries_options": countries,
         "categories_options": categories,
         "contact_fields": CONTACT_EDITOR_FIELDS,
@@ -369,8 +322,7 @@ def hide_item(request, item_id):
         raise Http404()
     old = Item.objects.get(id=item.id)
     item.visibility = Item.VISIBILITY_DRAFT
-    item.published_at = None
-    item.save(update_fields=["visibility", "published_at", "updated_at"])
+    item.save(update_fields=["visibility"])
     search.update_item_index(item)
     if old.is_listed:
         counters.item_hidden(old)

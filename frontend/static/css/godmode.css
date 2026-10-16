@@ -228,6 +228,42 @@
     padding-top: 30px;
 }
 
+.godmode-moderate-reasons {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.godmode-moderate-reason {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.godmode-moderate-reason input[type="radio"] {
+    width: 20px;
+    min-width: 20px;
+    height: 20px;
+    margin-top: 3px;
+    appearance: auto;
+    cursor: pointer;
+}
+
+.godmode-moderate-reason-title,
+.godmode-moderate-reason-text {
+    display: block;
+}
+
+.godmode-moderate-reason-title {
+    font-size: 120%;
+    font-weight: 600;
+}
+
+.godmode-moderate-reason-text {
+    opacity: 0.75;
+}
+
 .godmode-actions {
     display: flex;
     flex-direction: row;

@@ -1,6 +1,6 @@
 import json
 
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -28,9 +28,7 @@ def flag_item(request, item_id):
     if len(comment) > Flag.COMMENT_MAX_LENGTH:
         return JsonResponse({"error": "Комментарий слишком длинный"}, status=400)
 
-    item = get_object_or_404(Item, id=item_id)
-    if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.id:
-        raise Http404()
+    item = get_object_or_404(Item.objects_for_user(request.user), id=item_id)
 
     flag = Flag.objects.create(
         user=request.user,

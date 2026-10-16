@@ -14,13 +14,7 @@ from notifications.models import Subscription
 def bookmarks_page(request):
     items = paginate(
         request,
-        Item.objects_for_user(request.user, Item.objects.select_related(
-            "category",
-            "subcategory",
-            "country",
-            "city",
-            "author",
-        ).filter(bookmarks__user=request.user).order_by("-bookmarks__created_at")),
+        Item.objects_for_user(request.user).filter(bookmarks__user=request.user).order_by("-bookmarks__created_at"),
     )
     subscriptions = (
         Subscription.objects.filter(user=request.user)

@@ -2,12 +2,19 @@
 
 {% block item %}
     <div class="item-page">
-        <article class="block item-show{% if show_owner_actions or show_admin_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+        <article class="block item-show{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions or show_admin_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
             <div class="item-header">
                 {% include "items/widgets/tags.html" %}
             </div>
 
             <div class="item-main">
+                {% if item.moderator_comment %}
+                    <div class="item-moderator-comment">
+                        <div class="item-moderator-comment-icon" aria-hidden="true">⛔</div>
+                        <div class="item-moderator-comment-text">{{ item.moderator_comment }}</div>
+                    </div>
+                {% endif %}
+
                 <div class="item-title-row">
                     <h1 class="item-show-title">{% include "items/widgets/title.html" %}</h1>
                     {% item_upvote item %}
@@ -52,7 +59,7 @@
                         {% else %}
                             <span title="Создано">📅 {{ item.created_at|date:"j E Y" }}</span>
                         {% endif %}
-                        {% if item.updated_at|date:"Ymd" != item.created_at|date:"Ymd" %}
+                        {% if item.updated_at and item.published_at and item.updated_at > item.published_at %}
                             <span title="Обновлено">✏️ {{ item.updated_at|date:"j E Y" }}</span>
                         {% endif %}
                         {% if item.expires_at %}

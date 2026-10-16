@@ -73,6 +73,7 @@ class Item(SoftDeleteMixin, models.Model):
         default=VISIBILITY_VISIBLE,
         db_index=True,
     )
+    moderator_comment = models.TextField(null=True, blank=True, verbose_name="Комментарий модератора")
     upvotes = models.IntegerField(default=0)
     rating = models.IntegerField(default=0)
     comment_count = models.IntegerField(default=0)
@@ -81,7 +82,7 @@ class Item(SoftDeleteMixin, models.Model):
     published_at = models.DateTimeField(null=True, blank=True, db_index=True)
     expires_at = models.DateTimeField(null=True, blank=True, db_index=True)
     created_at = models.DateTimeField(auto_now_add=True)
-    updated_at = models.DateTimeField(auto_now=True)
+    updated_at = models.DateTimeField(null=True, blank=True, editable=False)
 
     class Meta:
         db_table = "items"
@@ -99,10 +100,9 @@ class Item(SoftDeleteMixin, models.Model):
     @classmethod
     def check_rate_limits(cls, user):
         since = timezone.now() - settings.RATE_LIMIT_PERIOD
-        recent = cls.objects.filter(
+        recent = cls.all_objects.filter(
             author=user,
-            visibility=cls.VISIBILITY_VISIBLE,
-            created_at__gte=since,
+            published_at__gte=since,
         ).count()
         return recent < settings.ITEM_RATE_LIMIT
 
@@ -119,9 +119,15 @@ class Item(SoftDeleteMixin, models.Model):
 
     @classmethod
     def objects_for_user(cls, user, queryset=None):
-        queryset = cls.visible_objects() if queryset is None else queryset
+        queryset = cls.objects.all() if queryset is None else queryset
+        queryset = queryset.select_related("category", "subcategory", "country", "city", "author").filter(
+            deleted_at__isnull=True,
+        )
+        public = Q(visibility__in=[cls.VISIBILITY_VISIBLE, cls.VISIBILITY_LINK_ONLY])
         if not user or not user.is_authenticated:
-            return queryset
+            return queryset.filter(public)
+        if not user.is_moderator:
+            queryset = queryset.filter(public | Q(author=user, visibility=cls.VISIBILITY_DRAFT))
 
         vote_qs = ItemVote.objects.filter(item=OuterRef("id"), user=user)
         return queryset.annotate(
@@ -132,18 +138,6 @@ class Item(SoftDeleteMixin, models.Model):
                 output_field=BigIntegerField(),
             ),
         )
-
-    @classmethod
-    def for_author(cls, author):
-        return cls.objects.select_related(
-            "category", "subcategory", "country", "city", "author",
-        ).filter(author=author)
-
-    @classmethod
-    def fetch(cls, *, user=None, **lookup):
-        return cls.objects_for_user(user, cls.objects.select_related(
-            "category", "subcategory", "country", "city", "author",
-        )).get(**lookup)
 
     def get_absolute_url(self):
         country = self.country_id or "everywhere"

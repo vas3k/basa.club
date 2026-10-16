@@ -14,6 +14,20 @@
     opacity: 0.72;
 }
 
+.block.item-draft {
+    border: 3px dashed var(--text-color);
+    opacity: 1;
+}
+
+.item-deleted-mark {
+    margin-bottom: 16px;
+    padding: 12px 16px;
+    border: 3px solid var(--text-color);
+    border-radius: var(--block-border-radius);
+    font-size: 140%;
+    font-weight: 700;
+}
+
 .item-page {
     display: flex;
     flex-wrap: wrap;
@@ -360,6 +374,24 @@
     line-height: 1.5;
     opacity: 0.8;
     overflow-wrap: anywhere;
+}
+
+.item-moderator-comment {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 18px;
+    padding: 16px 18px;
+    background: var(--promo-bg);
+    border-radius: var(--block-border-radius);
+    font-size: 120%;
+    line-height: 1.35;
+}
+
+.item-moderator-comment-icon {
+    flex: none;
+    font-size: 2.2rem;
+    line-height: 1;
 }
 
 .item-show-title {

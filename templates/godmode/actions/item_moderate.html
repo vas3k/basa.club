@@ -1,0 +1,29 @@
+{% extends "godmode/action.html" %}
+
+{% block title %}
+    Модерировать — {{ block.super }}
+{% endblock %}
+
+{% block godmode_action_form %}
+    <form action="." method="post">
+        {% csrf_token %}
+        <div class="godmode-moderate-reasons">
+            {% for reason in reasons %}
+                <label class="godmode-moderate-reason">
+                    <input type="radio" name="reason" value="{{ reason.title }}" {% if form.reason.value == reason.title %}checked{% endif %}>
+                    <span>
+                        <span class="godmode-moderate-reason-title">{{ reason.title }}</span>
+                        <span class="godmode-moderate-reason-text">{{ reason.description }}</span>
+                    </span>
+                </label>
+            {% endfor %}
+        </div>
+        {% if form.reason.errors %}
+            <div class="godmode-form-errors">{{ form.reason.errors }}</div>
+        {% endif %}
+        <div class="godmode-form-actions">
+            <span></span>
+            <button type="submit" class="button">Скрыть пост</button>
+        </div>
+    </form>
+{% endblock %}

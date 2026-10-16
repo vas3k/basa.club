@@ -259,6 +259,33 @@ ITEM_RATE_LIMIT = 50
 ITEM_VOTE_RATE_LIMIT = 100
 COMMENT_VOTE_RATE_LIMIT = 100
 VOTE_RETRACT_PERIOD = timedelta(days=20)
+
+ITEM_MODERATION_REASONS = [
+    {
+        "title": "Дубликат.",
+        "description": "Такой пост уже существует.",
+    },
+    {
+        "title": "Плохой заголовок.",
+        "description": "Заголовок не дает понять о чем пост либо слишком рекламный.",
+    },
+    {
+        "title": "Недостаточно описания.",
+        "description": "Добавьте описание и подробности, чтобы остальным было легче",
+    },
+    {
+        "title": "Недостаточно контактов.",
+        "description": "Добавьте контакты для связи или адрес.",
+    },
+    {
+        "title": "Неправильная категория.",
+        "description": "Категория или город выбраны неправильно для этой записи.",
+    },
+    {
+        "title": "Недооформлено.",
+        "description": "Проверьте заголовок, добавьте описание, контакты, адреса и всё остальное необходимое",
+    },
+]
 MEDIA_UPLOAD_URL = "https://i.vas3k.club/upload/multipart/"
 MEDIA_UPLOAD_CODE = os.getenv("MEDIA_UPLOAD_CODE") or ""
 SENTRY_DSN = os.getenv("SENTRY_DSN")

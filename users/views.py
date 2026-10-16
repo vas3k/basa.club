@@ -21,15 +21,24 @@ def profile_page(request, slug):
     profile_user = get_user_or_404(request, slug)
     active_items = paginate(
         request,
-        Item.objects_for_user(request.user).filter(author=profile_user),
+        Item.objects_for_user(request.user, Item.visible_objects()).filter(author=profile_user),
         settings.PROFILE_POSTS_PAGE_SIZE,
     )
+    draft_items = Item.objects.none()
     inactive_items = Item.objects.none()
-    if request.user.id == profile_user.id:
-        visible_ids = Item.visible_objects().filter(author=profile_user).values("id")
-        inactive_items = Item.for_author(profile_user).exclude(id__in=visible_ids)
-        inactive_items = Item.objects_for_user(request.user, inactive_items)
+    if request.user.id == profile_user.id or request.user.is_moderator:
+        author_items = Item.objects_for_user(request.user).filter(author=profile_user)
+        draft_items = author_items.filter(visibility=Item.VISIBILITY_DRAFT)
+        if request.user.id == profile_user.id:
+            visible_ids = Item.visible_objects().values("id")
+            inactive_items = author_items.exclude(id__in=visible_ids).exclude(visibility=Item.VISIBILITY_DRAFT)
 
+    draft_items = paginate(
+        request,
+        draft_items,
+        settings.PROFILE_POSTS_PAGE_SIZE,
+        "drafts_page",
+    )
     inactive_items = paginate(
         request,
         inactive_items,
@@ -39,7 +48,7 @@ def profile_page(request, slug):
     comments = paginate(
         request,
         Comment.objects_for_user(request.user)
-        .filter(author=profile_user, reply_to__isnull=True)
+        .filter(author=profile_user, reply_to__isnull=True, item__in=Item.objects_for_user(request.user))
         .select_related("item", "item__city", "item__subcategory")
         .order_by("-created_at"),
         settings.PROFILE_COMMENTS_PAGE_SIZE,
@@ -48,6 +57,7 @@ def profile_page(request, slug):
 
     return render(request, "users/profile.html", {
         "profile_user": profile_user,
+        "draft_items": draft_items,
         "active_items": active_items,
         "inactive_items": inactive_items,
         "comments": comments,

@@ -1,5 +1,5 @@
 from django.db import IntegrityError
-from django.http import Http404, JsonResponse
+from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
 from django.views.decorators.http import require_POST
 
@@ -12,9 +12,7 @@ from items.models import Item
 @api_login_required
 @require_POST
 def toggle_item_bookmark(request, item_id):
-    item = get_object_or_404(Item, id=item_id)
-    if item.visibility == Item.VISIBILITY_DRAFT and item.author_id != request.user.id:
-        raise Http404()
+    item = get_object_or_404(Item.objects_for_user(request.user), id=item_id)
 
     deleted, _ = Bookmark.objects.filter(user=request.user, item=item).delete()
     if deleted:
