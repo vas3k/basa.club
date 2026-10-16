@@ -38,12 +38,12 @@
                 {% if item.location %}
                     {% if request.user.is_authenticated %}
                         <div class="inline-block inline-block-green item-location">
-                            <span class="inline-block-icon item-location-icon" aria-hidden="true">📍</span>
+                            <span class="inline-block-icon item-location-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></span>
                             <div class="item-location-text">{{ item.location|urlize }}</div>
                         </div>
                     {% else %}
                         {% anon_teaser item.id "location" as teaser %}
-                        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon="📍" icon_class="item-location-icon" css_class="inline-block-green item-location" %}
+                        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon_fa="fas fa-map-marker-alt" icon_class="item-location-icon" css_class="inline-block-green item-location" %}
                     {% endif %}
                 {% endif %}
 

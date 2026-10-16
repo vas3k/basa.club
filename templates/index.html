@@ -11,57 +11,48 @@
     {% endif %}
 
     {% for subscription in subscriptions %}
-        <section class="index-section">
-            <h2 class="index-section-title">
-                <a href="{{ subscription.listing_url }}">{% if subscription.city %}{{ subscription.city.name }}{% elif subscription.country %}{{ subscription.country.name }}{% else %}Весь мир{% endif %}{% if subscription.category %} — {{ subscription.category.name }}{% endif %}{% if subscription.query %} — «{{ subscription.query }}»{% endif %}{% if subscription.include_online and subscription.country_id and subscription.country_id != settings.ONLINE_COUNTRY_ID %} · Включая онлайн{% endif %}</a>
-            </h2>
-            <div class="index-cards">
-                {% for item in subscription.index_items %}
-                    {% include "items/list/card.html" %}
-                {% empty %}
-                    <div class="block feed-empty">Пока нет постов по этой подписке.</div>
-                {% endfor %}
-                <a class="index-card-more" href="{{ subscription.listing_url }}">Все ▶︎</a>
-            </div>
-        </section>
-    {% endfor %}
-
-    {% if current_country %}
-        <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
-            {% if country_items %}
+        {% if subscription.index_items %}
+            <section class="index-section">
+                <h2 class="index-section-title">
+                    <a href="{{ subscription.listing_url }}">{% if subscription.city %}{{ subscription.city.name }}{% elif subscription.country %}{{ subscription.country.name }}{% else %}Весь мир{% endif %}{% if subscription.category %} — {{ subscription.category.name }}{% endif %}{% if subscription.query %} — «{{ subscription.query }}»{% endif %}{% if subscription.include_online and subscription.country_id and subscription.country_id != settings.ONLINE_COUNTRY_ID %} · Включая онлайн{% endif %}</a>
+                </h2>
                 <div class="index-cards">
-                    {% for item in country_items %}
+                    {% for item in subscription.index_items %}
                         {% include "items/list/card.html" %}
                     {% endfor %}
-                    <a class="index-card-more" href="{% url "listing" current_country.id "everywhere" %}">Все ▶︎</a>
+                    <a class="index-card-more" href="{{ subscription.listing_url }}">Все ▶︎</a>
                 </div>
-            {% else %}
-                <div class="block feed-empty">
-                    <p>В Вастрик Базе {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }} почему-то всё еще пусто!</p>
-                    <p>Давайте начнём наконец-то: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то еще!</p>
-                    <div class="feed-empty-actions">
-                        <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
-                        {% include "notifications/widgets/subscribe_button.html" %}
-                    </div>
-                </div>
-            {% endif %}
+            </section>
+        {% endif %}
+    {% endfor %}
+
+    {% if current_country and country_items %}
+        <section class="index-section">
+            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
+            <div class="index-cards">
+                {% for item in country_items %}
+                    {% include "items/list/card.html" %}
+                {% endfor %}
+                <a class="index-card-more" href="{% url "listing" current_country.id "everywhere" %}">Все ▶︎</a>
+            </div>
         </section>
     {% endif %}
 
     {% for block in city_blocks %}
-        <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" current_country.id block.city.id %}">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</a></h2>
-            <div class="index-cards">
-                {% for item in block.items %}
-                    {% include "items/list/card.html" %}
-                {% endfor %}
-                <a class="index-card-more" href="{% url "listing" current_country.id block.city.id %}">Все ▶︎</a>
-            </div>
-        </section>
+        {% if block.items %}
+            <section class="index-section">
+                <h2 class="index-section-title"><a href="{% url "listing" current_country.id block.city.id %}">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</a></h2>
+                <div class="index-cards">
+                    {% for item in block.items %}
+                        {% include "items/list/card.html" %}
+                    {% endfor %}
+                    <a class="index-card-more" href="{% url "listing" current_country.id block.city.id %}">Все ▶︎</a>
+                </div>
+            </section>
+        {% endif %}
     {% endfor %}
 
-    {% if not current_country %}
+    {% if not current_country and all_items %}
         <section class="index-section">
             <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
             <div class="index-cards">

@@ -4,13 +4,13 @@
             {% for contact in item.contact_links %}
                 {% if contact.href %}
                     <a class="inline-block inline-block-blue inline-block-small item-contact" href="{{ contact.href }}" data-nofavicon{% if contact.external %} target="_blank" rel="noopener noreferrer"{% endif %}>
-                        <span class="inline-block-icon item-contact-icon">{{ contact.icon }}</span>
+                        <span class="inline-block-icon item-contact-icon" aria-hidden="true"><i class="{{ contact.icon_class }}"></i></span>
                         <span>{{ contact.text }}</span>
                         {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
                     </a>
                 {% else %}
                     <span class="inline-block inline-block-blue inline-block-small item-contact item-contact-static">
-                        <span class="inline-block-icon item-contact-icon">{{ contact.icon }}</span>
+                        <span class="inline-block-icon item-contact-icon" aria-hidden="true"><i class="{{ contact.icon_class }}"></i></span>
                         <span>{{ contact.text }}</span>
                         {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
                     </span>
@@ -19,9 +19,9 @@
         </div>
     {% else %}
         <div class="item-contacts">
-            {% anon_teaser_list item.contact_links|length item.id "contact" as teasers %}
-            {% for teaser in teasers %}
-                {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon="💬" css_class="inline-block-blue inline-block-small item-contact" %}
+            {% for contact in item.contact_links %}
+                {% anon_teaser item.id "contact" forloop.counter0 as teaser %}
+                {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon_fa=contact.icon_class css_class="inline-block-blue inline-block-small item-contact" %}
             {% endfor %}
         </div>
     {% endif %}

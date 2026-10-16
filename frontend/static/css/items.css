@@ -367,6 +367,7 @@
     font-size: 180%;
     font-weight: 700;
     line-height: 1.25;
+    overflow-wrap: anywhere;
 }
 
 .item-card-description {
@@ -568,12 +569,6 @@
 .item-action[data-copied] {
     --inline-block-bg: var(--inline-block-hover-bg);
     color: var(--text-color);
-}
-
-.item-action-static,
-.item-action-static:hover {
-    --inline-block-bg: var(--inline-block-bg-default);
-    cursor: default;
 }
 
 .item-action:disabled {

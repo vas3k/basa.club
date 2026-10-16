@@ -4,11 +4,11 @@ CONTACT_MAX_LENGTH = 256
 CONTACT_MAX_COUNT = 15
 
 CONTACTS = [
-    {"type": "phone", "label": "Телефон", "icon": "📞"},
-    {"type": "telegram", "label": "Телеграм", "icon": "✈️"},
-    {"type": "whatsapp", "label": "WhatsApp", "icon": "💬"},
-    {"type": "website", "label": "Сайт", "icon": "🌐"},
-    {"type": "custom", "label": "Другое", "icon": "🔗"},
+    {"type": "phone", "label": "Телефон", "icon": "📞", "icon_class": "fas fa-phone"},
+    {"type": "telegram", "label": "Телеграм", "icon": "✈️", "icon_class": "fab fa-telegram"},
+    {"type": "whatsapp", "label": "WhatsApp", "icon": "💬", "icon_class": "fab fa-whatsapp"},
+    {"type": "website", "label": "Сайт", "icon": "🌐", "icon_class": "fas fa-globe"},
+    {"type": "custom", "label": "Другое", "icon": "🔗", "icon_class": "fas fa-link"},
 ]
 
 CONTACT_TYPES = {item["type"] for item in CONTACTS}
@@ -84,6 +84,7 @@ def present_contacts(contacts):
 
         shown.append({
             "icon": known["icon"] if known else "🔗",
+            "icon_class": known["icon_class"] if known else "fas fa-link",
             "label": known["label"] if known else "Ссылка",
             "text": text,
             "comment": comment,

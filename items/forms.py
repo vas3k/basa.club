@@ -178,7 +178,7 @@ class ItemForm(forms.ModelForm):
         return self.cleaned_data.get("prefix") or None
 
     def clean_title(self):
-        title = self.cleaned_data["title"]
+        title = " ".join(self.cleaned_data["title"].split())
         if len(title) < 8:
             raise forms.ValidationError(self.fields["title"].error_messages["min_length"], code="min_length")
         return title
