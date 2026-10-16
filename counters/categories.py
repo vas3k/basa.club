@@ -1,11 +1,12 @@
 from django.conf import settings
 from django.core.cache import caches
+from django.db import transaction
 from django.db.models import Count, Q
 
 from items.models import Item
 
 # Counts for one root category and all of its subcategories, for one country and city.
-TIMEOUT = 60 * 60 * 24
+TIMEOUT = 15 * 60
 VERSION_KEY = "category_counts:version"
 
 cache = caches["redis_cache"]
@@ -28,7 +29,7 @@ def counts(root_id, country_id="everywhere", city_id="everywhere", include_onlin
 def invalidate(root_id):
     # A change affects city, country, and worldwide totals.
     if root_id:
-        bump_version()
+        transaction.on_commit(bump_version)
 
 
 def refresh_all():

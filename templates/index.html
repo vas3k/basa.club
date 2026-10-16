@@ -13,7 +13,7 @@
     {% for subscription in subscriptions %}
         <section class="index-section">
             <h2 class="index-section-title">
-                {% if subscription.city %}{{ subscription.city.name }}{% elif subscription.country %}{{ subscription.country.name }}{% else %}Весь мир{% endif %}{% if subscription.category %} — {{ subscription.category.name }}{% endif %}{% if subscription.query %} — «{{ subscription.query }}»{% endif %}{% if subscription.include_online and subscription.country_id and subscription.country_id != settings.ONLINE_COUNTRY_ID %} · Включая онлайн{% endif %}
+                <a href="{{ subscription.listing_url }}">{% if subscription.city %}{{ subscription.city.name }}{% elif subscription.country %}{{ subscription.country.name }}{% else %}Весь мир{% endif %}{% if subscription.category %} — {{ subscription.category.name }}{% endif %}{% if subscription.query %} — «{{ subscription.query }}»{% endif %}{% if subscription.include_online and subscription.country_id and subscription.country_id != settings.ONLINE_COUNTRY_ID %} · Включая онлайн{% endif %}</a>
             </h2>
             <div class="index-cards">
                 {% for item in subscription.index_items %}
@@ -28,7 +28,7 @@
 
     {% if current_country %}
         <section class="index-section">
-            <h2 class="index-section-title">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</h2>
+            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
             {% if country_items %}
                 <div class="index-cards">
                     {% for item in country_items %}
@@ -51,7 +51,7 @@
 
     {% for block in city_blocks %}
         <section class="index-section">
-            <h2 class="index-section-title">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</h2>
+            <h2 class="index-section-title"><a href="{% url "listing" current_country.id block.city.id %}">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</a></h2>
             <div class="index-cards">
                 {% for item in block.items %}
                     {% include "items/list/card.html" %}
@@ -63,7 +63,7 @@
 
     {% if not current_country %}
         <section class="index-section">
-            <h2 class="index-section-title">Новое 🌎 Весь мир</h2>
+            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
             <div class="content-items">
                 {% for item in all_items %}
                     {% include "items/list/default.html" %}
