@@ -64,9 +64,9 @@
     {% if not current_country %}
         <section class="index-section">
             <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
-            <div class="content-items">
+            <div class="index-cards">
                 {% for item in all_items %}
-                    {% include "items/list/default.html" %}
+                    {% include "items/list/card.html" %}
                 {% endfor %}
             </div>
             {% paginator all_items %}
