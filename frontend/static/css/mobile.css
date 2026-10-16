@@ -53,13 +53,13 @@
         .header-logo {
             flex: 1 1 0;
             gap: 4px;
-            container-type: inline-size;
+            container: header-logo / inline-size;
         }
 
         .header-logo a {
             gap: 0.1em;
             /* Reserve the menu button space, then fit both words and the mark. */
-            font-size: clamp(10px, calc((100cqi - 51px) / 7.8), 25.6px);
+            font-size: clamp(20px, calc((100cqi - 51px) / 7.8), 25.6px);
         }
 
         .header-logo-mark {
@@ -131,10 +131,52 @@
             flex-shrink: 0;
         }
 
-    .subheader-search .subheader-search-geo {
-        flex: 1 1 100%;
-        width: 100%;
-        max-width: none;
+    @container header-logo (max-width: 230px) {
+        .header-logo-mark {
+            display: none;
+        }
+
+        .header-logo a {
+            gap: 0.35em;
+            font-size: clamp(20px, calc((100cqi - 41px) / 6.6), 25.6px);
+        }
+    }
+
+    @container header-logo (max-width: 180px) {
+        .header-logo-title:first-child {
+            display: none;
+        }
+
+        .header-logo a {
+            font-size: 25.6px;
+        }
+    }
+
+    .subheader-search {
+        container: subheader-search / inline-size;
+    }
+
+    @container subheader-search (width < calc(28rem + 12px)) {
+        .subheader-search-geo[data-geo="city"] {
+            max-width: none;
+        }
+    }
+
+    .subheader-search-place {
+        flex: 1 1 14rem;
+        min-width: min(100%, 14rem);
+    }
+
+    .subheader-search-place:has([data-geo="city"]) {
+        flex-basis: calc(28rem + var(--search-gap));
+        min-width: min(100%, calc(28rem + var(--search-gap)));
+    }
+
+    .subheader-search-geo[data-geo="country"],
+    .subheader-search-geo[data-geo="city"] {
+        flex: 1 1 14rem;
+        width: auto;
+        min-width: min(100%, 14rem);
     }
 
     .content-subcategories {

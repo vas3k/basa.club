@@ -75,11 +75,28 @@
     gap: var(--search-gap);
 }
 
-    .subheader-search .subheader-search-geo {
-        flex: 1 1 9rem;
+    .subheader-search-place {
+        display: flex;
+        flex: 0 1 auto;
+        flex-wrap: wrap;
+        gap: var(--search-gap);
+        min-width: min(100%, var(--sidebar-width));
+        max-width: 100%;
+    }
+
+    .subheader-search-geo[data-geo="country"] {
+        flex: 0 0 var(--sidebar-width);
+        width: var(--sidebar-width);
+    }
+
+    .subheader-search-geo[data-geo="city"] {
+        flex: 0 1 auto;
         width: auto;
         min-width: 0;
-        max-width: var(--sidebar-width);
+        max-width: 250px;
+    }
+
+    .subheader-search .subheader-search-geo {
         padding-top: calc(14px - 0.07em / 1.1);
         padding-bottom: calc(14px - 0.07em / 1.1);
         font-size: calc(var(--input-font-size) * 1.1);
@@ -88,10 +105,10 @@
 
     .subheader-search-find {
         display: flex;
-        flex: 1 1 18rem;
+        flex: 2 1 24rem;
         align-items: stretch;
         gap: var(--search-gap);
-        min-width: min(100%, 16rem);
+        min-width: min(100%, 24rem);
     }
 
     .subheader-search .subheader-search-query {

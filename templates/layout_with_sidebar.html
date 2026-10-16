@@ -3,50 +3,52 @@
 {% block subheader %}
     <section class="subheader">
         <form class="subheader-search" action="" method="get" data-behavior="geo-select">
-            <select class="subheader-search-geo" data-geo="country" aria-label="Страна">
-                <option value="everywhere" {% if not current_country %}selected{% endif %}>
-                    🌎 Весь мир
-                </option>
-                {% if online_country %}
-                    <option disabled value="">─────────</option>
-                    <option value="{{ online_country.id }}" {% if current_country.id == online_country.id %}selected{% endif %}>
-                        {{ online_country.icon }} {{ online_country.name }}{% if online_country.items_count %} ({{ online_country.items_count }}){% endif %}
+            <div class="subheader-search-place">
+                <select class="subheader-search-geo" data-geo="country" aria-label="Страна">
+                    <option value="everywhere" {% if not current_country %}selected{% endif %}>
+                        🌎 Весь мир
                     </option>
-                {% endif %}
-                {% for country in countries %}
-                    {% if country.items_count %}
-                        {% ifchanged %}
-                            <option disabled value="">─────────</option>
-                        {% endifchanged %}
-                        <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
-                            {{ country.icon|safe }} {{ country.name }}{% if country.items_count %} ({{ country.items_count }}){% endif %}
+                    {% if online_country %}
+                        <option disabled value="">─────────</option>
+                        <option value="{{ online_country.id }}" {% if current_country.id == online_country.id %}selected{% endif %}>
+                            {{ online_country.icon }} {{ online_country.name }}{% if online_country.items_count %} ({{ online_country.items_count }}){% endif %}
                         </option>
                     {% endif %}
-                {% endfor %}
-                {% for country in countries %}
-                    {% if not country.items_count %}
-                        {% ifchanged %}
-                            <option disabled value="">─────────</option>
-                        {% endifchanged %}
-                        <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
-                            {{ country.icon|safe }} {{ country.name }}
-                        </option>
-                    {% endif %}
-                {% endfor %}
-            </select>
-
-            {% if cities %}
-                <select class="subheader-search-geo" data-geo="city" aria-label="Город">
-                    <option value="everywhere" {% if not current_city %}selected{% endif %}>
-                        Везде
-                    </option>
-                    {% for city in cities %}
-                        <option value="{{ city.id }}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
-                            {% if city.icon %}{{ city.icon|safe }} {% endif %}{{ city.name }}{% if city.items_count %} ({{ city.items_count }}){% endif %}
-                        </option>
+                    {% for country in countries %}
+                        {% if country.items_count %}
+                            {% ifchanged %}
+                                <option disabled value="">─────────</option>
+                            {% endifchanged %}
+                            <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                                {{ country.icon|safe }} {{ country.name }}{% if country.items_count %} ({{ country.items_count }}){% endif %}
+                            </option>
+                        {% endif %}
+                    {% endfor %}
+                    {% for country in countries %}
+                        {% if not country.items_count %}
+                            {% ifchanged %}
+                                <option disabled value="">─────────</option>
+                            {% endifchanged %}
+                            <option value="{{ country.id }}" {% if current_country and current_country.id == country.id %}selected{% endif %}>
+                                {{ country.icon|safe }} {{ country.name }}
+                            </option>
+                        {% endif %}
                     {% endfor %}
                 </select>
-            {% endif %}
+
+                {% if cities %}
+                    <select class="subheader-search-geo" data-geo="city" aria-label="Город">
+                        <option value="everywhere" {% if not current_city %}selected{% endif %}>
+                            Везде
+                        </option>
+                        {% for city in cities %}
+                            <option value="{{ city.id }}" {% if current_city and current_city.id == city.id %}selected{% endif %}>
+                                {% if city.icon %}{{ city.icon|safe }} {% endif %}{{ city.name }}{% if city.items_count %} ({{ city.items_count }}){% endif %}
+                            </option>
+                        {% endfor %}
+                    </select>
+                {% endif %}
+            </div>
 
             {% if feed_sort and feed_sort != "standard" %}
                 <input type="hidden" name="sort" value="{{ feed_sort }}">
