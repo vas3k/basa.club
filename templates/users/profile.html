@@ -1,9 +1,7 @@
 {% extends "layout.html" %}
 
-{% block title %}
-    {% if request.user.id == profile_user.id %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}
-{% endblock %}
-{% block og_title %}{% if request.user.id == profile_user.id %}Мой профиль{% elif profile_user.full_name %}{{ profile_user.full_name }}{% else %}{{ profile_user.slug }}{% endif %} — {{ block.super }}{% endblock %}
+{% block title %}{% firstof profile_user.full_name profile_user.slug %} — {{ block.super }}{% endblock %}
+{% block og_title %}{% firstof profile_user.full_name profile_user.slug %} — {{ block.super }}{% endblock %}
 
 {% block content %}
     {% include "users/widgets/profile_header.html" %}

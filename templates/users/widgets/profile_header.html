@@ -21,7 +21,7 @@
                     </div>
                 {% endif %}
 
-                {% if profile_user.bio %}
+                {% if request.user.is_authenticated and profile_user.bio %}
                     <div class="profile-bio markdown-text">{{ profile_user.bio|markdown }}</div>
                 {% endif %}
             </div>

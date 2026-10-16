@@ -209,6 +209,7 @@ a.comment-action:visited {
 
 .reply-body .user-tiny {
     margin-right: 6px;
+    margin-top: -4px;
 }
 
 .reply-text,

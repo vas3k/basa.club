@@ -49,7 +49,7 @@ export default function ItemUpvote({ rating, voted, upvoteUrl, retractUrl, login
 
     const shown = Number.parseFloat(state.rating);
     let tone = "rating-zero";
-    if (shown > 0) {
+    if (shown > 0 || (state.voted && shown < 0)) {
         tone = "rating-positive";
     } else if (shown < 0) {
         tone = "rating-negative";
