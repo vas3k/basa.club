@@ -1,5 +1,5 @@
-// Must match the mobile breakpoint in static/css/mobile.css
-const SIDEBAR_BREAKPOINT = 900;
+// Must match the mobile breakpoint in static/css/theme.css and mobile.css.
+const SIDEBAR_BREAKPOINT = 739;
 
 export default function sidebarToggle(button: HTMLElement) {
     const sidebar = document.querySelector(".sidebar");

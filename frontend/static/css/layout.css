@@ -10,7 +10,7 @@
 }
 
 .header {
-    padding-top: 32px;
+    padding-top: var(--header-padding-top);
     padding-bottom: var(--index-gap);
 }
 

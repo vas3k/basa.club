@@ -1,7 +1,7 @@
 /* Blocks */
 
 .block {
-    padding: 30px;
+    padding: var(--block-padding);
     margin-bottom: 30px;
     box-sizing: border-box;
     box-shadow: var(--block-shadow);
@@ -72,12 +72,6 @@
     text-align: center;
     margin: 0 auto;
     padding-bottom: 20px;
-}
-
-@media only screen and (max-width : 570px) {
-    .block {
-        padding: 20px;
-    }
 }
 
 .block-description {
@@ -477,7 +471,7 @@ img.emoji {
     gap: 20px;
 }
 
-@media only screen and (max-width : 800px) {
+@media (max-width: 739px) {
     .form-row {
         grid-template-columns: 1fr;
     }

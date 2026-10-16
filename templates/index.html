@@ -14,7 +14,7 @@
         {% if subscription.index_items %}
             <section class="index-section">
                 <h2 class="index-section-title">
-                    <a href="{{ subscription.listing_url }}">{% if subscription.city %}{{ subscription.city.name }}{% elif subscription.country %}{{ subscription.country.name }}{% else %}Весь мир{% endif %}{% if subscription.category %} — {{ subscription.category.name }}{% endif %}{% if subscription.query %} — «{{ subscription.query }}»{% endif %}{% if subscription.include_online and subscription.country_id and subscription.country_id != settings.ONLINE_COUNTRY_ID %} · Включая онлайн{% endif %}</a>
+                    <a href="{{ subscription.listing_url }}">{% if subscription.city %}{{ subscription.city.name }}{% if subscription.city.icon %} {{ subscription.city.icon|safe }}{% elif subscription.country.icon %} {{ subscription.country.icon|safe }}{% endif %}{% elif subscription.country %}{{ subscription.country.name }}{% if subscription.country.icon %} {{ subscription.country.icon|safe }}{% endif %}{% else %}Весь мир 🌎{% endif %}{% if subscription.category %} {{ subscription.category.name }}{% endif %}{% if subscription.query %} «{{ subscription.query }}»{% endif %}</a>
                 </h2>
                 <div class="index-cards">
                     {% for item in subscription.index_items %}

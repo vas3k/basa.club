@@ -4,9 +4,14 @@
 
     --max-page-width: 1600px;
     --sidebar-width: 280px;
+    --sidebar-icon-size: 28px;
+    --sidebar-item-padding-x: 20px;
     --index-gap: 40px;
     --search-gap: 12px;
     --page-padding: 20px;
+    --header-padding-top: 32px;
+    --block-padding: 30px;
+    --body-font-size: 15px;
     --item-content-width: 600px;
     --highlight-bg: rgba(0, 0, 0, 0.05);
     --highlight-bg-active: rgba(0, 0, 0, 0.12);
@@ -83,7 +88,7 @@ html {
 
 body {
     font-family: var(--sans-font);
-    font-size: 15px;
+    font-size: var(--body-font-size);
     line-height: 1.42;
     color: var(--text-color);
     background-color: var(--bg-color);
@@ -92,15 +97,38 @@ body {
     -moz-osx-font-smoothing: grayscale;
 }
 
-@media only screen and (min-device-width : 768px) and (max-device-width : 1024px) and (orientation : portrait) {
-    body {
-        font-size: 14px;
+/*
+  Viewport widths. Media queries cannot read custom properties, so these
+  pixel values are the shared breakpoints (also sidebar-toggle.ts):
+
+  big     1200px and wider — full desktop
+  small   740px–1199px — tablets and compact desktops, including iPad portrait
+  mobile  739px and narrower — phones
+
+  739px sits under iPad mini portrait (744px). iPad Pro 11" is 834px and
+  iPad Pro 12.9"/13" portrait is 1024–1032px, so they stay on the small desktop.
+*/
+
+@media (max-width: 1199px) {
+    :root {
+        --sidebar-width: 220px;
+        --sidebar-icon-size: 22px;
+        --sidebar-item-padding-x: 12px;
+        --index-gap: 24px;
+        --page-padding: 16px;
+        --header-padding-top: 24px;
+        --block-padding: 22px;
+        --body-font-size: 14px;
     }
 }
 
-@media only screen and (max-width : 800px) {
-    body {
-        font-size: 13px;
+@media (max-width: 739px) {
+    :root {
+        --index-gap: 20px;
+        --page-padding: 12px;
+        --header-padding-top: 16px;
+        --block-padding: 18px;
+        --body-font-size: 13px;
     }
 }
 

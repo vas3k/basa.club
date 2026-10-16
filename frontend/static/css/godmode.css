@@ -24,7 +24,7 @@
 }
 
 .godmode-sidebar {
-    width: 280px;
+    width: var(--sidebar-width);
 }
 
 .godmode-content {
@@ -297,7 +297,7 @@
     display: none;
 }
 
-@media (max-width: 700px) {
+@media (max-width: 739px) {
     .godmode-container {
         flex-direction: column;
         gap: 0;
