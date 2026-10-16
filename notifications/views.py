@@ -18,7 +18,7 @@ def toggle_listing_subscription(request):
             request.POST.get("city"),
             request.POST.get("category"),
             request.POST.get("query"),
-            (request.POST.get("with_global") or "").lower() in {"1", "true", "on", "yes"},
+            (request.POST.get("include_online") or "").lower() in {"1", "true", "on", "yes"},
         )
     except InvalidSubscription:
         pass

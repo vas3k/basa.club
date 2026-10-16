@@ -10,6 +10,9 @@ from utils.strings import random_string
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 
+ONLINE_COUNTRY_ID = "online"
+INCLUDE_ONLINE_PARAM = "include_online"
+
 SECRET_KEY = os.getenv("SECRET_KEY") or "wow-so-secret"
 
 DEBUG = (os.getenv("DEBUG") != "false")

@@ -2,6 +2,7 @@ import zlib
 from urllib.parse import urlencode
 
 from django import template
+from django.conf import settings
 from django.urls import reverse
 
 from common.templatetags.islands import island
@@ -51,11 +52,8 @@ def feed_querystring(request):
     sort = request.GET.get("sort")
     if sort in {"date", "rating"}:
         params["sort"] = sort
-    show = (request.GET.get("show_global") or "").lower()
-    if show in {"1", "true", "on", "yes"}:
-        params["show_global"] = "1"
-    elif show in {"0", "false", "off", "no"}:
-        params["show_global"] = "0"
+    if request.GET.get(settings.INCLUDE_ONLINE_PARAM) == "1":
+        params[settings.INCLUDE_ONLINE_PARAM] = "1"
     return urlencode(params)
 
 

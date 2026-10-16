@@ -202,12 +202,8 @@ def comment_unvoted(comment):
 def bump_geo(item, delta):
     """+/- items_count on the country and city this item is listed in.
 
-    Worldwide items (no country) are ignored.
     An item with a country but no city is counted on the country only.
     """
-    if not item.country_id:
-        return
-
     GeoCountry.objects.filter(id=item.country_id).update(items_count=F("items_count") + delta)
     if item.city_id:
         GeoCity.objects.filter(id=item.city_id).update(items_count=F("items_count") + delta)

@@ -1,5 +1,6 @@
 import logging
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import IntegrityError
 from django.db.models import Q
@@ -50,7 +51,7 @@ def subscribe_to_geo(user, country_id, city_id):
     return subscription
 
 
-def toggle_subscription(user, country_id, city_id, category_id, query, with_global=False):
+def toggle_subscription(user, country_id, city_id, category_id, query, include_online=False):
     """Create the listing subscription, or delete it if it already exists."""
     country = None
     city = None
@@ -90,7 +91,7 @@ def toggle_subscription(user, country_id, city_id, category_id, query, with_glob
             city=city,
             category=category,
             query=query,
-            with_global=bool(with_global),
+            include_online=bool(include_online),
         )
     except IntegrityError:
         return True
@@ -166,18 +167,11 @@ def subscribers_for_item(item):
     Overlapping subscriptions all match. The user still gets one message.
     Only members with a linked Telegram account.
     """
-    # A worldwide item reaches an all-world subscription, and any subscription
-    # that was created with the global listing included. Index feeds do not use this flag.
+    geo = Q(country__isnull=True, city__isnull=True) | Q(country_id=item.country_id, city__isnull=True)
     if item.city_id:
-        geo = (
-            Q(city_id=item.city_id)
-            | Q(country_id=item.country_id, city__isnull=True)
-            | Q(country__isnull=True, city__isnull=True)
-        )
-    elif item.country_id:
-        geo = Q(country_id=item.country_id, city__isnull=True) | Q(country__isnull=True, city__isnull=True)
-    else:
-        geo = Q(country__isnull=True, city__isnull=True) | Q(with_global=True)
+        geo |= Q(country_id=item.country_id, city_id=item.city_id)
+    if item.country_id == settings.ONLINE_COUNTRY_ID:
+        geo |= Q(include_online=True)
 
     categories = Q(category__isnull=True)
     if item.subcategory_id:

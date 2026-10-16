@@ -37,7 +37,7 @@ class Subscription(models.Model):
         on_delete=models.CASCADE,
     )
     query = models.CharField(max_length=QUERY_MAX_LENGTH, blank=True, default="")
-    with_global = models.BooleanField(default=False, verbose_name="Глобальные")
+    include_online = models.BooleanField(default=False, verbose_name="Включая онлайн")
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:
@@ -71,6 +71,8 @@ class Subscription(models.Model):
         if self.category_id:
             parts.append(self.category.name)
         parts.append(place)
+        if self.include_online and self.country_id and self.country_id != settings.ONLINE_COUNTRY_ID:
+            parts.append("Включая онлайн")
         return " · ".join(parts)
 
     @property
@@ -97,8 +99,8 @@ class Subscription(models.Model):
         params = {}
         if self.query:
             params["query"] = self.query
-        if self.with_global:
-            params["show_global"] = "1"
+        if self.include_online:
+            params[settings.INCLUDE_ONLINE_PARAM] = "1"
         if params:
             return f"{path}?{urlencode(params)}"
         return path

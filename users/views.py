@@ -9,7 +9,7 @@ from common.pagination import paginate
 from common.users import get_user_or_404
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
-from users.forms import EVERYWHERE, ProfileForm, WelcomeForm
+from users.forms import ProfileForm, WelcomeForm
 from notifications.subscriptions import subscribe_to_geo
 
 
@@ -73,8 +73,8 @@ def edit_profile(request, slug):
 
     country = GeoCountry.objects.filter(name=user.country).first() if user.country else None
     city = GeoCity.objects.filter(country=country, name=user.city).first() if country and user.city else None
-    country_id = country.id if country else EVERYWHERE
-    city_id = city.id if city else EVERYWHERE
+    country_id = country.id if country else ""
+    city_id = city.id if city else ""
 
     form = ProfileForm(request.POST or None, instance=user, initial={
         "country": country_id,
@@ -112,8 +112,8 @@ def welcome(request):
     user = request.user
     country = GeoCountry.objects.filter(name=user.country).first() if user.country else None
     city = GeoCity.objects.filter(country=country, name=user.city).first() if country and user.city else None
-    country_id = country.id if country else EVERYWHERE
-    city_id = city.id if city else EVERYWHERE
+    country_id = country.id if country else ""
+    city_id = city.id if city else ""
 
     form = WelcomeForm(request.POST or None, instance=user, initial={
         "country": country_id,

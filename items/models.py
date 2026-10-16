@@ -54,9 +54,7 @@ class Item(SoftDeleteMixin, models.Model):
     )
     country = models.ForeignKey(
         "geo.GeoCountry",
-        on_delete=models.SET_NULL,
-        null=True,
-        blank=True,
+        on_delete=models.PROTECT,
         related_name="items",
     )
     city = models.ForeignKey(
@@ -140,7 +138,7 @@ class Item(SoftDeleteMixin, models.Model):
         )
 
     def get_absolute_url(self):
-        country = self.country_id or "everywhere"
+        country = self.country_id
         city = self.city_id or "everywhere"
         if not self.subcategory_id:
             return f"/{country}/{city}/{self.category_id}/{self.id}/"

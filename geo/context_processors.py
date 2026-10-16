@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from geo.models import GeoCountry
 
 
@@ -17,7 +19,8 @@ def geo(request):
             break
 
     return {
-        "countries": countries,
+        "countries": [country for country in countries if country.id != settings.ONLINE_COUNTRY_ID],
+        "online_country": next((country for country in countries if country.id == settings.ONLINE_COUNTRY_ID), None),
         "cities": cities,
         "current_country": current_country,
         "current_city": current_city,

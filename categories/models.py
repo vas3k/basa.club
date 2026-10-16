@@ -21,7 +21,6 @@ class Category(models.Model):
         related_name="descendants",
     )
     sort_order = models.PositiveIntegerField(default=0)
-    is_global = models.BooleanField(default=False)
     created_at = models.DateTimeField(auto_now_add=True)
 
     class Meta:

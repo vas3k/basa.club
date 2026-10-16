@@ -23,7 +23,7 @@ EXPIRES_CHOICES = (
 class ItemForm(forms.ModelForm):
     country = forms.CharField(
         label="Страна",
-        required=False,
+        required=True,
         max_length=100,
         widget=forms.HiddenInput(),
         error_messages={"max_length": "Слишком длинное значение"},
@@ -129,7 +129,9 @@ class ItemForm(forms.ModelForm):
     def initial_from_query(cls, params, initial):
         result = dict(initial)
         if "country" in params:
-            result["country"] = (params.get("country") or "").strip() or "everywhere"
+            result["country"] = (params.get("country") or "").strip()
+            if result["country"] == "everywhere":
+                result["country"] = ""
             if "city" not in params:
                 result["city"] = None
         if "city" in params:
@@ -153,8 +155,6 @@ class ItemForm(forms.ModelForm):
 
     def __init__(self, *args, **kwargs):
         super().__init__(*args, **kwargs)
-        if not self.is_bound and not self.initial.get("country") and not self.instance.country_id:
-            self.initial["country"] = "everywhere"
         if not self.instance.expires_at:
             return
         shown = formats.date_format(self.instance.expires_at, "j E Y")
@@ -168,9 +168,7 @@ class ItemForm(forms.ModelForm):
     def clean_country(self):
         raw = (self.cleaned_data.get("country") or "").strip()
         if not raw:
-            raise forms.ValidationError("Выберите страну или «Весь мир»")
-        if raw == "everywhere":
-            return None
+            raise forms.ValidationError("Выберите страну")
         country = GeoCountry.objects.filter(id=raw).first()
         if not country:
             raise forms.ValidationError("Нет такой страны")

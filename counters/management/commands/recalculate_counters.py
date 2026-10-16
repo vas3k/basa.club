@@ -178,10 +178,9 @@ class Command(BaseCommand):
             User.objects.bulk_update(objects, ["items_count", "comments_count"], batch_size=500)
 
         visible = Item.visible_objects().order_by()
-        worldwide = visible.filter(country__isnull=True).count()
         country_counts = {
             row["country_id"]: row["n"]
-            for row in visible.exclude(country__isnull=True).values("country_id").annotate(n=Count("id"))
+            for row in visible.values("country_id").annotate(n=Count("id"))
         }
         countries = list(GeoCountry.objects.all())
         for country in countries:
@@ -201,5 +200,5 @@ class Command(BaseCommand):
 
         category_totals = refresh_all()
         self.stdout.write("Categories: " + ", ".join(f"{root_id} {total}" for root_id, total in category_totals.items()))
-        self.stdout.write(f"Geo: {worldwide} worldwide ignored, {len(countries)} countries, {len(cities)} cities")
+        self.stdout.write(f"Geo: {len(countries)} countries, {len(cities)} cities")
         self.stdout.write(self.style.SUCCESS("Live ratings, counters and rating history rebuilt"))

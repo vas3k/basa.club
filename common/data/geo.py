@@ -17,6 +17,7 @@ class Country:
 
 
 GEO = [
+    Country("online", "Онлайн и ремоут", "🛜"),
     Country("au", "Австралия", "🇦🇺", [
         City("sydney", "Сидней", "🎭"),
         City("melbourne", "Мельбурн", "☕"),

@@ -3,7 +3,7 @@ from copy import copy
 from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
-from django.db.models import F, Q
+from django.db.models import Count, F, Q
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.urls import reverse
@@ -50,63 +50,57 @@ def index_page(request, country=None):
         request.city_id = "everywhere"
 
     page_query = (request.GET.get("query") or "").strip()
-    ordering = ("-search_rank", "-created_at") if page_query else ("-created_at",)
+    feed = search.filter_items(
+        Item.objects_for_user(request.user, Item.visible_objects()), page_query,
+    ).order_by("-published_at", "-id")
 
     country_items = []
-    if request.country_id != "everywhere":
-        country_items = Item.objects_for_user(request.user, Item.visible_objects()).filter(country_id=request.country_id)
-        country_items = search.filter_items(country_items, page_query).order_by(*ordering)
-        country_items = list(country_items[:20])
-
-    world_items = []
+    city_blocks = []
     all_items = []
-    feed = search.filter_items(Item.objects_for_user(request.user, Item.visible_objects()), page_query).order_by(*ordering)
-    if request.country_id == "everywhere":
-        world_items = list(feed[:10])
-    elif country_items:
-        all_items = list(feed[:10])
-
     subscriptions = []
-    if request.user.is_authenticated:
-        subscriptions = (
-            Subscription.objects.filter(user=request.user)
-            .select_related("country", "city", "category")
-            .order_by("-created_at")
+    if country:
+        feed = feed.filter(country=country)
+        country_items = list(feed[:20])
+        city_counts = dict(
+            feed.exclude(city_id=None).order_by().values("city_id").annotate(total=Count("id"))
+            .values_list("city_id", "total")
         )
-        if request.country_id != "everywhere":
-            subscriptions = subscriptions.exclude(
-                country_id=request.country_id,
-                city__isnull=True,
-                category__isnull=True,
-                query="",
+        for city in GeoCity.objects.filter(country=country, id__in=city_counts):
+            city_blocks.append({
+                "city": city,
+                "count": city_counts[city.id],
+                "items": list(feed.filter(city=city)[:10]),
+            })
+    else:
+        all_items = paginate(request, feed)
+        if request.user.is_authenticated:
+            subscriptions = list(
+                Subscription.objects.filter(user=request.user)
+                .select_related("country", "city", "category").order_by("-created_at")
             )
-        subscriptions = list(subscriptions[:5])
-        with_items = []
-        for subscription in subscriptions:
-            items = Item.objects_for_user(request.user, Item.visible_objects())
-            if subscription.city_id:
-                items = items.filter(city_id=subscription.city_id)
-            elif subscription.country_id:
-                items = items.filter(country_id=subscription.country_id)
-            if subscription.category_id and subscription.category.parent_id:
-                items = items.filter(subcategory_id=subscription.category_id)
-            elif subscription.category_id:
-                items = items.filter(category_id=subscription.category_id)
-            if subscription.query:
-                items = search.filter_items(items, subscription.query)
-            if page_query:
-                items = search.filter_items(items, page_query)
-            subscription.index_items = list(items.order_by(*ordering)[:10])
-            if subscription.index_items:
-                with_items.append(subscription)
-        subscriptions = with_items
+            for subscription in subscriptions:
+                items = feed
+                if subscription.country_id:
+                    place = Q(country_id=subscription.country_id)
+                    if subscription.city_id:
+                        place &= Q(city_id=subscription.city_id)
+                    if subscription.include_online:
+                        place |= Q(country_id=settings.ONLINE_COUNTRY_ID)
+                    items = items.filter(place)
+                if subscription.category_id and subscription.category.parent_id:
+                    items = items.filter(subcategory_id=subscription.category_id)
+                elif subscription.category_id:
+                    items = items.filter(category_id=subscription.category_id)
+                if subscription.query:
+                    items = search.filter_items(items, subscription.query)
+                subscription.index_items = list(items[:10])
 
     return render(request, "index.html", {
         "country_items": country_items,
-        "world_items": world_items,
+        "city_blocks": city_blocks,
         "all_items": all_items,
         "subscriptions": subscriptions,
-        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not world_items and not all_items and not subscriptions else [],
+        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not all_items else [],
     })
 
 
@@ -116,6 +110,8 @@ def listing_page(request, country, city, category=None, subcategory=None):
 
     request.country_id = country
     request.city_id = city
+    if country == "everywhere" and city != "everywhere":
+        raise Http404()
 
     current_category = None
     if subcategory:
@@ -129,28 +125,16 @@ def listing_page(request, country, city, category=None, subcategory=None):
     elif category:
         items = items.filter(category_id=category)
 
-    requested = request.GET.get("show_global")
-    if requested == "1":
-        show_global = True
-        show_global_param = "1"
-    elif requested == "0":
-        show_global = False
-        show_global_param = "0"
-    else:
-        show_global = bool(current_category and current_category.is_global)
-        show_global_param = None
-
-    if request.country_id == "everywhere":
-        items = items.filter(country__isnull=True)
-    else:
-        if request.city_id != "everywhere":
-            here = Q(city_id=request.city_id)
-        else:
-            here = Q(country_id=request.country_id)
-        if show_global:
-            items = items.filter(here | Q(country__isnull=True))
-        else:
-            items = items.filter(here)
+    include_online = request.GET.get(settings.INCLUDE_ONLINE_PARAM) == "1"
+    if country != "everywhere":
+        get_object_or_404(GeoCountry, id=country)
+        here = Q(country_id=country)
+        if city != "everywhere":
+            get_object_or_404(GeoCity, id=city, country_id=country)
+            here &= Q(city_id=city)
+        if include_online:
+            here |= Q(country_id=settings.ONLINE_COUNTRY_ID)
+        items = items.filter(here)
 
     query = (request.GET.get("query") or "").strip()
     if query and request.user.is_authenticated:
@@ -165,8 +149,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
     return render(request, "listing.html", {
         "items": items,
         "feed_sort": sort if sort in FEED_SORTS else "standard",
-        "show_global": show_global,
-        "show_global_param": show_global_param,
+        "include_online": include_online,
         "subscribers": subscribers(request) if request.user.is_authenticated and items.paginator.count == 0 else [],
     })
 
@@ -229,7 +212,7 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 
     Item.objects.filter(id=item.id).update(view_count=F("view_count") + 1)
 
-    request.country_id = item.country_id or "everywhere"
+    request.country_id = item.country_id
     request.city_id = item.city_id or "everywhere"
     return render_item_page(request, item)
 
@@ -249,7 +232,7 @@ def compose_item(request, item_id=None):
     if not item_id:
         country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
         city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
-        initial = {"country": country.id if country else "everywhere", "city": city.id if city else None}
+        initial = {"country": country.id if country else "", "city": city.id if city else None}
         initial = ItemForm.initial_from_query(request.GET, initial)
     form = ItemForm(request.POST if request.method == "POST" else None, instance=item, initial=initial)
 

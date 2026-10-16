@@ -94,14 +94,14 @@ def load_records(clashes):
 
     records = []
     seen = set()
-    collect_records(CATEGORIES, None, None, False, records, seen, clashes)
+    collect_records(CATEGORIES, None, None, records, seen, clashes)
     if not records:
         clashes.append("CATEGORIES has no usable categories, existing categories were left untouched")
         return None
     return records
 
 
-def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, clashes):
+def collect_records(nodes, parent_id, root_id, records, seen, clashes):
     for index, node in enumerate(nodes):
         category_id = node.id.strip() if isinstance(node.id, str) else ""
         label = node.name if isinstance(node.name, str) and node.name.strip() else parent_id or "the root"
@@ -136,11 +136,6 @@ def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, 
             clashes.append(f"{category_id}: description is not text")
             description = ""
 
-        if node.is_global is None:
-            is_global = inherited_global
-        else:
-            is_global = bool(node.is_global)
-
         seen.add(category_id)
         records.append({
             "id": category_id,
@@ -151,14 +146,12 @@ def collect_records(nodes, parent_id, root_id, inherited_global, records, seen, 
                 "parent_id": parent_id,
                 "root_id": root_id,
                 "sort_order": index,
-                "is_global": is_global,
             },
         })
         collect_records(
             node.children,
             category_id,
             root_id or category_id,
-            is_global,
             records,
             seen,
             clashes,

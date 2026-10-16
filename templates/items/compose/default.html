@@ -1,7 +1,7 @@
 {% extends "items/compose/layout.html" %}
 
 {% block fields %}
-    {% island "LocationPicker" countries=countries_options country=form.country.value|default:"" city=form.city.value|default:"" %}
+    {% island "LocationPicker" online_country_id=settings.ONLINE_COUNTRY_ID countries=countries_options country=form.country.value|default:"" city=form.city.value|default:"" %}
     {% if form.country.errors %}<div class="form-error">{{ form.country.errors }}</div>{% endif %}
     {% if form.city.errors %}<div class="form-error">{{ form.city.errors }}</div>{% endif %}
 

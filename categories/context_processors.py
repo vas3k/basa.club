@@ -1,3 +1,5 @@
+from django.conf import settings
+
 from counters.categories import counts
 from categories.models import Category
 
@@ -5,9 +7,14 @@ from categories.models import Category
 def categories(request):
     country_id = getattr(request, "country_id", None) or "everywhere"
     city_id = getattr(request, "city_id", None) or "everywhere"
+    match = request.resolver_match
+    include_online = (
+        match and match.url_name in {"listing", "listing_category", "listing_subcategory"}
+        and request.GET.get(settings.INCLUDE_ONLINE_PARAM) == "1"
+    )
     tree = list(Category.objects.filter(parent__isnull=True).prefetch_related("children"))
     for category in tree:
-        counted = counts(category.id, country_id, city_id)
+        counted = counts(category.id, country_id, city_id, bool(include_online))
         category.items_count = counted.get(category.id, 0)
         for child in category.children.all():
             child.items_count = counted.get(child.id, 0)

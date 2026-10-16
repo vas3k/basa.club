@@ -1,5 +1,6 @@
+from django.conf import settings
 from django.core.cache import caches
-from django.db.models import Count
+from django.db.models import Count, Q
 
 from items.models import Item
 
@@ -10,28 +11,28 @@ VERSION_KEY = "category_counts:version"
 cache = caches["redis_cache"]
 
 
-def counts(root_id, country_id="everywhere", city_id="everywhere"):
+def counts(root_id, country_id="everywhere", city_id="everywhere", include_online=False):
     country_id = country_id or "everywhere"
     city_id = city_id or "everywhere"
     version = cache.get(VERSION_KEY) or 0
 
-    key = f"category_counts:{version}:{country_id}:{city_id}:{root_id}"
+    key = f"category_counts:v2:{version}:{country_id}:{city_id}:{root_id}:{int(include_online)}"
     cached = cache.get(key)
     if cached is not None:
         return cached
-    fresh = calculate(root_id, country_id, city_id)
+    fresh = calculate(root_id, country_id, city_id, include_online)
     cache.set(key, fresh, TIMEOUT)
     return fresh
 
 
 def invalidate(root_id):
-    # One item is counted in its city, its country, or the everywhere bucket.
+    # A change affects city, country, and worldwide totals.
     if root_id:
         bump_version()
 
 
 def refresh_all():
-    """Drop the category cache and return root totals for items with no country."""
+    """Drop the category cache and return root totals across all countries."""
     from categories.models import Category
 
     bump_version()
@@ -42,14 +43,15 @@ def refresh_all():
     return totals
 
 
-def calculate(root_id, country_id="everywhere", city_id="everywhere"):
+def calculate(root_id, country_id="everywhere", city_id="everywhere", include_online=False):
     items = Item.visible_objects()
-    if country_id == "everywhere":
-        items = items.filter(country__isnull=True)
-    elif city_id and city_id != "everywhere":
-        items = items.filter(city_id=city_id)
-    else:
-        items = items.filter(country_id=country_id)
+    if country_id != "everywhere":
+        place = Q(country_id=country_id)
+        if city_id and city_id != "everywhere":
+            place &= Q(city_id=city_id)
+        if include_online:
+            place |= Q(country_id=settings.ONLINE_COUNTRY_ID)
+        items = items.filter(place)
 
     grouped = (
         items

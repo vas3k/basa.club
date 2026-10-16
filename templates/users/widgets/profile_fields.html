@@ -13,7 +13,7 @@
 </div>
 
 <div class="profile-form-place">
-    {% island "LocationPicker" countries=countries_options country=country_id city=city_id allow_everywhere=True %}
+    {% island "LocationPicker" countries=countries_options country=country_id city=city_id online_country_id=settings.ONLINE_COUNTRY_ID %}
     <p class="form-help">Если вашей страны или города нет в списке, значит мы их пока не поддерживаем. Выберите пока «Везде», а потом мы возможно добавим и ваш город тоже :)</p>
     {% if form.country.errors or form.city.errors %}
         <div class="form-error">{{ form.country.errors }}{{ form.city.errors }}</div>

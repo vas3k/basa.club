@@ -7,6 +7,12 @@
                 <option value="everywhere" {% if not current_country %}selected{% endif %}>
                     🌎 Весь мир
                 </option>
+                {% if online_country %}
+                    <option disabled value="">─────────</option>
+                    <option value="{{ online_country.id }}" {% if current_country.id == online_country.id %}selected{% endif %}>
+                        {{ online_country.icon }} {{ online_country.name }}{% if online_country.items_count %} ({{ online_country.items_count }}){% endif %}
+                    </option>
+                {% endif %}
                 {% for country in countries %}
                     {% if country.items_count %}
                         {% ifchanged %}
@@ -29,7 +35,7 @@
                 {% endfor %}
             </select>
 
-            {% if current_country %}
+            {% if cities %}
                 <select class="subheader-search-geo" data-geo="city" aria-label="Город">
                     <option value="everywhere" {% if not current_city %}selected{% endif %}>
                         Везде
@@ -45,8 +51,8 @@
             {% if feed_sort and feed_sort != "standard" %}
                 <input type="hidden" name="sort" value="{{ feed_sort }}">
             {% endif %}
-            {% if show_global_param %}
-                <input type="hidden" name="show_global" value="{{ show_global_param }}">
+            {% if include_online %}
+                <input type="hidden" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="1">
             {% endif %}
             <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" maxlength="200" value="{{ request.GET.query|slice:":200" }}">
 

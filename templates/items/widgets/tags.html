@@ -3,8 +3,6 @@
         <a class="item-tag" href="{% listing_url country=item.country_id city="everywhere" %}">
             {% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}
         </a>
-    {% elif not item.city %}
-        <span class="item-tag">🌍 Весь мир</span>
     {% endif %}
     {% if item.city %}
         {% if item.country %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}

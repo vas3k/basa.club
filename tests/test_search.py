@@ -123,7 +123,7 @@ class SearchIndexTests(TestCase):
 
         home = self.client.get("/?query=квартиры")
         self.assertEqual(home.status_code, 200)
-        self.assertEqual([item.title for item in home.context["world_items"]], ["Квартира на два месяца"])
+        self.assertEqual([item.title for item in home.context["all_items"]], ["Квартира на два месяца"])
 
         guests = self.client
         guests.logout()

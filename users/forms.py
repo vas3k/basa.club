@@ -35,7 +35,7 @@ class ProfileForm(forms.ModelForm):
         error_messages={"max_length": "Слишком длинное значение"},
     )
     country = forms.CharField(
-        required=False,
+        required=True,
         max_length=64,
         widget=forms.HiddenInput(),
         error_messages={"max_length": "Слишком длинное значение"},
@@ -59,10 +59,6 @@ class ProfileForm(forms.ModelForm):
         country_id = self.cleaned_data["country"].strip()
         if not country_id:
             raise forms.ValidationError("Выберите страну")
-        if country_id == EVERYWHERE:
-            self.cleaned_data["country_id"] = EVERYWHERE
-            return ""
-
         country = GeoCountry.objects.filter(id=country_id).first()
         if not country:
             raise forms.ValidationError("Выберите страну из списка")

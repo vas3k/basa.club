@@ -5,10 +5,6 @@ from common.data.geo import GEO
 def seed_categories(Category):
     def create_tree(nodes, parent=None, root=None):
         for index, node in enumerate(nodes):
-            if node.is_global is None:
-                is_global = bool(parent and getattr(parent, "is_global", False))
-            else:
-                is_global = bool(node.is_global)
             defaults = {
                 "name": node.name,
                 "icon": node.icon or "",
@@ -17,8 +13,6 @@ def seed_categories(Category):
                 "root": root,
                 "sort_order": index,
             }
-            if any(field.name == "is_global" for field in Category._meta.fields):
-                defaults["is_global"] = is_global
             category, _ = Category.objects.update_or_create(
                 id=node.id,
                 defaults=defaults,

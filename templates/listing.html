@@ -48,11 +48,10 @@
                     <option value="rating" {% if feed_sort == "rating" %}selected{% endif %}>По рейтингу</option>
                 </select>
             </label>
-            {% if current_country %}
+            {% if current_country and current_country.id != settings.ONLINE_COUNTRY_ID %}
                 <label class="feed-button">
-                    <input type="hidden" name="show_global" value="0">
-                    <input type="checkbox" name="show_global" value="1" {% if show_global %}checked{% endif %}>
-                    Показывать глобальные
+                    <input type="checkbox" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="1" {% if include_online %}checked{% endif %}>
+                    Включая онлайн
                 </label>
             {% endif %}
         </form>

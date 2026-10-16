@@ -6,17 +6,14 @@ type Props = {
     countries: CountryOption[];
     country?: string;
     city?: string;
-    allowEverywhere?: boolean;
+    onlineCountryId: string;
 };
 
-const everywhere = "everywhere";
-
-export default function LocationPicker({ countries, country = "", city = "", allowEverywhere = false }: Props) {
+export default function LocationPicker({ countries, country = "", city = "", onlineCountryId }: Props) {
     const [countryId, setCountryId] = useState(country);
-    const [cityId, setCityId] = useState(city || (allowEverywhere ? everywhere : ""));
-
-    const wholeWorld = countryId === everywhere;
+    const [cityId, setCityId] = useState(city);
     const cities = countries.find((c) => c.id === countryId)?.cities ?? [];
+    const online = countries.find((c) => c.id === onlineCountryId);
 
     return (
         <div className="form-row">
@@ -28,47 +25,30 @@ export default function LocationPicker({ countries, country = "", city = "", all
                     required
                     value={countryId}
                     onChange={(event) => {
-                        const nextCountry = event.target.value;
-                        setCountryId(nextCountry);
-                        setCityId(nextCountry === everywhere || allowEverywhere ? everywhere : "");
+                        setCountryId(event.target.value);
+                        setCityId("");
                     }}
                 >
-                    <option value="" disabled>
-                        Выберите страну
-                    </option>
-                    <option value={everywhere}>🌎 Весь мир</option>
-                    {countries.map((c) => (
-                        <option key={c.id} value={c.id}>
-                            {c.icon} {c.name}
-                        </option>
+                    <option value="" disabled>Выберите страну</option>
+                    {online && <option value={online.id}>{online.icon} {online.name}</option>}
+                    {online && <option disabled value="separator">─────────</option>}
+                    {countries.filter((c) => c.id !== onlineCountryId).map((c) => (
+                        <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
                     ))}
                 </select>
             </div>
 
-            {countryId && (
+            {cities.length > 0 ? (
                 <div className="form-group">
                     <label htmlFor="id_city">Город</label>
-                    {wholeWorld && <input type="hidden" name="city" value="" />}
-                    <select
-                        id="id_city"
-                        name={wholeWorld ? undefined : "city"}
-                        value={wholeWorld ? everywhere : cityId}
-                        disabled={wholeWorld}
-                        onChange={(event) => setCityId(event.target.value)}
-                    >
-                        {wholeWorld || allowEverywhere ? (
-                            <option value={everywhere}>Везде</option>
-                        ) : (
-                            <option value="">Вся страна</option>
-                        )}
+                    <select id="id_city" name="city" value={cityId} onChange={(event) => setCityId(event.target.value)}>
+                        <option value="">Вся страна</option>
                         {cities.map((c) => (
-                            <option key={c.id} value={c.id}>
-                                {c.icon} {c.name}
-                            </option>
+                            <option key={c.id} value={c.id}>{c.icon} {c.name}</option>
                         ))}
                     </select>
                 </div>
-            )}
+            ) : <input type="hidden" name="city" value="" />}
         </div>
     );
 }

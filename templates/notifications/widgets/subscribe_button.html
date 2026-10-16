@@ -12,8 +12,8 @@
         {% if request.GET.query %}
             <input type="hidden" name="query" value="{{ request.GET.query|slice:":200" }}">
         {% endif %}
-        {% if show_global %}
-            <input type="hidden" name="with_global" value="1">
+        {% if include_online %}
+            <input type="hidden" name="include_online" value="1">
         {% endif %}
         <button
             type="submit"

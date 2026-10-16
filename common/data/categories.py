@@ -8,7 +8,6 @@ class Category:
     icon: str = ""
     children: list = field(default_factory=list)
     description: str = ""
-    is_global: bool = None  # None inherits the flag from the parent
 
 
 CATEGORIES = [
@@ -48,6 +47,5 @@ CATEGORIES = [
             Category("fun", "Развлечения", '<i class="fas fa-ticket-alt"></i>'),
             Category("other", "Другое", '<i class="fas fa-ellipsis-h"></i>'),
         ],
-        is_global=True,
     ),
 ]
