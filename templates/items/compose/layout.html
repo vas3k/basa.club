@@ -14,6 +14,10 @@
 
             {% block fields %}{% endblock %}
 
+            {% if form.non_field_errors %}
+                <div class="form-error">{{ form.non_field_errors }}</div>
+            {% endif %}
+
             {% block actions %}
                 <div class="form-actions">
                     {% if not is_new and form.instance.visibility != "draft" %}

@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.conf import settings
 from django.db import models
 from django.db.models import BigIntegerField, OuterRef, Q, Subquery
 from django.db.models.functions import Extract, Round
@@ -96,6 +97,16 @@ class Item(SoftDeleteMixin, models.Model):
         return f"{self.get_prefix_display()} {self.title}"
 
     @classmethod
+    def check_rate_limits(cls, user):
+        since = timezone.now() - settings.RATE_LIMIT_PERIOD
+        recent = cls.objects.filter(
+            author=user,
+            visibility=cls.VISIBILITY_VISIBLE,
+            created_at__gte=since,
+        ).count()
+        return recent < settings.ITEM_RATE_LIMIT
+
+    @classmethod
     def visible_objects(cls):
         now = timezone.now()
         return cls.objects.select_related(
@@ -165,3 +176,12 @@ class ItemVote(models.Model):
     class Meta:
         db_table = "item_votes"
         unique_together = [["user", "item"]]
+
+    def is_retractable(self):
+        return timezone.now() < self.created_at + settings.VOTE_RETRACT_PERIOD
+
+    @classmethod
+    def check_rate_limits(cls, user):
+        since = timezone.now() - settings.RATE_LIMIT_PERIOD
+        recent = cls.objects.filter(user=user, created_at__gte=since).count()
+        return recent < settings.ITEM_VOTE_RATE_LIMIT

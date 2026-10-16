@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { postJson } from "../lib/http";
+import { HttpError, postJson } from "../lib/http";
 
 type Props = {
     upvotes: number;
@@ -31,6 +31,7 @@ export default function UpvoteButton({
 }: Props) {
     const [state, setState] = useState({ upvotes, voted });
     const [isPending, setIsPending] = useState(false);
+    const [notice, setNotice] = useState<string | null>(null);
 
     async function toggle() {
         if (loginUrl) {
@@ -46,9 +47,11 @@ export default function UpvoteButton({
 
         try {
             setState(await postJson<VoteResponse>(voting ? upvoteUrl : retractUrl));
+            setNotice(null);
         } catch (error) {
             console.error("Vote failed", error);
             setState(previous);
+            setNotice(error instanceof HttpError ? error.message : "Не получилось проголосовать");
         } finally {
             setIsPending(false);
         }
@@ -62,7 +65,7 @@ export default function UpvoteButton({
             className={classNames}
             disabled={disabled}
             aria-pressed={state.voted}
-            title={disabled ? "Голоса" : state.voted ? "Забрать голос" : "Проголосовать"}
+            title={notice || (disabled ? "Голоса" : state.voted ? "Забрать голос" : "Проголосовать")}
             onClick={toggle}
         >
             {variant === "block" && <i className="fas fa-chevron-up upvote-arrow" />}

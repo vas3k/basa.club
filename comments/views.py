@@ -1,5 +1,7 @@
 from copy import deepcopy
 
+from django.conf import settings
+from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
@@ -21,11 +23,14 @@ def create_comment(request, item_id):
     form = ReplyForm(request.POST, item=item) if is_reply else CommentForm(request.POST, item=item)
 
     if form.is_valid():
-        comment = form.save(author=request.user, request=request, commit=False)
-        comment.save()
-        counters.comment_created(comment)
-        notification.comment_created(comment)
-        return redirect(f"{item.get_absolute_url()}#comment-{comment.id}")
+        if not Comment.check_rate_limits(request.user):
+            form.add_error(None, f"Можно оставить не больше {settings.COMMENT_RATE_LIMIT} комментариев за сутки")
+        else:
+            comment = form.save(author=request.user, request=request, commit=False)
+            comment.save()
+            counters.comment_created(comment)
+            notification.comment_created(comment)
+            return redirect(f"{item.get_absolute_url()}#comment-{comment.id}")
 
     return render_item_page(
         request,
@@ -45,6 +50,12 @@ def edit_comment(request, comment_id):
     )
     if comment.author_id != request.user.id:
         raise Http404()
+    if not comment.is_editable():
+        messages.error(
+            request,
+            f"Комментарий можно редактировать только первые {settings.COMMENT_EDIT_PERIOD.days} дней",
+        )
+        return redirect(f"{comment.item.get_absolute_url()}#comment-{comment.id}")
 
     is_reply = bool(comment.reply_to_id)
     form_class = ReplyForm if is_reply else CommentForm
@@ -76,6 +87,12 @@ def delete_comment(request, comment_id):
     )
     if comment.author_id != request.user.id:
         raise Http404()
+    if not comment.is_deletable():
+        messages.error(
+            request,
+            f"Комментарий можно удалить только первые {settings.COMMENT_DELETE_PERIOD.days} дней",
+        )
+        return redirect(f"{comment.item.get_absolute_url()}#comment-{comment.id}")
 
     comment.delete(by=request.user)
     counters.comment_deleted(comment)

@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { postJson } from "../lib/http";
+import { HttpError, postJson } from "../lib/http";
 
 type Props = {
     rating: string;
@@ -19,6 +19,7 @@ type VoteResponse = {
 export default function ItemUpvote({ rating, voted, upvoteUrl, retractUrl, loginUrl, disabled }: Props) {
     const [state, setState] = useState({ rating, voted });
     const [isPending, setIsPending] = useState(false);
+    const [notice, setNotice] = useState<string | null>(null);
     const canToggle = !disabled || state.voted;
 
     async function toggle() {
@@ -36,9 +37,11 @@ export default function ItemUpvote({ rating, voted, upvoteUrl, retractUrl, login
         try {
             const data = await postJson<VoteResponse>(voting ? upvoteUrl : retractUrl);
             setState({ rating: data.rating, voted: data.voted });
+            setNotice(null);
         } catch (error) {
             console.error("Vote failed", error);
             setState(previous);
+            setNotice(error instanceof HttpError ? error.message : "Не получилось проголосовать");
         } finally {
             setIsPending(false);
         }
@@ -60,7 +63,7 @@ export default function ItemUpvote({ rating, voted, upvoteUrl, retractUrl, login
             className={className}
             disabled={!canToggle || isPending}
             aria-pressed={state.voted}
-            title={!canToggle ? "Рейтинг" : state.voted ? "Забрать голос" : "Проголосовать"}
+            title={notice || (!canToggle ? "Рейтинг" : state.voted ? "Забрать голос" : "Проголосовать")}
             onClick={toggle}
         >
             <span className="item-upvote-rating">{state.rating}</span>

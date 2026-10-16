@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.db.models import F
 from django.http import JsonResponse
 from django.shortcuts import get_object_or_404
@@ -18,6 +19,12 @@ def upvote_comment(request, comment_id):
     )
     if comment.author_id == request.user.id:
         return JsonResponse({"error": "Нельзя голосовать за свое"}, status=403)
+
+    already_voted = CommentVote.objects.filter(user=request.user, comment=comment).exists()
+    if not already_voted and not CommentVote.check_rate_limits(request.user):
+        return JsonResponse({
+            "error": f"Можно оставить не больше {settings.COMMENT_VOTE_RATE_LIMIT} голосов за комментарии за сутки",
+        }, status=429)
 
     _, created = CommentVote.objects.get_or_create(
         user=request.user,
@@ -44,7 +51,16 @@ def retract_comment_vote(request, comment_id):
         Comment.objects.select_related("item", "author"),
         id=comment_id,
     )
-    deleted, _ = CommentVote.objects.filter(user=request.user, comment=comment).delete()
+    vote = CommentVote.objects.filter(user=request.user, comment=comment).first()
+    if vote and not vote.is_retractable():
+        return JsonResponse({
+            "error": f"Голос можно забрать только первые {settings.VOTE_RETRACT_PERIOD.days} дней",
+        }, status=403)
+
+    deleted = 0
+    if vote:
+        vote.delete()
+        deleted = 1
     if deleted and request.user.id in {comment.author_id, comment.item.author_id}:
         Comment.objects.filter(id=comment.id).update(upvotes=F("upvotes") - 1)
     elif deleted:

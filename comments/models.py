@@ -1,5 +1,6 @@
 from uuid import uuid4
 
+from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
 from django.db.models import BigIntegerField, OuterRef, Q, Subquery
@@ -80,6 +81,18 @@ class Comment(SoftDeleteMixin, models.Model):
     def is_on_own_item(self):
         return bool(self.author_id and self.author_id == self.item.author_id)
 
+    def is_editable(self):
+        return timezone.now() < self.created_at + settings.COMMENT_EDIT_PERIOD
+
+    def is_deletable(self):
+        return timezone.now() < self.created_at + settings.COMMENT_DELETE_PERIOD
+
+    @classmethod
+    def check_rate_limits(cls, user):
+        since = timezone.now() - settings.RATE_LIMIT_PERIOD
+        recent = cls.all_objects.filter(author=user, created_at__gte=since).count()
+        return recent < settings.COMMENT_RATE_LIMIT
+
     @classmethod
     def visible_objects(cls):
         return cls.objects.select_related("author", "reply_to")
@@ -113,3 +126,12 @@ class CommentVote(models.Model):
     class Meta:
         db_table = "comment_votes"
         unique_together = [["user", "comment"]]
+
+    def is_retractable(self):
+        return timezone.now() < self.created_at + settings.VOTE_RETRACT_PERIOD
+
+    @classmethod
+    def check_rate_limits(cls, user):
+        since = timezone.now() - settings.RATE_LIMIT_PERIOD
+        recent = cls.objects.filter(user=user, created_at__gte=since).count()
+        return recent < settings.COMMENT_VOTE_RATE_LIMIT

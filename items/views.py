@@ -1,3 +1,4 @@
+from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db.models import F, Q
 from django.http import Http404
@@ -251,19 +252,23 @@ def create_item(request):
 
     if request.method == "POST" and form.is_valid():
         action = request.POST.get("action") or "publish"
-        item = form.save(
-            author=request.user,
-            is_draft=action in {"draft", "preview"},
-            commit=False,
-        )
-        item.save()
-        search.update_item_index(item)
-        if item.is_listed:
-            counters.item_created(item)
-            notification.item_created(item)
-        if action == "draft":
-            return redirect("user_profile", slug=request.user.slug)
-        return redirect(item.get_absolute_url())
+        publishing = action not in {"draft", "preview"}
+        if publishing and not Item.check_rate_limits(request.user):
+            form.add_error(None, f"Можно опубликовать не больше {settings.ITEM_RATE_LIMIT} постов за сутки")
+        else:
+            item = form.save(
+                author=request.user,
+                is_draft=not publishing,
+                commit=False,
+            )
+            item.save()
+            search.update_item_index(item)
+            if item.is_listed:
+                counters.item_created(item)
+                notification.item_created(item)
+            if action == "draft":
+                return redirect("user_profile", slug=request.user.slug)
+            return redirect(item.get_absolute_url())
 
     countries = [
         {
