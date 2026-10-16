@@ -13,7 +13,9 @@
             {% endif %}
         </span>
         <span class="item-tag-separator item-tag-separator-wide">·</span>
-        <span>{% if item.category.icon %}{{ item.category.icon|safe }} {% endif %}{{ item.category.name }}</span>
+        {% with category=item.subcategory|default:item.category %}
+            <span>{% if category.icon %}{{ category.icon|safe }} {% endif %}{{ category.name }}</span>
+        {% endwith %}
     </div>
     <div class="index-card-title-row">
         <div class="index-card-title">{% include "items/widgets/title.html" %}</div>

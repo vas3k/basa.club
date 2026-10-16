@@ -2,7 +2,7 @@
 <div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
     {% if show_source %}
         <a class="profile-comment-source" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">
-            {% if item.city %}{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}{% elif item.country %}{% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}{% else %}🌍 Весь мир{% endif %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% if item.subcategory %}{% if item.subcategory.icon %}{{ item.subcategory.icon|safe }} {% endif %}{{ item.subcategory.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endif %}{{ item.title }}
+            {% if item.city %}{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}{% elif item.country %}{% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}{% else %}🌍 Весь мир{% endif %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% with category=item.subcategory|default:item.category %}{% if category.icon %}{{ category.icon|safe }} {% endif %}{{ category.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endwith %}{{ item.title }}
         </a>
     {% endif %}
 

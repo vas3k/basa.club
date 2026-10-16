@@ -11,10 +11,10 @@
         </a>
     {% endif %}
 
-    {% if item.subcategory %}
+    {% with category=item.subcategory|default:item.category %}
         <span class="item-tag-separator item-tag-separator-wide">·</span>
-        <a class="item-tag" href="{% listing_url category=item.category_id subcategory=item.subcategory_id %}">
-            {% if item.subcategory.icon %}{{ item.subcategory.icon|safe }} {% endif %}{{ item.subcategory.name }}
+        <a class="item-tag" href="{% listing_url category=item.category_id subcategory=item.subcategory_id|default:"" %}">
+            {% if category.icon %}{{ category.icon|safe }} {% endif %}{{ category.name }}
         </a>
-    {% endif %}
+    {% endwith %}
 </div>

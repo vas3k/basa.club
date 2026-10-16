@@ -51,13 +51,15 @@
         }
 
         .header-logo {
-            flex: 1 1 auto;
+            flex: 1 1 0;
             gap: 4px;
-            font-size: 25.6px;
+            container-type: inline-size;
         }
 
         .header-logo a {
             gap: 0.1em;
+            /* Reserve the menu button space, then fit both words and the mark. */
+            font-size: clamp(10px, calc((100cqi - 51px) / 7.8), 25.6px);
         }
 
         .header-logo-mark {
@@ -129,6 +131,12 @@
             flex-shrink: 0;
         }
 
+    .subheader-search .subheader-search-geo {
+        flex: 1 1 100%;
+        width: 100%;
+        max-width: none;
+    }
+
     .content-subcategories {
         margin-bottom: 14px;
     }
@@ -197,20 +205,3 @@
             font-size: 22px;
         }
 }
-
-@media (max-width: 429px) {
-    .header-logo-mark {
-        display: none;
-    }
-
-    .header-logo a {
-        gap: calc(0.1em + 0.25em);
-    }
-}
-
-@media (max-width: 360px) {
-    .header-logo-title:first-child {
-        display: none;
-    }
-}
-
