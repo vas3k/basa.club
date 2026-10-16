@@ -54,9 +54,10 @@
             {% if include_online_param %}
                 <input type="hidden" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="{{ include_online_param }}">
             {% endif %}
-            <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" maxlength="200" value="{{ request.GET.query|slice:":200" }}">
-
-            <button type="submit" class="button subheader-search-button" aria-label="Искать"><i class="fas fa-search"></i></button>
+            <div class="subheader-search-find">
+                <input type="text" name="query" class="subheader-search-query" placeholder="Что ищем?" maxlength="200" value="{{ request.GET.query|slice:":200" }}">
+                <button type="submit" class="button subheader-search-button" aria-label="Искать"><i class="fas fa-search"></i></button>
+            </div>
         </form>
     </section>
 {% endblock %}

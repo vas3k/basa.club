@@ -7,38 +7,6 @@
         display: none;
     }
 
-    .subheader-search {
-        flex-wrap: wrap;
-        gap: var(--search-gap);
-    }
-
-        .subheader-search .subheader-search-geo {
-            width: calc((100% - var(--search-gap)) / 2);
-            flex: 1 1 calc((100% - var(--search-gap)) / 2);
-            min-width: 0;
-            padding: 8px 22px 8px 8px;
-            font-size: 13px;
-            background-position: right 8px center;
-        }
-
-        .subheader-search .subheader-search-query {
-            flex: 1 1 0;
-            width: auto;
-            min-width: 0;
-        }
-
-        .subheader-search .subheader-search-button-label {
-            display: none;
-        }
-
-        .subheader-search .subheader-search-button {
-            flex: 0 0 50px;
-            align-self: stretch;
-            width: 50px;
-            min-width: 50px;
-            padding: 0;
-        }
-
     .main {
         display: block;
     }
@@ -78,22 +46,34 @@
         .header-top {
             flex-wrap: nowrap;
             align-items: center;
-            gap: 6px;
+            gap: 4px;
             min-width: 0;
         }
 
         .header-logo {
             flex: 1 1 auto;
-            min-width: 0;
-            gap: 6px;
-            overflow: hidden;
-            font-size: 16px;
+            gap: 4px;
+            font-size: 25.6px;
+        }
+
+        .header-logo a {
+            gap: 0.1em;
+        }
+
+        .header-logo-mark {
+            width: 0.805em;
+            height: 0.805em;
+            align-self: center;
+            margin-left: 5px;
+            margin-right: 5px;
         }
 
         .header-menu-button {
-            width: 36px;
-            height: 36px;
+            width: 32px;
+            height: 32px;
             flex-shrink: 0;
+            margin-right: 5px;
+            font-size: 15px;
         }
 
         .header-actions {
@@ -114,8 +94,8 @@
 
         .header-action {
             min-height: 36px;
-            padding: 0 8px;
-            gap: 0;
+            padding: 0 4px;
+            gap: 4px;
         }
 
         .header-create-label {
@@ -150,7 +130,6 @@
         }
 
     .content-subcategories {
-        gap: 16px;
         margin-bottom: 14px;
     }
 
@@ -218,3 +197,20 @@
             font-size: 22px;
         }
 }
+
+@media (max-width: 429px) {
+    .header-logo-mark {
+        display: none;
+    }
+
+    .header-logo a {
+        gap: calc(0.1em + 0.25em);
+    }
+}
+
+@media (max-width: 360px) {
+    .header-logo-title:first-child {
+        display: none;
+    }
+}
+
