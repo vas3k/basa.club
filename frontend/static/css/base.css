@@ -35,7 +35,6 @@
     margin-bottom: 30px;
     box-sizing: border-box;
     border: var(--block-border);
-    transition: 0.1s ease-out;
 }
 
 .block-narrow {
@@ -57,7 +56,7 @@
 
 .block-clickable {
     padding: 24px;
-    transition: all 0.2s ease;
+    transition: transform 0.2s ease, box-shadow 0.2s ease;
     cursor: pointer;
 }
 
@@ -162,7 +161,7 @@
     line-height: 1em;
     font-weight: 600;
     white-space: nowrap;
-    transition: 0.2s ease-out;
+    transition: color 0.2s ease-out, background-color 0.2s ease-out, border-color 0.2s ease-out;
 }
 
 @media only screen and (max-width : 600px) {

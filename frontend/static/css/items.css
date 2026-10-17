@@ -388,7 +388,7 @@
     font-variant-numeric: tabular-nums;
     white-space: nowrap;
     cursor: pointer;
-    transition: 0.1s ease-out;
+    transition: color 0.1s ease-out, background-color 0.1s ease-out, opacity 0.1s ease-out;
 }
 
 .upvote-block {
@@ -493,7 +493,6 @@
     width: min(420px, 100%);
     margin-bottom: 0;
     padding: 24px;
-    transition: none;
     box-shadow: var(--block-shadow-hover);
 }
 
