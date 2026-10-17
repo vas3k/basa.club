@@ -2,7 +2,7 @@
 
 {% block item %}
     <div class="item-page">
-        <article class="block item-show{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions or show_admin_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+        <article class="block stack item-show{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions or show_admin_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
             <div class="item-header">
                 {% include "items/widgets/tags.html" %}
             </div>
@@ -37,13 +37,13 @@
 
                 {% if item.location %}
                     {% if request.user.is_authenticated %}
-                        <div class="inline-block inline-block-green item-location">
+                        <div class="inline-block tone-location item-location">
                             <span class="inline-block-icon item-location-icon" aria-hidden="true"><i class="fas fa-map-marker-alt"></i></span>
                             <div class="item-location-text">{{ item.location|urlize }}</div>
                         </div>
                     {% else %}
                         {% anon_teaser item.id "location" as teaser %}
-                        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon_fa="fas fa-map-marker-alt" icon_class="item-location-icon" css_class="inline-block-green item-location" %}
+                        {% include "items/widgets/inline_block_secure.html" with teaser=teaser icon_fa="fas fa-map-marker-alt" icon_class="item-location-icon" css_class="tone-location item-location" %}
                     {% endif %}
                 {% endif %}
 
@@ -51,7 +51,7 @@
 
                 {% include "items/widgets/promo_code.html" %}
 
-                <div class="item-byline">
+                <div class="row item-byline">
                     {% include "users/widgets/user_small.html" with user=item.author %}
                     <div class="item-stats">
                         {% if item.published_at %}
@@ -72,7 +72,7 @@
         </article>
 
         {% if show_owner_actions or show_admin_actions %}
-            <div class="item-side">
+            <div class="stack item-side">
                 {% if show_owner_actions %}
                     {% include "items/widgets/manage.html" %}
                 {% endif %}

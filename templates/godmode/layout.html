@@ -12,17 +12,17 @@
 {% block content %}
     <div class="godmode" id="godmode">
         <div class="godmode-container">
-            <div class="block godmode-sidebar godmode-groups">
+            <div class="block godmode-sidebar stack stack-spaced">
                 <button type="button" class="godmode-mobile-menu-close" onclick="document.getElementById('godmode').classList.remove('mobile-menu-opened')">
                     ✕
                 </button>
                 {% for group in admin.groups %}
-                    <div class="godmode-group">
+                    <div class="stack">
                         <div class="godmode-group-header">
                             <span class="godmode-group-icon">{{ group.icon }}</span>
                             <span class="godmode-group-name">{{ group.title }}</span>
                         </div>
-                        <div class="godmode-group-items">
+                        <div class="stack godmode-group-items">
                             {% for item in group.models %}
                                 <span class="godmode-group-item">
                                     <span>→ </span>

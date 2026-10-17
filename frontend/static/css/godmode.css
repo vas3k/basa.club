@@ -32,36 +32,17 @@
     min-width: 500px;
 }
 
-.godmode-groups {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
-}
-
-.godmode-group {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-}
-
 .godmode-group-header {
     font-weight: 500;
     font-size: 120%;
 }
 
 .godmode-group-items {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
     font-size: 110%;
     padding-left: 3px;
 }
 
 .godmode-filters {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-    align-items: center;
     margin-bottom: 20px;
 }
 
@@ -71,12 +52,6 @@
 
 .godmode-filters-button {
     padding: 10px 15px;
-}
-
-.godmode-list {
-    display: flex;
-    flex-direction: column;
-    gap: 30px;
 }
 
 .godmode-header {
@@ -151,10 +126,7 @@
 }
 
 .godmode-table-user {
-    display: flex;
-    flex-direction: row;
     gap: 5px;
-    align-items: center;
 }
 
 .godmode-table-user-avatar {
@@ -176,18 +148,12 @@
 }
 
 .godmode-form {
-    display: flex;
-    flex-direction: column;
     gap: 20px;
     padding: 20px 0;
 }
 
 .godmode-form-row {
-    display: flex;
-    flex-direction: row;
     flex-wrap: wrap;
-    gap: 10px;
-    align-items: center;
 }
 
 .godmode-form-label {
@@ -220,17 +186,11 @@
 }
 
 .godmode-form-actions {
-    display: flex;
-    gap: 10px;
-    flex-direction: row;
-    align-items: center;
     justify-content: space-between;
     padding-top: 30px;
 }
 
 .godmode-moderate-reasons {
-    display: flex;
-    flex-direction: column;
     gap: 16px;
 }
 
@@ -326,7 +286,8 @@
         width: 100%;
     }
 
-    .godmode-mobile-menu-toggle {
+    .godmode-mobile-menu-toggle,
+    .godmode-mobile-menu-close {
         display: block;
         background: var(--opposite-bg-color);
         color: var(--opposite-text-color);
@@ -335,21 +296,16 @@
         border-radius: 5px;
         cursor: pointer;
         font-size: 18px;
+    }
+
+    .godmode-mobile-menu-toggle {
         margin-bottom: 20px;
     }
 
     .godmode-mobile-menu-close {
-        display: block;
         position: absolute;
         top: 20px;
         right: 20px;
-        background: var(--opposite-bg-color);
-        color: var(--opposite-text-color);
-        border: none;
-        padding: 10px 15px;
-        border-radius: 5px;
-        cursor: pointer;
-        font-size: 18px;
     }
 
     .godmode-filters {

@@ -193,7 +193,7 @@
     .sidebar-soon {
         margin-top: 8px;
         padding: 14px var(--sidebar-item-padding-x) 2px;
-        border-top: 1px solid rgba(0, 0, 0, 0.08);
+        border-top: 1px solid var(--separator-color);
         color: #9a9a9a;
         font-size: 11px;
         font-weight: 500;
@@ -234,8 +234,6 @@
 
 .index-card {
     position: relative;
-    display: flex;
-    flex-direction: column;
     align-items: stretch;
     gap: 12px;
     flex: 1 1 18rem;
@@ -307,12 +305,6 @@
     border-radius: 8px;
     overflow: hidden;
     background: var(--highlight-bg);
-}
-
-.index-card-thumb img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
 }
 
 .index-card-footer {
@@ -396,6 +388,10 @@
     margin: 0 0 0 auto;
 }
 
+.feed-subscribe.button-toggle {
+    margin: 0;
+}
+
 .feed-empty-actions {
     display: flex;
     flex-wrap: wrap;
@@ -418,49 +414,8 @@
     text-align: center;
 }
 
-.feed-button {
-    display: inline-flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 8px;
-    box-sizing: border-box;
-    margin: 0;
-    padding: 8px 12px;
-    border-radius: var(--button-border-radius);
-    background-color: #fff;
-    color: #000;
-    border: solid 2px #000;
-    font-family: var(--sans-font);
-    font-size: 90%;
-    font-weight: 600;
-    line-height: 1em;
-    text-align: left;
-    text-decoration: none;
-    cursor: pointer;
-    white-space: nowrap;
-    transition: 0.2s ease-out;
-}
-
-.content-feed-settings > .feed-button {
+.content-feed-settings > .button-toggle {
     font-size: 100%;
-}
-
-.feed-button:hover,
-.feed-button:has(:checked),
-.feed-button-active,
-.feed-button-active:hover {
-    background-color: #000;
-    color: #fff;
-    border-color: #000;
-}
-
-.feed-button input[type="checkbox"] {
-    width: 1.1em;
-    height: 1.1em;
-    margin: 0;
-    flex-shrink: 0;
-    accent-color: currentColor;
-    cursor: pointer;
 }
 
     .content-feed-setting {

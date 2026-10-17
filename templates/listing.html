@@ -49,7 +49,7 @@
                 </select>
             </label>
             {% if current_country and current_country.id != settings.ONLINE_COUNTRY_ID %}
-                <label class="feed-button">
+                <label class="button button-small button-toggle">
                     <input type="hidden" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="0">
                     <input type="checkbox" name="{{ settings.INCLUDE_ONLINE_PARAM }}" value="1" {% if include_online %}checked{% endif %}>
                     Включая онлайн
@@ -61,7 +61,7 @@
         {% endif %}
     </div>
 
-    <section class="content-items">
+    <section class="stack content-items">
         {% for item in items %}
             {% include "items/list/default.html" %}
         {% empty %}

@@ -3,7 +3,7 @@
         {% for image in item.images %}
             {% if image.image %}
                 <a href="{{ image.image }}" data-nofavicon>
-                    <img src="{{ image.image }}" alt="">
+                    <img class="image-cover" src="{{ image.image }}" alt="">
                 </a>
             {% endif %}
         {% endfor %}

@@ -6,7 +6,7 @@
         <span class="reply-text markdown-text">{{ comment.text|markdown }}</span>
     </div>
 
-    <div class="reply-actions">
+    <div class="row reply-actions">
         {% if request.user.is_authenticated and request.user.id == comment.author_id %}
             {% include "comments/widgets/edit.html" %}
             {% include "comments/widgets/delete.html" %}

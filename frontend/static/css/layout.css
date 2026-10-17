@@ -87,8 +87,7 @@
             min-height: 50px;
         }
 
-        .header-bookmarks,
-        .header-godmode {
+        .header-action-icon {
             width: 50px;
             min-width: 50px;
             padding: 0;
@@ -118,7 +117,7 @@
             align-items: center;
             justify-content: center;
             background-image: none;
-            color: #333;
+            color: var(--text-color);
             font-size: 16px;
         }
 
@@ -284,13 +283,6 @@
 
 .footer-logout .button {
     opacity: 1;
-}
-
-.error,
-.message {
-    max-width: 600px;
-    margin-left: auto;
-    margin-right: auto;
 }
 
 .banned {

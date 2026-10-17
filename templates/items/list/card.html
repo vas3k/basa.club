@@ -1,5 +1,5 @@
 {% item_url item as url %}
-<article class="index-card block block-clickable" data-published-at="{{ item.published_at|date:"c" }}">
+<article class="stack index-card block block-clickable" data-published-at="{{ item.published_at|date:"c" }}">
     <span class="index-card-new" hidden>Новое</span>
     <a class="index-card-cover" href="{{ url }}" aria-label="{{ item.title_with_prefix }}"></a>
     <div class="index-card-category">
@@ -21,7 +21,7 @@
         <div class="index-card-title">{% include "items/widgets/title.html" %}</div>
         {% if item.images and item.images.0.image %}
             <span class="index-card-thumb">
-                <img src="{{ item.images.0.image }}" alt="">
+                <img class="image-cover" src="{{ item.images.0.image }}" alt="">
             </span>
         {% endif %}
     </div>

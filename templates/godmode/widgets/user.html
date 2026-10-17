@@ -1,6 +1,6 @@
 {% with value as user %}
     {% if user %}
-        <a href="{% url "user_profile" user.slug %}" class="godmode-table-user">
+        <a href="{% url "user_profile" user.slug %}" class="row godmode-table-user">
             <span class="avatar godmode-table-user-avatar" style="background-image: url('{{ user.default_avatar }}');"></span>
             <span class="godmode-table-user-name {% if user.is_banned or user.deleted_at %}godmode-is-banned{% endif %}">{% firstof user.full_name user.slug %}</span>
         </a>

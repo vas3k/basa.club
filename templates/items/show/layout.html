@@ -17,7 +17,7 @@
     {% block comments %}
         {% if request.user.is_authenticated %}
             <section class="comments" id="comments">
-                <div class="comments-header">
+                <div class="row comments-header">
                     Комментарии
                     <span class="item-badge">{{ item.comment_count|cool_number }}</span>
                 </div>

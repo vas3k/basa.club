@@ -1,5 +1,5 @@
 {% item_url item as item_link %}
-<div class="item-actions">
+<div class="row item-actions">
     <a class="inline-block item-action" href="{{ item_link }}" title="Просмотры" aria-label="Просмотры {{ item.view_count|cool_number }}">
         <i class="fas fa-eye"></i>
         <span class="item-action-count">{{ item.view_count|cool_number }}</span>

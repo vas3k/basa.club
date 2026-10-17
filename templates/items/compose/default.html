@@ -21,8 +21,8 @@
     {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" max_length=form.description.field.max_length %}
     {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
 
-    <div class="form-optionals">
-        <div class="form-optional form-optional-photos">
+    <div class="stack stack-spaced form-optionals">
+        <div class="form-optional tone-photos">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-images" {% if form.images.errors or form.images.value and form.images.value != "[]" and form.images.value != "null" %}hidden{% endif %}>+ Добавить картинки</button>
             <div class="block form-section" id="item-images" {% if not form.images.errors and not form.images.value or not form.images.errors and form.images.value == "[]" or not form.images.errors and form.images.value == "null" %}hidden{% endif %}>
                 <div class="form-section-title">🖼️ Картинки</div>
@@ -31,7 +31,7 @@
             </div>
         </div>
 
-        <div class="form-optional form-optional-location">
+        <div class="form-optional tone-location">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-location" {% if form.location.errors or form.location.value %}hidden{% endif %}>+ Добавить локацию или адрес</button>
             <div class="block form-section" id="item-location" {% if not form.location.errors and not form.location.value %}hidden{% endif %}>
                 <div class="form-section-title">📍 Локация</div>
@@ -42,7 +42,7 @@
             </div>
         </div>
 
-        <div class="form-optional form-optional-contacts">
+        <div class="form-optional tone-contacts">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-contacts" {% if form.contacts.errors or form.contacts.value and form.contacts.value != "[]" and form.contacts.value != "null" %}hidden{% endif %}>+ Добавить контакты и ссылки</button>
             <div class="block form-section" id="item-contacts" {% if not form.contacts.errors and not form.contacts.value or not form.contacts.errors and form.contacts.value == "[]" or not form.contacts.errors and form.contacts.value == "null" %}hidden{% endif %}>
                 {% island "RecordList" name="contacts" label="💬 Контакты и ссылки" add_label="Добавить контакт" fields=contact_fields records=form.contacts.value max_count=15 %}
@@ -50,7 +50,7 @@
             </div>
         </div>
 
-        <div class="form-optional form-optional-promo">
+        <div class="form-optional tone-promo">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-promo" {% if form.promo_code.errors or form.promo_code.value or form.expires_in.errors %}hidden{% endif %}>+ Добавить скидку или промокод</button>
             <div class="block form-section" id="item-promo" {% if not form.promo_code.errors and not form.promo_code.value and not form.expires_in.errors %}hidden{% endif %}>
                 <div class="form-section-title">🎁 Промокод</div>

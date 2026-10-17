@@ -10,9 +10,9 @@
 
     <div class="profile-feed">
         <div class="block-header">История изменений рейтинга</div>
-        <section class="block rating-history">
+        <section class="block stack rating-history">
             {% for row in ratings %}
-                <div class="rating-history-row">
+                <div class="row rating-history-row">
                     <span class="rating-history-change {% if row.change > 0 %}rating-positive{% elif row.change < 0 %}rating-negative{% else %}rating-zero{% endif %}">{{ row.change|rating }}</span>
                     <span class="rating-history-reason">{{ row.reason }}</span>
                     <time class="rating-history-date" datetime="{{ row.created_at|date:'c' }}">{{ row.created_at|date:"j E Y, H:i" }}</time>

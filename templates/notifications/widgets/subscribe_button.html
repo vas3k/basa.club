@@ -17,7 +17,7 @@
         {% endif %}
         <button
             type="submit"
-            class="button button-small feed-button feed-subscribe-button{% if listing_subscribed %} feed-button-active{% endif %}"
+            class="button button-small button-toggle feed-subscribe-button{% if listing_subscribed %} button-toggle-active{% endif %}"
             aria-pressed="{% if listing_subscribed %}true{% else %}false{% endif %}"
         >
             <i class="{% if listing_subscribed %}fas{% else %}far{% endif %} fa-bell"></i>
@@ -40,7 +40,7 @@
         </button>
     </form>
 {% else %}
-    <a href="{% url "login" %}" class="button button-small feed-button feed-subscribe feed-subscribe-button">
+    <a href="{% url "login" %}" class="button button-small button-toggle feed-subscribe feed-subscribe-button">
         <i class="far fa-bell"></i>
         Подписаться на:
         {% if current_subcategory %}

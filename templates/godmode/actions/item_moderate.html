@@ -7,7 +7,7 @@
 {% block godmode_action_form %}
     <form action="." method="post">
         {% csrf_token %}
-        <div class="godmode-moderate-reasons">
+        <div class="stack godmode-moderate-reasons">
             {% for reason in reasons %}
                 <label class="godmode-moderate-reason">
                     <input type="radio" name="reason" value="{{ reason.title }}" {% if form.reason.value == reason.title %}checked{% endif %}>
@@ -21,7 +21,7 @@
         {% if form.reason.errors %}
             <div class="godmode-form-errors">{{ form.reason.errors }}</div>
         {% endif %}
-        <div class="godmode-form-actions">
+        <div class="row godmode-form-actions">
             <span></span>
             <button type="submit" class="button">Скрыть пост</button>
         </div>

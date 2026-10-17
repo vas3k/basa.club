@@ -87,7 +87,7 @@ export default function FlagButton({
         createPortal(
           <div className="flag-popup-backdrop" onClick={() => setIsOpen(false)}>
             <form
-              className="flag-popup"
+              className="block flag-popup"
               onClick={(event) => event.stopPropagation()}
               onSubmit={submit}
             >

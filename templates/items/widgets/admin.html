@@ -1,27 +1,27 @@
 <aside class="block block-note item-manage item-manage-admin">
     <div class="item-manage-title">Админить</div>
 
-    <div class="item-manage-actions">
+    <div class="stack action-list">
         {% if item.visibility == "draft" %}
-            <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+            <a href="{% url "item_edit" item.id %}" class="button">
                 <i class="fas fa-paper-plane"></i> Опубликовать
             </a>
         {% endif %}
 
-        <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+        <a href="{% url "item_edit" item.id %}" class="button">
             <i class="fas fa-pen"></i> Редактировать
         </a>
 
-        <a href="{% url "godmode_action" "items" item.id "moderate" %}" class="button item-manage-button">
+        <a href="{% url "godmode_action" "items" item.id "moderate" %}" class="button">
             <i class="fas fa-flag"></i> Модерировать
         </a>
 
-        <a href="{% url "godmode_edit_model" "items" item.id %}" class="button item-manage-button">
+        <a href="{% url "godmode_edit_model" "items" item.id %}" class="button">
             <i class="fas fa-bomb"></i> Открыть в админке
         </a>
 
         {% if item.author_id %}
-            <a href="{% url "godmode_action" "users" item.author_id "ban" %}" class="button item-manage-button">
+            <a href="{% url "godmode_action" "users" item.author_id "ban" %}" class="button">
                 <i class="fas fa-gavel"></i> Забанить автора
             </a>
         {% endif %}
@@ -30,7 +30,7 @@
     {% if moderation.upvote_count %}
         <div class="item-admin-section">
             <div class="item-admin-heading">Плюсы ({{ moderation.upvote_count }})</div>
-            <div class="item-admin-people">
+            <div class="stack item-admin-people">
                 {% for user in moderation.upvoters %}
                     {% include "users/widgets/user_tiny.html" with user=user %}
                 {% endfor %}
@@ -41,7 +41,7 @@
     {% if moderation.bookmark_count %}
         <div class="item-admin-section">
             <div class="item-admin-heading">Закладки ({{ moderation.bookmark_count }})</div>
-            <div class="item-admin-people">
+            <div class="stack item-admin-people">
                 {% for user in moderation.bookmarkers %}
                     {% include "users/widgets/user_tiny.html" with user=user %}
                 {% endfor %}

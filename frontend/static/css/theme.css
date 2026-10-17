@@ -1,4 +1,23 @@
 :root {
+    --muted-color: #888;
+    --danger-color: #ff1917;
+    --positive-color: #1f8a4c;
+    --telegram-color: #0088cc;
+    --avatar-bg: #bdc3c7;
+    --separator-color: rgba(0, 0, 0, 0.08);
+    --form-separator-color: rgba(0, 0, 0, 0.1);
+    --vibe-good-bg: #e7f6ec;
+    --vibe-good-color: #1b7a3d;
+    --vibe-bad-bg: #fdeceb;
+    --vibe-bad-color: #c62a22;
+    --rating-selected-color: #fff;
+    --button-emphasis-bg: #111;
+    --button-emphasis-hover-bg: var(--brighter-text-color);
+    --form-reveal-shadow: 0 10px 28px rgba(51, 51, 51, 0.16), 0 2px 8px rgba(51, 51, 51, 0.08);
+    --form-reveal-shadow-hover: 0 16px 36px rgba(51, 51, 51, 0.24), 0 4px 12px rgba(51, 51, 51, 0.12);
+    --rating-positive-hover-bg: #e7f6ee;
+    --rating-negative-hover-bg: #fdecec;
+
     --sans-font: "Ubuntu", Helvetica, Verdana, sans-serif;
     --serif-font: Georgia, Times, serif;
 
@@ -20,12 +39,12 @@
     --button-border-radius: 15px;
     --input-border-radius: 10px;
 
-    --button-color: #FFF;
-    --button-bg-color: #333;
-    --button-border: solid 2px #333;
-    --button-hover-color: #333;
-    --button-hover-bg-color: #FFF;
-    --button-hover-border: solid 2px #333;
+    --button-color: #fff;
+    --button-bg-color: var(--text-color);
+    --button-border: solid 2px var(--button-bg-color);
+    --button-hover-color: var(--text-color);
+    --button-hover-bg-color: var(--block-bg-color);
+    --button-hover-border: var(--button-border);
     --button-disabled-bg-color: #DDD;
 
     --input-font-size: 120%;
@@ -35,11 +54,8 @@
     --badge-color: rgba(255, 196, 85, 0.91);
 
     --inline-block-bg-default: #f2f3f5;
-    --inline-block-bg: var(--inline-block-bg-default);
     --inline-block-hover-bg: #e4e6ea;
-}
 
-html {
     --bg-color: #FCFDFF;
     --opposite-bg-color: #282c35;
 
@@ -47,21 +63,21 @@ html {
     --brighter-text-color: #000;
     --opposite-text-color: #DDD;
 
-    --block-bg-color: #FFF;
+    --block-bg-color: #fff;
     --opposite-block-bg-color: #282c35;
     --block-shadow: 10px 15px 40px rgba(83, 91, 110, 0.11);
     --block-shadow-hover: 0 8px 16px -2px rgba(9, 30, 66, .35), 0 0 0 1px rgba(9, 30, 66, .18);
     --block-border: none;
 
-    --link-color: #333;
-    --link-hover-color: #000;
-    --visited-link-color: #333;
+    --link-color: var(--text-color);
+    --link-hover-color: var(--brighter-text-color);
+    --visited-link-color: var(--link-color);
 
-    --select-color: #333;
-    --select-bg-color: #FFF;
+    --select-color: var(--text-color);
+    --select-bg-color: var(--block-bg-color);
 
-    --input-color: #000;
-    --input-bg-color: #fff;
+    --input-color: var(--brighter-text-color);
+    --input-bg-color: var(--block-bg-color);
     --input-border-color: #ddd;
 
     --location-bg: #e4f6de;
@@ -79,11 +95,6 @@ html {
     --note-accent: #9a5b16;
 
     --block-gradient: linear-gradient(180deg, #ffffff 0%, #f7f8fb 100%);
-    --gold-gradient: linear-gradient(135deg, #d4af37 0%, #f4e4c1 30%, #d4af37 100%);
-    --grey-gradient: linear-gradient(135deg, #e0e0e0 0%, #f5f5f5 50%, #e0e0e0 100%);
-    --red-gradient: linear-gradient(135deg, #fecdd3 0%, #ffe4e6 50%, #fecdd3 100%);
-    --green-gradient: linear-gradient(135deg, #d9f99d 0%, #ecfccb 50%, #d9f99d 100%);
-    --purple-gradient: linear-gradient(135deg, #ddd6fe 0%, #ede9fe 50%, #ddd6fe 100%);
 }
 
 body {
@@ -228,43 +239,3 @@ pre>code {
     overflow-y: hidden;
 }
 
-.bg-gold {
-    background: var(--gold-gradient);
-}
-
-.bg-grey {
-    background: var(--grey-gradient);
-}
-
-.bg-red {
-    background: var(--red-gradient);
-}
-
-.bg-green {
-    background: var(--green-gradient);
-}
-
-.bg-purple {
-    background: var(--purple-gradient);
-}
-
-.label {
-    display: inline-block;
-    padding: 0.27rem 0.6rem;
-    border-radius: var(--input-border-radius);
-    color: #FFF;
-    font-weight: 600;
-    max-width: none;
-}
-
-.label-green {
-    background-color: rgba(0, 168, 107, 0.86);
-}
-
-.label-red {
-    background-color: rgba(255, 8, 0, 0.86);
-}
-
-.label-grey {
-    background-color: rgba(128, 128, 128, 0.86);
-}

@@ -10,7 +10,7 @@
         {% if request.user.id == profile_user.id or request.user.is_moderator %}
             {% if draft_items %}
                 <div class="block-header block-header-with-button">Черновики</div>
-                <section class="content-items">
+                <section class="stack content-items">
                     {% for item in draft_items %}
                         {% include "items/list/default.html" with show_owner_actions=True %}
                     {% endfor %}
@@ -21,7 +21,7 @@
 
         {% if active_items %}
             <div class="block-header block-header-with-button">Посты</div>
-            <section class="content-items">
+            <section class="stack content-items">
                 {% for item in active_items %}
                     {% if request.user.id == profile_user.id %}
                         {% include "items/list/default.html" with show_owner_actions=True %}
@@ -39,7 +39,7 @@
 
         {% if inactive_items and request.user.id == profile_user.id and inactive_items.paginator.count %}
             <div class="block-header block-header-with-button">Не в общей ленте</div>
-            <section class="content-items">
+            <section class="stack content-items">
                 {% for item in inactive_items %}
                     {% include "items/list/default.html" with show_owner_actions=True %}
                 {% endfor %}
@@ -49,7 +49,7 @@
 
         {% if comments %}
             <div class="block-header block-header-with-button">Комментарии</div>
-            <section class="content-items">
+            <section class="stack content-items">
                 {% for comment in comments %}
                     {% include "comments/comment.html" with item=comment.item show_source=True %}
                 {% endfor %}

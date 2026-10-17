@@ -6,7 +6,7 @@
 {% endblock %}
 
 {% block godmode_content %}
-    <div class="godmode-list">
+    <div class="stack stack-spaced">
         <div class="godmode-header">
             <span>{{ admin_model.icon }}</span>
             <span>{{ admin_model.title }}</span>
@@ -21,7 +21,7 @@
         </div>
 
         <form method="get">
-            <div class="godmode-filters">
+            <div class="row godmode-filters">
                 <input type="hidden" name="page" value="1">
                 <input type="hidden" name="sort_field" value="{{ current_sort.field }}">
                 <input type="hidden" name="sort_direction" value="{{ current_sort.direction }}">

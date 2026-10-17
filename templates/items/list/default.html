@@ -1,5 +1,5 @@
 {% item_url item as url %}
-<article class="block item-card{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
+<article class="block stack item-card{% if item.visibility == "draft" %} item-draft{% endif %}{% if show_owner_actions %}{% if item.visibility != "visible" or item.is_expired %} item-inactive{% endif %}{% endif %}">
     <div class="item-header">
         {% include "items/widgets/tags.html" %}
     </div>
@@ -8,11 +8,11 @@
         {% if item.images and item.images.0.image %}
             {% if url %}
                 <a class="item-thumb" href="{{ url }}">
-                    <img src="{{ item.images.0.image }}" alt="">
+                    <img class="image-cover" src="{{ item.images.0.image }}" alt="">
                 </a>
             {% else %}
                 <span class="item-thumb">
-                    <img src="{{ item.images.0.image }}" alt="">
+                    <img class="image-cover" src="{{ item.images.0.image }}" alt="">
                 </span>
             {% endif %}
         {% endif %}
@@ -35,7 +35,7 @@
         </div>
     </div>
 
-    <div class="item-footer">
+    <div class="row item-footer">
         {% include "users/widgets/user_small.html" with user=item.author %}
         {% include "items/widgets/actions.html" %}
     </div>

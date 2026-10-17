@@ -27,20 +27,20 @@
             {% csrf_token %}
             {% include "users/widgets/profile_fields.html" %}
 
-            <div class="welcome-agreements">
-                <label class="welcome-agreement">
+            <div class="stack welcome-agreements">
+                <label class="row welcome-agreement">
                     {{ form.agree_data }}
                     <span>я соглашаюсь на <a href="{% url "data_policy" %}" target="_blank" rel="noopener noreferrer">обработку персональных данных</a>, куки и прочую фигню, без которой ничо не будет работать</span>
                 </label>
                 {% if form.agree_data.errors %}<div class="form-error">{{ form.agree_data.errors }}</div>{% endif %}
 
-                <label class="welcome-agreement">
+                <label class="row welcome-agreement">
                     {{ form.agree_rules }}
                     <span>я прочитал <a href="{% url "about" %}" target="_blank" rel="noopener noreferrer">правила сообщества</a> и буду их соблюдать</span>
                 </label>
                 {% if form.agree_rules.errors %}<div class="form-error">{{ form.agree_rules.errors }}</div>{% endif %}
 
-                <label class="welcome-agreement">
+                <label class="row welcome-agreement">
                     {{ form.agree_conduct }}
                     <span>а если я буду вести себя плохо — меня забанят! мне нравится!</span>
                 </label>

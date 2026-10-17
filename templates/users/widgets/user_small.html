@@ -1,8 +1,8 @@
 {# {% include "users/widgets/user_small.html" with user=item.author %} #}
 {% if request.user.is_authenticated %}
-    <a class="user-small" href="{{ user.get_absolute_url }}">
-        <span class="avatar user-small-avatar" style="background-image: url('{{ user.default_avatar }}');"></span>
-        <span class="user-small-name">{% firstof user.full_name user.slug %}</span>
+    <a class="user-badge user-badge-small" href="{{ user.get_absolute_url }}">
+        <span class="avatar" style="background-image: url('{{ user.default_avatar }}');"></span>
+        <span class="user-badge-name">{% firstof user.full_name user.slug %}</span>
         <span class="rating {% if user.rating > 0 %}rating-positive{% elif user.rating < 0 %}rating-negative{% else %}rating-zero{% endif %}" title="Репутация">{{ user.rating|rating }}</span>
     </a>
 {% endif %}

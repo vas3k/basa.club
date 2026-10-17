@@ -105,8 +105,7 @@
         }
 
         .header-create,
-        .header-bookmarks,
-        .header-godmode {
+        .header-action-icon {
             width: 36px;
             min-width: 36px;
             height: 36px;
@@ -196,7 +195,7 @@
     }
 
     .content-feed-setting,
-    .content-feed-settings > .feed-button {
+    .content-feed-settings > .button-toggle {
         width: 100%;
         white-space: normal;
     }

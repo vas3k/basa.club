@@ -5,7 +5,7 @@
         <div class="form-error">{{ comment_form.non_field_errors }}</div>
     {% endif %}
 
-    <div class="comment-form-vibes">
+    <div class="stack comment-form-vibes">
         {% for radio in comment_form.vibe %}
             <label class="comment-form-vibe comment-vibe-{{ radio.data.value }}">
                 {{ radio.tag }}

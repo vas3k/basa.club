@@ -1,5 +1,5 @@
 {# {% include "comments/comment.html" with comment=node.comment replies=node.replies %} #}
-<div class="comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
+<div class="block comment comment-vibe-{{ comment.vibe|default:"neutral" }}" id="comment-{{ comment.id }}">
     {% if show_source %}
         <a class="profile-comment-source" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">
             {% if item.city %}{% if item.city.icon %}{{ item.city.icon|safe }} {% endif %}{{ item.city.name }}{% elif item.country %}{% if item.country.icon %}{{ item.country.icon|safe }} {% endif %}{{ item.country.name }}{% else %}🌍 Весь мир{% endif %}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% with category=item.subcategory|default:item.category %}{% if category.icon %}{{ category.icon|safe }} {% endif %}{{ category.name }}<span class="item-tag-separator"><i class="fas fa-chevron-right"></i></span>{% endwith %}{{ item.title }}
@@ -10,15 +10,15 @@
         {% if comment.author %}
             {% include "users/widgets/user_small.html" with user=comment.author %}
         {% endif %}
-        <div class="comment-upvote">
+        <div class="stack comment-upvote">
             {% comment_upvote comment %}
         </div>
     </div>
 
     <div class="comment-text markdown-text text-size{% if comment.text|length >= 1500 %} text-size-long{% elif comment.text|length >= 250 %} text-size-medium{% endif %}">{{ comment.text|markdown }}</div>
 
-    <div class="comment-footer">
-        <div class="comment-actions">
+    <div class="row comment-footer">
+        <div class="row comment-actions">
             <a class="comment-date" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
             {% if request.user.is_authenticated and request.user.id == comment.author_id %}
                 {% include "comments/widgets/edit.html" %}

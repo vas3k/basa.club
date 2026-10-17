@@ -16,9 +16,9 @@
         <form action="." method="post">
             {% csrf_token %}
 
-            <div class="godmode-form">
+            <div class="stack godmode-form">
                 {% for field in form %}
-                    <div class="godmode-form-row">
+                    <div class="row godmode-form-row">
                         <div class="godmode-form-label">{{ field.label_tag }}</div>
                         <div class="godmode-form-input">
                             <div>{{ field }}</div>
@@ -32,7 +32,7 @@
                     </div>
                 {% endfor %}
 
-                <div class="godmode-form-actions">
+                <div class="row godmode-form-actions">
                     <a href="{% url 'godmode_list_model' model_name=admin_model.name %}" class="button button-inverted">
                         Назад к списку
                     </a>

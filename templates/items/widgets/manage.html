@@ -1,21 +1,21 @@
 <aside class="block item-manage">
     <div class="item-manage-title">Управлять</div>
 
-    <div class="item-manage-actions">
+    <div class="stack action-list">
         {% if item.visibility == "draft" %}
-            <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+            <a href="{% url "item_edit" item.id %}" class="button">
                 <i class="fas fa-paper-plane"></i> Опубликовать
             </a>
         {% endif %}
 
-        <a href="{% url "item_edit" item.id %}" class="button item-manage-button">
+        <a href="{% url "item_edit" item.id %}" class="button">
             <i class="fas fa-pen"></i> Редактировать
         </a>
 
         {% if item.visibility != "draft" %}
             <form method="post" action="{% url "item_hide" item.id %}">
                 {% csrf_token %}
-                <button type="submit" class="button item-manage-button">
+                <button type="submit" class="button">
                     <i class="fas fa-eye-slash"></i> Скрыть
                 </button>
             </form>
@@ -23,7 +23,7 @@
 
         <form method="post" action="{% url "item_delete" item.id %}">
             {% csrf_token %}
-            <button type="submit" class="button item-manage-button" onclick="return confirm('Точно удаляем? Удаленные посты больше нигде не получится найти. Даже вам!')">
+            <button type="submit" class="button" onclick="return confirm('Точно удаляем? Удаленные посты больше нигде не получится найти. Даже вам!')">
                 <i class="fas fa-trash-alt"></i> Удалить
             </button>
         </form>
