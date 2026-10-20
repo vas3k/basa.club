@@ -61,25 +61,33 @@ def index_page(request, country=None):
     if country:
         feed = feed.filter(country=country)
         country_items = list(feed[:20])
+        shown_ids = [item.id for item in country_items]
         city_counts = dict(
             feed.exclude(city_id=None).order_by().values("city_id").annotate(total=Count("id"))
             .values_list("city_id", "total")
         )
         for city in GeoCity.objects.filter(country=country, id__in=city_counts):
+            city_items = feed.filter(city=city)
+            if shown_ids:
+                city_items = city_items.exclude(id__in=shown_ids)
+            city_items = list(city_items[:10])
+            shown_ids.extend(item.id for item in city_items)
             city_blocks.append({
                 "city": city,
                 "count": city_counts[city.id],
-                "items": list(feed.filter(city=city)[:10]),
+                "items": city_items,
             })
     else:
-        all_items = paginate(request, feed)
         if request.user.is_authenticated:
             subscriptions = list(
                 Subscription.objects.filter(user=request.user)
                 .select_related("country", "city", "category").order_by("-created_at")
             )
+            shown_ids = []
             for subscription in subscriptions:
                 items = feed
+                if shown_ids:
+                    items = items.exclude(id__in=shown_ids)
                 if subscription.country_id:
                     place = Q(country_id=subscription.country_id)
                     if subscription.city_id:
@@ -94,6 +102,10 @@ def index_page(request, country=None):
                 if subscription.query:
                     items = search.filter_items(items, subscription.query)
                 subscription.index_items = list(items[:10])
+                shown_ids.extend(item.id for item in subscription.index_items)
+            if shown_ids:
+                feed = feed.exclude(id__in=shown_ids)
+        all_items = paginate(request, feed)
 
     return render(request, "index.html", {
         "country_items": country_items,
