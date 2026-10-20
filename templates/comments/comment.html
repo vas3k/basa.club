@@ -47,6 +47,7 @@
                       action="{% url "item_comment" item.id %}"
                       class="comment-reply-form"
                       id="reply-form-{{ comment.id }}"
+                      data-behavior="no-enter-submit"
                       {% if open_reply_to != comment.id|stringformat:"s" %}hidden{% endif %}>
                     {% csrf_token %}
                     <input type="hidden" name="{{ reply_form.reply_to.html_name }}" value="{{ comment.id }}">
@@ -62,7 +63,7 @@
                 </form>
             {% endwith %}
         {% else %}
-            <form method="post" action="{% url "item_comment" item.id %}" class="comment-reply-form" id="reply-form-{{ comment.id }}" hidden>
+            <form method="post" action="{% url "item_comment" item.id %}" class="comment-reply-form" id="reply-form-{{ comment.id }}" data-behavior="no-enter-submit" hidden>
                 {% csrf_token %}
                 <input type="hidden" name="reply_to" value="{{ comment.id }}">
                 <input type="text" name="text" placeholder="Ваш ответ" maxlength="5000" required>

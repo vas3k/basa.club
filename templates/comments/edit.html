@@ -7,7 +7,7 @@
     <div class="block">
         <div class="block-header">{{ form_title }}</div>
 
-        <form method="post" action="{% url "comment_edit" comment.id %}" class="comment-form">
+        <form method="post" action="{% url "comment_edit" comment.id %}" class="comment-form" data-behavior="no-enter-submit">
             {% csrf_token %}
 
             {% if form.non_field_errors %}

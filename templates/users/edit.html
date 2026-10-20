@@ -9,7 +9,7 @@
     <div class="block profile-form-page">
         <div class="block-header">Редактировать профиль</div>
 
-        <form class="profile-form" method="post" action="{% url "user_profile_edit" slug %}">
+        <form class="profile-form" method="post" action="{% url "user_profile_edit" slug %}" data-behavior="no-enter-submit">
             {% csrf_token %}
             {% include "users/widgets/profile_fields.html" %}
 
