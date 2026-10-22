@@ -164,6 +164,7 @@ def publish_draft(token):
         subcategory = Category.objects.filter(id=fields["subcategory_id"], parent__isnull=False).first()
         country = GeoCountry.objects.filter(id=fields["country_id"]).first() if fields["country_id"] else None
         city = None
+
         if fields["city_id"] and country is not None:
             city = GeoCity.objects.filter(id=fields["city_id"], country=country).first()
         if author is None or author.is_banned or category is None or subcategory is None:
@@ -255,6 +256,7 @@ async def answer_listing(message, source, content, comment=""):
         for chat in (origin_chat, candidate.chat):
             if chat and chat.type != "private" and chat.title and chat.title not in chat_names:
                 chat_names.append(chat.title)
+
     blocks = []
     if chat_names:
         blocks.append("Чат: " + ", ".join(chat_names))
@@ -265,7 +267,7 @@ async def answer_listing(message, source, content, comment=""):
     text = "\n\n".join(blocks)
 
     await message.reply_chat_action("typing")
-    await message.reply_text("Посмотрим, парсю сообщение...")
+    await message.reply_text("🤔 Посмотрим, парсю сообщение...")
 
     try:
         async with PARSING_SLOTS:
@@ -281,8 +283,8 @@ async def answer_listing(message, source, content, comment=""):
     token = preview["token"]
     keyboard = InlineKeyboardMarkup([
         [InlineKeyboardButton("✅ Постим", callback_data=f"add:post:{token}")],
-        [InlineKeyboardButton("✏️ Отредактировать", url=preview["edit_url"])],
-        [InlineKeyboardButton("❌ Отмена", callback_data=f"add:cancel:{token}")],
+        [InlineKeyboardButton("✏️ Отредактировать руками", url=preview["edit_url"])],
+        [InlineKeyboardButton("❌ Отменить", callback_data=f"add:cancel:{token}")],
     ])
     html = preview["html"]
     try:
