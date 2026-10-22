@@ -24,11 +24,12 @@ from items.api import retract_item_vote, upvote_item
 from items.views import (
     compose_item,
     compose_item_ai,
+    country_index_page,
     delete_item,
     hide_item,
-    index_page,
     item_page,
     listing_page,
+    main_index_page,
 )
 from counters.views import user_ratings
 from notifications.views import remove_subscription, toggle_listing_subscription
@@ -37,7 +38,7 @@ from users.views import edit_profile, profile_page, welcome
 from vas3k_base.sitemap import sitemaps
 
 urlpatterns = [
-    path("", index_page, name="index"),
+    path("", main_index_page, name="index"),
 
     path("login/", log_in, name="login"),
     path("logout/", log_out, name="logout"),
@@ -88,7 +89,7 @@ urlpatterns = [
     path("godmode/<slug:model_name>/<str:item_id>/delete/", godmode_delete_model, name="godmode_delete_model"),
     path("godmode/<slug:model_name>/<str:item_id>/action/<str:action_code>/", godmode_action, name="godmode_action"),
 
-    path("<str:country>/", index_page, name="country_index"),
+    path("<str:country>/", country_index_page, name="country_index"),
     path("<str:country>/<str:city>/", listing_page, name="listing"),
     path("<str:country>/<str:city>/<slug:category>/", listing_page, name="listing_category"),
     path("<str:country>/<str:city>/<slug:category>/<uuid:item_id>/", item_page, name="item_without_subcategory"),

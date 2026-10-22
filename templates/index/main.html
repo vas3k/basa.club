@@ -12,9 +12,9 @@
         {% include "index/welcome.html" %}
     {% endif %}
 
-    {% if not current_country and all_items %}
+    {% if all_items %}
         <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
+            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}{% append_query_param sort="date" page=1 %}">Новое 🌎 Весь мир</a></h2>
             <div class="index-cards">
                 {% for item in all_items %}
                     {% include "items/list/card.html" %}
@@ -42,39 +42,9 @@
         {% endif %}
     {% endfor %}
 
-    {% if current_country and country_items %}
-        <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
-            <div class="index-cards">
-                {% for item in country_items %}
-                    {% include "items/list/card.html" %}
-                {% endfor %}
-            </div>
-            {% if country_items|length >= 20 %}
-                <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id "everywhere" %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
-            {% endif %}
-        </section>
-    {% endif %}
-
-    {% for block in city_blocks %}
-        {% if block.items %}
-            <section class="index-section">
-                <h2 class="index-section-title"><a href="{% url "listing" current_country.id block.city.id %}">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</a></h2>
-                <div class="index-cards">
-                    {% for item in block.items %}
-                        {% include "items/list/card.html" %}
-                    {% endfor %}
-                </div>
-                {% if block.items|length >= 10 %}
-                    <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id block.city.id %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
-                {% endif %}
-            </section>
-        {% endif %}
-    {% endfor %}
-
     {% include "common/widgets/join.html" %}
 
-    {% if not country_items and not all_items %}
+    {% if not all_items %}
         <div class="block feed-empty">
             <p>Тут пока ничего нет</p>
             <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>

@@ -44,79 +44,80 @@ def anonymous_search_redirect(request):
     return None
 
 
-def index_page(request, country=None):
+def main_index_page(request):
     if response := anonymous_search_redirect(request):
         return response
 
-    if country:
-        country = get_object_or_404(GeoCountry, id=country)
-        request.country_id = country.id
-        request.city_id = "everywhere"
-
-    page_query = (request.GET.get("query") or "").strip()
+    query = (request.GET.get("query") or "").strip()[:200]
     feed = search.filter_items(
-        Item.objects_for_user(request.user, Item.visible_objects()), page_query,
+        Item.objects_for_user(request.user, Item.visible_objects()), query,
     ).order_by("-published_at", "-id")
+    all_items = paginate(request, feed)
+    shown_ids = [item.id for item in all_items]
 
-    country_items = []
-    city_blocks = []
-    all_items = []
     subscriptions = []
-    if country:
-        feed = feed.filter(country=country)
-        country_items = list(feed[:20])
-        shown_ids = [item.id for item in country_items]
-        city_counts = dict(
-            feed.exclude(city_id=None).order_by().values("city_id").annotate(total=Count("id"))
-            .values_list("city_id", "total")
+    if request.user.is_authenticated:
+        subscriptions = list(
+            Subscription.objects.filter(user=request.user)
+            .select_related("country", "city", "category").order_by("-created_at")
         )
-        for city in GeoCity.objects.filter(country=country, id__in=city_counts):
-            city_items = feed.filter(city=city)
-            if shown_ids:
-                city_items = city_items.exclude(id__in=shown_ids)
-            city_items = list(city_items[:10])
-            shown_ids.extend(item.id for item in city_items)
-            city_blocks.append({
-                "city": city,
-                "count": city_counts[city.id],
-                "items": city_items,
-            })
-    else:
-        if request.user.is_authenticated:
-            subscriptions = list(
-                Subscription.objects.filter(user=request.user)
-                .select_related("country", "city", "category").order_by("-created_at")
-            )
-            shown_ids = []
-            for subscription in subscriptions:
-                items = feed
-                if shown_ids:
-                    items = items.exclude(id__in=shown_ids)
-                if subscription.country_id:
-                    place = Q(country_id=subscription.country_id)
-                    if subscription.city_id:
-                        place &= Q(city_id=subscription.city_id)
-                    if subscription.include_online:
-                        place |= Q(country_id=settings.ONLINE_COUNTRY_ID)
-                    items = items.filter(place)
-                if subscription.category_id and subscription.category.parent_id:
-                    items = items.filter(subcategory_id=subscription.category_id)
-                elif subscription.category_id:
-                    items = items.filter(category_id=subscription.category_id)
-                if subscription.query:
-                    items = search.filter_items(items, subscription.query)
-                subscription.index_items = list(items[:10])
-                shown_ids.extend(item.id for item in subscription.index_items)
-            if shown_ids:
-                feed = feed.exclude(id__in=shown_ids)
-        all_items = paginate(request, feed)
+        for subscription in subscriptions:
+            items = feed.exclude(id__in=shown_ids)
+            if subscription.country_id:
+                place = Q(country_id=subscription.country_id)
+                if subscription.city_id:
+                    place &= Q(city_id=subscription.city_id)
+                if subscription.include_online:
+                    place |= Q(country_id=settings.ONLINE_COUNTRY_ID)
+                items = items.filter(place)
+            if subscription.category_id and subscription.category.parent_id:
+                items = items.filter(subcategory_id=subscription.category_id)
+            elif subscription.category_id:
+                items = items.filter(category_id=subscription.category_id)
+            if subscription.query:
+                items = search.filter_items(items, subscription.query)
+            subscription.index_items = list(items[:10])
+            shown_ids.extend(item.id for item in subscription.index_items)
 
-    return render(request, "index.html", {
-        "country_items": country_items,
-        "city_blocks": city_blocks,
+    return render(request, "index/main.html", {
         "all_items": all_items,
         "subscriptions": subscriptions,
-        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items and not all_items else [],
+        "subscribers": subscribers(request) if request.user.is_authenticated and not all_items else [],
+    })
+
+
+def country_index_page(request, country):
+    if response := anonymous_search_redirect(request):
+        return response
+
+    country = get_object_or_404(GeoCountry, id=country)
+    request.country_id = country.id
+    request.city_id = "everywhere"
+
+    query = (request.GET.get("query") or "").strip()[:200]
+    feed = search.filter_items(
+        Item.objects_for_user(request.user, Item.visible_objects()), query,
+    ).filter(country=country).order_by("-published_at", "-id")
+    country_items = list(feed[:20])
+    shown_ids = [item.id for item in country_items]
+
+    city_blocks = []
+    city_counts = dict(
+        feed.exclude(city_id=None).order_by().values("city_id").annotate(total=Count("id"))
+        .values_list("city_id", "total")
+    )
+    for city in GeoCity.objects.filter(country=country, id__in=city_counts):
+        city_items = list(feed.filter(city=city).exclude(id__in=shown_ids)[:10])
+        city_blocks.append({
+            "city": city,
+            "count": city_counts[city.id],
+            "items": city_items,
+        })
+
+    return render(request, "index/country.html", {
+        "country_items": country_items,
+        "city_blocks": city_blocks,
+        "subscribers": subscribers(request) if request.user.is_authenticated and not country_items else [],
     })
 
 
@@ -159,13 +160,12 @@ def listing_page(request, country, city, category=None, subcategory=None):
             here |= Q(country_id=settings.ONLINE_COUNTRY_ID)
         items = items.filter(here)
 
-    query = (request.GET.get("query") or "").strip()
-    if query and request.user.is_authenticated:
-        items = search.filter_items(items, query)
+    query = (request.GET.get("query") or "").strip()[:200]
+    items = search.filter_items(items, query)
 
     sort = request.GET.get("sort")
     ordering = list(FEED_SORTS.get(sort, FEED_SORTS["standard"]))
-    if query and request.user.is_authenticated and sort not in {"date", "rating"}:
+    if query and sort not in {"date", "rating"}:
         ordering = ["-search_rank", *ordering]
     items = paginate(request, items.order_by(*ordering))
 

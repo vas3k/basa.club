@@ -49,6 +49,9 @@ def anon_teaser_list(count, *parts):
 
 def feed_querystring(request):
     params = {}
+    query = (request.GET.get("query") or "").strip()[:200]
+    if query:
+        params["query"] = query
     sort = request.GET.get("sort")
     if sort in {"date", "rating"}:
         params["sort"] = sort

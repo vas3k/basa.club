@@ -7,7 +7,10 @@ export default function geoSelect(form: HTMLElement) {
             const country = countrySelect?.value || "everywhere";
             const city = select.dataset.geo === "country" ? "everywhere" : citySelect?.value || "everywhere";
             event.stopPropagation();
-            window.location.assign(placePath(country, city));
+            const target = new URL(placePath(country, city), window.location.origin);
+            const query = form.querySelector<HTMLInputElement>('[name="query"]')?.value.trim().slice(0, 200);
+            if (query) target.searchParams.set("query", query);
+            window.location.assign(target.pathname + target.search);
         });
     });
 }

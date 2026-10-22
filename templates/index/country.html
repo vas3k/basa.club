@@ -1,0 +1,65 @@
+{% extends "layout_with_sidebar.html" %}
+
+{% block title %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block og_title %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block meta_description %}{% geo_title %}{{ block.super }}{% endblock %}
+{% block og_description %}{% geo_title %}{{ block.super }}{% endblock %}
+
+{% block content_attributes %}data-behavior="index-new-items"{% endblock %}
+
+{% block content %}
+    {% if not request.COOKIES.is_welcome_read and not request.user.metadata.is_welcome_read %}
+        {% include "index/welcome.html" %}
+    {% endif %}
+
+    {% if country_items %}
+        <section class="index-section">
+            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}{% append_query_param page=1 %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
+            <div class="index-cards">
+                {% for item in country_items %}
+                    {% include "items/list/card.html" %}
+                {% endfor %}
+            </div>
+            {% if country_items|length >= 20 %}
+                <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id "everywhere" %}{% append_query_param page=1 %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+            {% endif %}
+        </section>
+    {% endif %}
+
+    {% for block in city_blocks %}
+        {% if block.items %}
+            <section class="index-section">
+                <h2 class="index-section-title"><a href="{% url "listing" current_country.id block.city.id %}{% append_query_param page=1 %}">{{ block.city.icon }} {{ block.city.name }} ({{ block.count }})</a></h2>
+                <div class="index-cards">
+                    {% for item in block.items %}
+                        {% include "items/list/card.html" %}
+                    {% endfor %}
+                </div>
+                {% if block.items|length >= 10 %}
+                    <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id block.city.id %}{% append_query_param page=1 %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+                {% endif %}
+            </section>
+        {% endif %}
+    {% endfor %}
+
+    {% include "common/widgets/join.html" %}
+
+    {% if not country_items %}
+        <div class="block feed-empty">
+            <p>Тут пока ничего нет</p>
+            <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>
+            <div class="feed-empty-actions">
+                <a href="{% if request.user.is_authenticated %}{% url "item_create_ai" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                {% include "notifications/widgets/subscribe_button.html" %}
+            </div>
+            {% if subscribers %}
+                <p class="feed-empty-subscribers">
+                    Новых постов в эту категорию {% if subscribers|length == 1 %}ждет{% else %}ждут{% endif %} еще {{ subscribers|length }} {{ subscribers|length|pluralize:"человек,человека,человек" }}:
+                        {% for user in subscribers|slice:":5" %}
+                            <a href="{{ user.get_absolute_url }}">{% firstof user.full_name user.slug %}</a>{% if not forloop.last %}, {% elif subscribers|length > 5 %}...{% endif %}
+                        {% endfor %}
+                </p>
+            {% endif %}
+        </div>
+    {% endif %}
+{% endblock %}
