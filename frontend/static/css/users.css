@@ -264,6 +264,7 @@
 .profile-comment-source:visited {
     display: block;
     margin-bottom: 12px;
+    overflow-wrap: anywhere;
     color: inherit;
     font-weight: 700;
     text-decoration: none;

@@ -79,6 +79,7 @@
 }
 
 .item-card {
+    container: item-card / inline-size;
     align-items: stretch;
     gap: 24px;
     margin-bottom: 0;
@@ -261,10 +262,18 @@
 .item-card-title {
     display: block;
     margin: 0;
-    font-size: 180%;
     font-weight: 700;
-    line-height: 1.25;
     overflow-wrap: anywhere;
+}
+
+.item-card-title-normal {
+    font-size: 180%;
+    line-height: 1.4;
+}
+
+.item-card-title-medium {
+    font-size: 140%;
+    line-height: 1.3;
 }
 
 .item-card-description {
@@ -294,20 +303,59 @@
 
 .item-show-title {
     margin: 0;
-    font-size: 260%;
     font-weight: 700;
-    line-height: 1.15;
     overflow-wrap: anywhere;
 }
 
+.item-show-title-normal {
+    font-size: 260%;
+    line-height: 1.3;
+}
+
+.item-show-title-medium {
+    font-size: 210%;
+    line-height: 1.25;
+}
+
+.item-show-title-small {
+    font-size: 170%;
+    line-height: 1.2;
+}
+
 .item-show .item-title-row {
+    flex-wrap: wrap;
     margin-bottom: 12px;
+}
+
+.item-show .item-title-row .item-show-title {
+    flex-basis: 16rem;
+}
+
+.item-show .item-title-row > [data-island] {
+    margin-left: auto;
 }
 
 .item-show-description {
     margin-top: 1.5em;
     margin-bottom: 3em;
     overflow-wrap: anywhere;
+}
+
+.item-description-normal {
+    font-size: 140%;
+    line-height: 1.5;
+}
+
+.item-description-medium {
+    font-size: 112%;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.item-description-small {
+    font-size: 110%;
+    font-weight: 400;
+    line-height: 1.42;
 }
 
 .item-description-more {
@@ -366,9 +414,16 @@
     .item-thumb {
         width: min(150px, 42vw);
     }
+}
 
-    .item-show-title {
-        font-size: 190%;
+@container item-card (max-width: 420px) {
+    .item-body {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .item-thumb {
+        width: 96px;
     }
 }
 

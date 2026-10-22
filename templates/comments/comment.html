@@ -15,7 +15,7 @@
         </div>
     </div>
 
-    <div class="comment-text markdown-text text-size{% if comment.text|length >= 1500 %} text-size-long{% elif comment.text|length >= 250 %} text-size-medium{% endif %}">{{ comment.text|markdown }}</div>
+    <div class="comment-text markdown-text {% text_length_class comment.text "comment-text-normal" 250 "comment-text-medium" 1500 "comment-text-small" %}">{{ comment.text|markdown }}</div>
 
     <div class="row comment-footer">
         <div class="row comment-actions">

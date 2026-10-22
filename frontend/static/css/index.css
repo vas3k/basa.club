@@ -291,17 +291,31 @@
 
 .index-card-title-row {
     display: flex;
-    align-items: flex-start;
+    flex: 1;
+    align-items: center;
     gap: 10px;
 }
 
 .index-card-title {
     flex: 1;
     min-width: 0;
-    font-size: 118%;
     font-weight: 700;
-    line-height: 1.3;
     overflow-wrap: anywhere;
+}
+
+.index-card-title-normal {
+    font-size: 125%;
+    line-height: 1.35;
+}
+
+.index-card-title-medium {
+    font-size: 100%;
+    line-height: 1.3;
+}
+
+.index-card-title-small {
+    font-size: 100%;
+    line-height: 1.3;
 }
 
 .index-card-thumb {

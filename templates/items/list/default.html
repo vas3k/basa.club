@@ -20,9 +20,9 @@
         <div class="item-main">
             <div class="item-title-row">
                 {% if url %}
-                    <a class="item-card-title" href="{{ url }}">{% include "items/widgets/title.html" %}</a>
+                    <a class="item-card-title {% text_length_class item.title_with_prefix "item-card-title-normal" 200 "item-card-title-medium" %}" href="{{ url }}">{% include "items/widgets/title.html" %}</a>
                 {% else %}
-                    <div class="item-card-title">{% include "items/widgets/title.html" %}</div>
+                    <div class="item-card-title {% text_length_class item.title_with_prefix "item-card-title-normal" 200 "item-card-title-medium" %}">{% include "items/widgets/title.html" %}</div>
                 {% endif %}
                 {% item_upvote item %}
             </div>

@@ -76,13 +76,19 @@
 
 .comment-header {
     display: flex;
+    flex-wrap: wrap;
     align-items: flex-start;
     justify-content: space-between;
     gap: 12px;
     margin-bottom: 12px;
 }
 
+.comment-header > .user-badge {
+    min-width: 0;
+}
+
 .comment-upvote {
+    margin-left: auto;
     align-items: center;
     gap: 6px;
     flex-shrink: 0;
@@ -90,6 +96,23 @@
 
 .comment-text {
     overflow-wrap: anywhere;
+}
+
+.comment-text-normal {
+    font-size: 140%;
+    line-height: 1.5;
+}
+
+.comment-text-medium {
+    font-size: 112%;
+    font-weight: 400;
+    line-height: 1.45;
+}
+
+.comment-text-small {
+    font-size: 110%;
+    font-weight: 400;
+    line-height: 1.42;
 }
 
 .comment-footer {

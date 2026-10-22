@@ -1,1 +1,1 @@
-{% if item.prefix %}<span class="item-title-prefix">{{ item.get_prefix_display }}</span> {% endif %}{{ item.title }}
+{% if item.prefix %}<span class="item-title-prefix">{{ item.get_prefix_display }}</span> {% endif %}{% if title_limit %}{{ item.title|truncatechars:title_limit }}{% else %}{{ item.title }}{% endif %}

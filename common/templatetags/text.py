@@ -13,6 +13,24 @@ register = template.Library()
 PUBLIC_PREVIEW_LENGTH = 240
 
 
+@register.simple_tag
+def text_length_class(text, default_class, *length_class_pairs):
+    """Usage: {% text_length_class text "title-normal" 50 "title-medium" 100 "title-small" %}"""
+    if len(length_class_pairs) % 2:
+        raise template.TemplateSyntaxError("text_length_class requires length/class pairs")
+
+    text_length = len(text or "")
+    css_class = default_class
+    matched_length = -1
+    for length, candidate_class in zip(length_class_pairs[::2], length_class_pairs[1::2]):
+        length = int(length)
+        if matched_length < length <= text_length:
+            matched_length = length
+            css_class = candidate_class
+
+    return css_class
+
+
 @register.filter
 def markdown(text):
     return mark_safe(markdown_text(text or ""))

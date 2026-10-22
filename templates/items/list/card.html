@@ -18,7 +18,7 @@
         {% endwith %}
     </div>
     <div class="index-card-title-row">
-        <div class="index-card-title">{% include "items/widgets/title.html" %}</div>
+        <div class="index-card-title {% text_length_class item.title_with_prefix "index-card-title-normal" 64 "index-card-title-medium" 150 "index-card-title-small" %}">{% include "items/widgets/title.html" with title_limit=110 %}</div>
         {% if item.images and item.images.0.image %}
             <span class="index-card-thumb">
                 <img class="image-cover" src="{{ item.images.0.image }}" alt="">
