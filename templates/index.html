@@ -23,7 +23,9 @@
                         {% include "items/list/card.html" %}
                     {% endfor %}
                 </div>
-                <a class="index-card-more" href="{{ subscription.listing_url }}">Все ▶︎</a>
+                {% if subscription.index_items|length >= 10 %}
+                    <a class="button button-inverted index-card-more" href="{{ subscription.listing_url }}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+                {% endif %}
             </section>
         {% endif %}
     {% endfor %}
@@ -36,7 +38,9 @@
                     {% include "items/list/card.html" %}
                 {% endfor %}
             </div>
-            <a class="index-card-more" href="{% url "listing" current_country.id "everywhere" %}">Все ▶︎</a>
+            {% if country_items|length >= 20 %}
+                <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id "everywhere" %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+            {% endif %}
         </section>
     {% endif %}
 
@@ -49,7 +53,9 @@
                         {% include "items/list/card.html" %}
                     {% endfor %}
                 </div>
-                <a class="index-card-more" href="{% url "listing" current_country.id block.city.id %}">Все ▶︎</a>
+                {% if block.items|length >= 10 %}
+                    <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id block.city.id %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
+                {% endif %}
             </section>
         {% endif %}
     {% endfor %}
