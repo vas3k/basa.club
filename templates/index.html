@@ -12,6 +12,18 @@
         {% include "index/welcome.html" %}
     {% endif %}
 
+    {% if not current_country and all_items %}
+        <section class="index-section">
+            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
+            <div class="index-cards">
+                {% for item in all_items %}
+                    {% include "items/list/card.html" %}
+                {% endfor %}
+            </div>
+            {% paginator all_items %}
+        </section>
+    {% endif %}
+
     {% for subscription in subscriptions %}
         {% if subscription.index_items %}
             <section class="index-section">
@@ -59,18 +71,6 @@
             </section>
         {% endif %}
     {% endfor %}
-
-    {% if not current_country and all_items %}
-        <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}?sort=date">Новое 🌎 Весь мир</a></h2>
-            <div class="index-cards">
-                {% for item in all_items %}
-                    {% include "items/list/card.html" %}
-                {% endfor %}
-            </div>
-            {% paginator all_items %}
-        </section>
-    {% endif %}
 
     {% include "common/widgets/join.html" %}
 
