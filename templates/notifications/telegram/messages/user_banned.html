@@ -1,6 +1,11 @@
 🚫 <b>Вас забанили в Вастрик Базе</b>
 
-Причина: {{ reason }}{% if comment %}
-Комментарий: {{ comment }}{% endif %}
+<b>Причина:</b> {{ reason }}
 
-{% if is_permanent %}Срок: навсегда{% else %}Осталось {{ days }} {{ days|pluralize:"день,дня,дней" }}, {{ hours }} {{ hours|pluralize:"час,часа,часов" }} и {{ minutes }} {{ minutes|pluralize:"минута,минуты,минут" }}{% endif %}
+{% if is_permanent %}Это навсегда.{% else %}Бан до <b>{{ until|date:"d.m.Y H:i" }} UTC</b>.
+Осталось {{ days }} {{ days|pluralize:"день,дня,дней" }}, {{ hours }} {{ hours|pluralize:"час,часа,часов" }} и {{ minutes }} {{ minutes|pluralize:"минута,минуты,минут" }}.{% endif %}{% if comment %}
+
+<i>Модератор пишет:</i>
+<blockquote>{{ comment }}</blockquote>{% endif %}
+
+<a href="{{ settings.APP_HOST }}{% url "about" %}">Правила Базы ➜</a>

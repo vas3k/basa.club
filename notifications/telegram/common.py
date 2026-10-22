@@ -3,6 +3,7 @@ import logging
 import requests
 from django.conf import settings
 from django.template import loader
+from django.template.defaultfilters import truncatechars_html
 
 log = logging.getLogger(__name__)
 
@@ -22,15 +23,18 @@ def render_html_message(template, **data):
     return loader.get_template(template).render({
         **data,
         "settings": settings,
-    })
+    }).strip()
 
 
 def send_telegram_message(chat_id, text, reply_markup=None):
     if not chat_id or not text:
         return None
+
+    text = truncatechars_html(text, TEXT_LIMIT)
+
     payload = {
         "chat_id": chat_id,
-        "text": text[:TEXT_LIMIT],
+        "text": text,
         "parse_mode": "HTML",
         "link_preview_options": {"is_disabled": True},
     }
@@ -40,12 +44,13 @@ def send_telegram_message(chat_id, text, reply_markup=None):
 
 
 def send_telegram_photo(chat_id, photo, caption, reply_markup=None):
-    if not chat_id or not photo:
+    caption = caption or ""
+    if not chat_id or not photo or truncatechars_html(caption, CAPTION_LIMIT) != caption:
         return None
     payload = {
         "chat_id": chat_id,
         "photo": photo,
-        "caption": (caption or "")[:CAPTION_LIMIT],
+        "caption": caption,
         "parse_mode": "HTML",
     }
     if reply_markup:

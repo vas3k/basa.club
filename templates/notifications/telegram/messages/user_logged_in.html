@@ -1,0 +1,7 @@
+✅ <b>Вы вошли в Вастрик Базу</b>
+
+Ваш профиль: <a href="{{ settings.APP_HOST }}{{ user.get_absolute_url }}">{{ user.full_name|default:user.slug }}</a>.
+
+{{ help_message }}
+
+<a href="{{ settings.APP_HOST }}">Открыть Базу ➜</a>

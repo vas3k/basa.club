@@ -1,4 +1,9 @@
-{% load telegram %}{% if vibe_label %}{{ vibe_label }}{% if is_reply %} · ответ{% endif %}
-{% endif %}{% if comment.author %}<a href="{{ settings.APP_HOST }}{{ comment.author.get_absolute_url }}">{{ comment.author.full_name|default:comment.author.slug }}</a>{% endif %}
-{% render_tg comment.text text_limit %}
-➜ <a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.item.title }}</a>
+{% load telegram %}{% if is_reply %}↩️ <b>{% if is_parent_author %}Вам ответили под объявлением{% else %}Обсуждают ваше объявление{% endif %} «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% else %}💬 <b>Вам написали под объявлением «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% endif %}{% if not is_reply and vibe_label %}
+<i>{{ vibe_label }}</i>{% endif %}
+
+<b>{% if comment.author and not comment.author.deleted_at %}<a href="{{ settings.APP_HOST }}{{ comment.author.get_absolute_url }}">{{ comment.author.full_name|default:comment.author.slug }}</a>{% else %}Участник Базы{% endif %}:</b> {% render_tg comment.text text_limit %}{% if is_reply %}
+
+{% if comment.reply_to.deleted_at %}<i>Комментарий, на который ответили, уже удалён.</i>{% else %}<i>В ответ на <a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}#comment-{{ comment.reply_to.id }}">комментарий</a>{% if comment.reply_to.author and not comment.reply_to.author.deleted_at %} · <a href="{{ settings.APP_HOST }}{{ comment.reply_to.author.get_absolute_url }}">{{ comment.reply_to.author.full_name|default:comment.reply_to.author.slug }}</a>{% endif %}:</i>
+<blockquote>{{ comment.reply_to.text|markdown_summary|truncatechars:240 }}</blockquote>{% endif %}{% endif %}
+
+<i>↩ <a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}#comment-{{ comment.id }}">Ответить на Базе</a></i>

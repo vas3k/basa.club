@@ -61,7 +61,7 @@ def prepare_listing(author, text):
             params[name.removesuffix("_id")] = value if value is not None else ""
         edit_url = settings.APP_HOST.rstrip("/") + reverse("item_create") + "?" + urlencode(params)
         html = render_html_message(
-            "notifications/telegram/messages/_item_full.html",
+            "notifications/telegram/messages/item_full.html",
             item=item,
         )
         return {"html": html, "token": token, "edit_url": edit_url}, ""

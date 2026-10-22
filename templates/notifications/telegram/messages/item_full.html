@@ -1,0 +1,18 @@
+{% load telegram %}<b>{{ item.title_with_prefix }}</b>
+
+📂 {{ item.category.name }}{% if item.subcategory %} · {{ item.subcategory.name }}{% endif %}
+📍 {% if item.city %}{{ item.city.name }}{% if item.country %}, {{ item.country.name }}{% endif %}{% elif item.country %}{{ item.country.name }}{% else %}Весь мир{% endif %}
+{% if item.description %}
+<b>Описание:</b> {% render_tg item.description %}
+{% endif %}{% if item.location %}
+<b>Адрес:</b> {{ item.location }}
+{% endif %}{% if item.contact_links %}
+<b>Контакты:</b>
+{% for contact in item.contact_links %}{{ contact.icon }} {% if contact.href %}<a href="{{ contact.href }}">{{ contact.text }}</a>{% else %}{{ contact.text }}{% endif %}{% if contact.comment %} — {{ contact.comment }}{% endif %}
+{% endfor %}{% endif %}{% if item.promo_code %}
+🎁 Промокод: <code>{{ item.promo_code }}</code>
+{% endif %}{% if item.expires_at %}
+⏳ Действует до {{ item.expires_at|date:"d.m.Y H:i" }} UTC
+{% endif %}{% if item.images %}
+📷 Фото: {{ item.images|length }}
+{% endif %}

@@ -161,7 +161,7 @@ def listing_target(request):
     )
 
 
-def subscribers_for_item(item):
+def subscribers_for_item(item, subscription_ids=None):
     """One subscription per user who should hear about this new item.
 
     Overlapping subscriptions all match. The user still gets one message.
@@ -192,24 +192,15 @@ def subscribers_for_item(item):
         .exclude(user_id=item.author_id)
     )
 
+    if subscription_ids is not None:
+        candidates = candidates.filter(id__in=subscription_ids)
+
     chosen = {}
     for subscription in candidates:
-        if subscription.user_id in chosen or not search.item_matches(item, subscription.query):
+        if subscription.user.is_banned or subscription.user_id in chosen or not search.item_matches(item, subscription.query):
             continue
         chosen[subscription.user_id] = subscription
     return list(chosen.values())
-
-
-def subscription_kind(subscription):
-    if subscription.query:
-        return "query"
-    if subscription.category_id:
-        return "category"
-    if subscription.city_id:
-        return "city"
-    if subscription.country_id:
-        return "country"
-    return "global"
 
 
 def normalize_geo_ids(country_id, city_id):

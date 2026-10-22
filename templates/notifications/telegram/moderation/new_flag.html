@@ -1,5 +1,1 @@
-🚩 <b>{{ flag.get_reason_display }}</b>
-{% if flag.comment %}{{ flag.comment }}
-{% endif %}
-Пост: <a href="{{ settings.APP_HOST }}{{ flag.item.get_absolute_url }}">{{ flag.item.title }}</a>
-Жалоба от: <a href="{{ settings.APP_HOST }}{{ flag.user.get_absolute_url }}">{{ flag.user.full_name|default:flag.user.slug }}</a>
+🚩 <b>{{ flag.get_reason_display }}</b> · <a href="{{ settings.APP_HOST }}{{ flag.item.get_absolute_url }}">{{ flag.item.title_with_prefix|truncatewords:200 }}</a> · от <a href="{{ settings.APP_HOST }}{{ flag.user.get_absolute_url }}">{{ flag.user.full_name|default:flag.user.slug|truncatewords:200 }}</a>{% if flag.comment %} · {{ flag.comment|truncatewords:100|truncatechars:200 }}{% endif %} · <a href="{{ settings.APP_HOST }}{% url "godmode_edit_model" "flags" flag.id %}">Разобрать</a>
