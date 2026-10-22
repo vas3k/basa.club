@@ -9,7 +9,7 @@
     <div class="block">
         <div class="block-header">{{ form_title }}</div>
 
-        <form method="post" action="{{ form_url }}" class="item-form" data-behavior="no-enter-submit">
+        <form method="post" action="{{ form_url }}" class="item-form" {% block form_attributes %}data-behavior="no-enter-submit"{% endblock %}>
             {% csrf_token %}
 
             {% block fields %}{% endblock %}

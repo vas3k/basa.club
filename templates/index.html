@@ -73,7 +73,7 @@
             <p>Тут пока ничего нет</p>
             <p>Вы можете быть первым: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то своё! Или просто подпишитесь на будущие обновления :)</p>
             <div class="feed-empty-actions">
-                <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                <a href="{% if request.user.is_authenticated %}{% url "item_create_ai" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                 {% include "notifications/widgets/subscribe_button.html" %}
             </div>
             {% if subscribers %}

@@ -17,9 +17,7 @@ from telegram.error import BadRequest, TelegramError
 
 from bot.config import BOT_PAGE_URL
 from categories.models import Category
-from common.ai.core import OPENAI_MODEL_SMART
-from common.ai.item_parser import parse_item
-from common.contacts import CONTACT_MAX_COUNT, CONTACT_MAX_LENGTH, CONTACT_TYPES
+from common.ai.item_parser import ItemParsingError, parse_item
 from counters import counters
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
@@ -30,7 +28,6 @@ from users.models import User
 
 log = logging.getLogger(__name__)
 
-TITLE_MIN_LENGTH = 8
 DRAFT_TIMEOUT = 60 * 60 * 24
 NO_PREVIEW = LinkPreviewOptions(is_disabled=True)
 PARSING_SLOTS = asyncio.Semaphore(4)
@@ -40,82 +37,14 @@ def prepare_listing(author, text):
     close_old_connections()
     try:
         try:
-            parsed = parse_item(text, model=OPENAI_MODEL_SMART)
+            fields = parse_item(text, author)
+        except ItemParsingError as error:
+            return None, str(error)
         except Exception:
             log.exception("item parse failed")
             return None, "Не получилось разобрать сообщение. Попробуйте ещё раз."
 
         close_old_connections()
-        if parsed.error.strip():
-            return None, parsed.error.strip()
-
-        title = parsed.title.strip()
-        category = Category.objects.filter(id=parsed.category.strip(), parent__isnull=True).first()
-        subcategory = Category.objects.filter(id=parsed.subcategory.strip(), parent__isnull=False).first()
-        country = None
-        if parsed.country is not None:
-            country_name = parsed.country.strip() or author.country
-            if country_name:
-                country = (
-                    GeoCountry.objects.filter(name__iexact=country_name).first()
-                    or GeoCountry.objects.filter(id__iexact=country_name).first()
-                )
-
-        missing = []
-        if len(title) < TITLE_MIN_LENGTH:
-            missing.append("что именно рекомендуете")
-        if category is None or subcategory is None or subcategory.root_id != category.id:
-            missing.append("категорию")
-        if parsed.country is not None and country is None and parsed.country.strip() and not missing:
-            return None, f"Не нашёл страну «{parsed.country.strip()}» в Базе."
-        if parsed.country is not None and country is None:
-            missing.append("страну")
-        if missing:
-            return None, "Не хватает данных: " + ", ".join(missing) + "."
-
-        city_name = (parsed.city or "").strip()
-        city = None
-        if country is not None and parsed.city is not None and city_name:
-            city = (
-                GeoCity.objects.filter(country=country, name__iexact=city_name).first()
-                or GeoCity.objects.filter(country=country, id__iexact=city_name).first()
-            )
-
-        location = (parsed.location or "").strip()
-        if len(location) < 5:
-            location = ""
-        promo_code = (parsed.promo_code or "").strip()
-        if len(promo_code) < 3:
-            promo_code = ""
-        prefix = parsed.prefix if parsed.prefix in dict(Item.PREFIXES) else ""
-
-        cleaned = []
-        for row in parsed.contacts:
-            text = (row.text or "").strip()
-            comment = (row.comment or "").strip()
-            if len(text) < 3:
-                continue
-            contact_type = row.type if row.type in CONTACT_TYPES else "custom"
-            cleaned.append({
-                "type": contact_type,
-                "text": text[:CONTACT_MAX_LENGTH],
-                "comment": comment[:CONTACT_MAX_LENGTH],
-            })
-            if len(cleaned) >= CONTACT_MAX_COUNT:
-                break
-
-        fields = {
-            "prefix": prefix,
-            "title": " ".join(parsed.title.split())[:Item._meta.get_field("title").max_length],
-            "description": (parsed.description or "").strip()[:5000],
-            "location": location[:512],
-            "contacts": cleaned,
-            "promo_code": promo_code[:Item._meta.get_field("promo_code").max_length],
-            "category_id": category.id,
-            "subcategory_id": subcategory.id,
-            "country_id": country.id if country else "",
-            "city_id": city.id if city else "",
-        }
 
         token = secrets.token_hex(8)
         cache.set(f"bot-item-draft:{token}", {
@@ -124,21 +53,12 @@ def prepare_listing(author, text):
             "item_id": str(uuid4()),
             "fields": fields,
         }, DRAFT_TIMEOUT)
-        item = Item(**{
-            **fields,
-            "country_id": fields["country_id"] or None,
-            "city_id": fields["city_id"] or None,
-        })
-        item.author = author
-        item.category = category
-        item.subcategory = subcategory
-        item.country = country
-        item.city = city
+        item = Item(author=author, **fields)
         params = {}
         for name, value in fields.items():
             if name == "contacts":
                 value = json.dumps(value, ensure_ascii=False)
-            params[name.removesuffix("_id")] = value
+            params[name.removesuffix("_id")] = value if value is not None else ""
         edit_url = settings.APP_HOST.rstrip("/") + reverse("item_create") + "?" + urlencode(params)
         html = render_html_message(
             "notifications/telegram/messages/_item_full.html",

@@ -1,3 +1,4 @@
+import logging
 from copy import copy
 
 from django.conf import settings
@@ -11,18 +12,21 @@ from django.utils import timezone
 from django.views.decorators.http import require_http_methods, require_POST
 
 from categories.models import Category
+from common.ai.item_parser import ItemParsingError, parse_item
 from common.pagination import paginate
 from comments.forms import CommentForm, ReplyForm
 from comments.models import Comment
 from counters import counters
 from common.contacts import CONTACT_EDITOR_FIELDS
 from geo.models import GeoCity, GeoCountry
-from items.forms import ItemForm
+from items.forms import AIItemForm, ItemForm
 from items.models import Item
 from notifications import notification
 from search import search
 from notifications.models import Subscription
 from notifications.subscriptions import subscribers
+
+log = logging.getLogger(__name__)
 
 FEED_SORTS = {
     "standard": ("-created_at",),
@@ -239,6 +243,39 @@ def item_page(request, country, city, category, item_id, subcategory=None):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+def compose_item_ai(request):
+    if request.method == "GET":
+        error = request.session.pop("item_ai_error", None)
+        if error:
+            return render(request, "error.html", {
+                "title": "Не получилось разобрать пост",
+                "message": error,
+            }, status=400)
+
+    form = AIItemForm(request.POST if request.method == "POST" else None)
+    if request.method == "POST" and form.is_valid():
+        try:
+            fields = parse_item(form.cleaned_data["text"], request.user)
+            request.session["item_ai_initial"] = {
+                name.removesuffix("_id"): value for name, value in fields.items()
+            }
+            return redirect(reverse("item_create") + "?prefill_from_session=1")
+        except ItemParsingError as error:
+            request.session["item_ai_error"] = str(error)
+        except Exception:
+            log.exception("Web item parse failed")
+            request.session["item_ai_error"] = "Не получилось разобрать сообщение. Попробуйте ещё раз."
+        return redirect("item_create_ai")
+
+    return render(request, "items/compose/ai.html", {
+        "form": form,
+        "form_title": "Добавить пост в Базу",
+        "form_url": reverse("item_create_ai"),
+    })
+
+
+@login_required
+@require_http_methods(["GET", "POST"])
 @transaction.atomic
 def compose_item(request, item_id=None):
     item = Item(author=request.user, visibility=Item.VISIBILITY_DRAFT)
@@ -253,6 +290,8 @@ def compose_item(request, item_id=None):
         country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
         city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
         initial = {"country": country.id if country else "", "city": city.id if city else None}
+        if request.method == "GET" and request.GET.get("prefill_from_session") == "1":
+            initial.update(request.session.pop("item_ai_initial", {}))
         initial = ItemForm.initial_from_query(request.GET, initial)
     form = ItemForm(request.POST if request.method == "POST" else None, instance=item, initial=initial)
 

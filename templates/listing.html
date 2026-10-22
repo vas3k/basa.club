@@ -69,7 +69,7 @@
                 <p>Тут почему-то всё еще пусто!</p>
                 <p>Давайте начнём наконец-то: добавьте рекомендацию, проверенного автомеханика, стоматолога, промокод или что-то еще!</p>
                 <div class="feed-empty-actions">
-                    <a href="{% if request.user.is_authenticated %}{% url "item_create" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
+                    <a href="{% if request.user.is_authenticated %}{% url "item_create_ai" %}{% else %}{% url "login" %}{% endif %}" class="button"><i class="fas fa-plus"></i> Добавить</a>
                     {% include "notifications/widgets/subscribe_button.html" %}
                 </div>
                 {% if subscribers %}

@@ -13,7 +13,7 @@ def openai_client():
     api_key = settings.OPENAI_API_KEY
     if not api_key:
         raise ImproperlyConfigured("OPENAI_API_KEY is not set")
-    return OpenAI(api_key=api_key, timeout=60)
+    return OpenAI(api_key=api_key, timeout=45, max_retries=0)
 
 
 def schema_from(cls):

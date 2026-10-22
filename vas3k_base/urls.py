@@ -23,6 +23,7 @@ from common.api import upload_image
 from items.api import retract_item_vote, upvote_item
 from items.views import (
     compose_item,
+    compose_item_ai,
     delete_item,
     hide_item,
     index_page,
@@ -61,6 +62,7 @@ urlpatterns = [
     path("bookmarks/<uuid:item_id>/remove/", remove_bookmark, name="bookmark_remove"),
  
     path("items/new/", compose_item, name="item_create"),
+    path("items/new/ai/", compose_item_ai, name="item_create_ai"),
     path("items/<uuid:item_id>/edit/", compose_item, name="item_edit"),
     path("items/<uuid:item_id>/hide/", hide_item, name="item_hide"),
     path("items/<uuid:item_id>/delete/", delete_item, name="item_delete"),

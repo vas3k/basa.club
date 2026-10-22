@@ -20,6 +20,20 @@ EXPIRES_CHOICES = (
 )
 
 
+class AIItemForm(forms.Form):
+    text = forms.CharField(
+        label="Ваш пост или рекомендация. Не забудьте контакты, адреса, личные впечатления.",
+        widget=forms.Textarea(attrs={
+            "class": "item-ai-text",
+            "placeholder": "Например: Русскоговорящий стоматолог Александр в Белграде, три года хожу к нему на чистку "
+                "и ставили имплант, новая клиника с современным оборудованием, заботливые медсестры, наливают ракию. "
+                "Адрес: Ника Вуйчича 8, https://google.maps.com/... Запись через телефон и WhatsApp: +0000... "
+                "либо через онлайн форму на сайте: https://... "
+        }),
+        error_messages={"required": "Напишите что-нибудь!"},
+    )
+
+
 class ItemForm(forms.ModelForm):
     country = forms.CharField(
         label="Страна",
