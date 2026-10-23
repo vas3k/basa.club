@@ -5,6 +5,18 @@
 {% block meta_description %}{% if item.description %}{{ item.description|public_preview }}{% else %}{{ item.title_with_prefix }}{% endif %}{% endblock %}
 {% block og_description %}{% if item.description %}{{ item.description|public_preview }}{% else %}{{ item.title_with_prefix }}{% endif %}{% endblock %}
 
+{% block og_images %}
+    {% item_og_image item as preview_url %}
+    <meta property="og:image" content="{{ preview_url }}">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:type" content="image/png">
+    <meta property="og:image:alt" content="{{ item.title_with_prefix }}">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:image" content="{{ preview_url }}">
+    <meta name="twitter:image:alt" content="{{ item.title_with_prefix }}">
+{% endblock %}
+
 {% block content %}
     {% block item %}{% endblock %}
 

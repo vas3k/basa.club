@@ -27,6 +27,7 @@ from items.views import (
     country_index_page,
     delete_item,
     hide_item,
+    item_og_page,
     item_page,
     listing_page,
     main_index_page,
@@ -64,6 +65,7 @@ urlpatterns = [
  
     path("items/new/", compose_item, name="item_create"),
     path("items/new/ai/", compose_item_ai, name="item_create_ai"),
+    path("items/<uuid:item_id>/og/", item_og_page, name="item_og"),
     path("items/<uuid:item_id>/edit/", compose_item, name="item_edit"),
     path("items/<uuid:item_id>/hide/", hide_item, name="item_hide"),
     path("items/<uuid:item_id>/delete/", delete_item, name="item_delete"),

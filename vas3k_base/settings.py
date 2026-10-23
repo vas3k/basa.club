@@ -245,6 +245,7 @@ LOGGING = {
 
 APP_TITLE = "Вастрик База"
 APP_HOST = os.environ.get("APP_HOST") or "http://127.0.0.1:8000"
+OG_IMAGE_GENERATOR_URL = "https://scr.vas3k.club"
 if not TELEGRAM_BOT_WEBHOOK_URL:
     TELEGRAM_BOT_WEBHOOK_URL = f"{APP_HOST}/telegram/webhook/"
 DEFAULT_AVATAR = "https://i.vas3k.club/v.png"

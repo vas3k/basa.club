@@ -5,11 +5,13 @@ from django.conf import settings
 from django.contrib.auth.decorators import login_required
 from django.db import transaction
 from django.db.models import Count, F, Q
-from django.http import Http404
+from django.http import Http404, HttpResponse
 from django.shortcuts import get_object_or_404, redirect, render
+from django.template.loader import render_to_string
 from django.urls import reverse
 from django.utils import timezone
-from django.views.decorators.http import require_http_methods, require_POST
+from django.views.decorators.cache import never_cache
+from django.views.decorators.http import require_http_methods, require_POST, require_safe
 
 from categories.models import Category
 from common.ai.item_parser import ItemParsingError, parse_item
@@ -239,6 +241,22 @@ def item_page(request, country, city, category, item_id, subcategory=None):
     request.country_id = item.country_id
     request.city_id = item.city_id or "everywhere"
     return render_item_page(request, item)
+
+
+@require_safe
+@never_cache
+def item_og_page(request, item_id):
+    item = get_object_or_404(Item.objects_for_user(None), id=item_id)
+    image = next((image["image"] for image in item.images if image.get("image")), None)
+
+    html = render_to_string("items/og.html", {
+        "item": item,
+        "background_url": request.build_absolute_uri(image) if image else None,
+        "avatar_url": request.build_absolute_uri(item.author.default_avatar()),
+    })
+    response = HttpResponse(html)
+    response["X-Robots-Tag"] = "noindex, nofollow"
+    return response
 
 
 @login_required

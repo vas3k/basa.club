@@ -1,4 +1,5 @@
 import zlib
+from base64 import urlsafe_b64encode
 from urllib.parse import urlencode
 
 from django import template
@@ -122,6 +123,14 @@ def geo_title(context, item=None):
 @register.simple_tag
 def item_url(item):
     return item.get_absolute_url()
+
+
+@register.simple_tag
+def item_og_image(item):
+    path = reverse("item_og", args=[item.id])
+    url = f"{settings.APP_HOST.rstrip('/')}{path}"
+    encoded_url = urlsafe_b64encode(url.encode()).decode("ascii").rstrip("=")
+    return f"{settings.OG_IMAGE_GENERATOR_URL.rstrip('/')}/{encoded_url}"
 
 
 @register.simple_tag(takes_context=True)
