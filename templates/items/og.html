@@ -23,10 +23,15 @@
             overflow: hidden;
         }
 
-        body {
+        body, .card {
             font-family: Ubuntu, "Noto Color Emoji", "Apple Color Emoji", sans-serif;
             font-weight: 500;
             color: white;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
         }
 
         .card {
@@ -38,6 +43,7 @@
             padding: 5.333333vw;
             background: #282c35;
             overflow: hidden;
+            gap: 2vw;
         }
 
             .background, .overlay {
@@ -67,6 +73,13 @@
                 font-size: 2.333333vw;
             }
 
+                .avatar-link {
+                    display: flex;
+                    width: 4vw;
+                    height: 4vw;
+                    flex-shrink: 0;
+                }
+
                 .avatar {
                     width: 4vw;
                     height: 4vw;
@@ -89,6 +102,7 @@
                     padding: 0.666667vw 1.333333vw;
                     border-radius: 1vw;
                     background: rgba(255, 255, 255, 0.15);
+                    box-shadow: 0 0.166667vw 0.666667vw rgba(0, 0, 0, 0.8);
                     font-size: 3vw;
                     white-space: nowrap;
                     flex-shrink: 0;
@@ -107,30 +121,28 @@
                 display: flex;
                 flex-direction: column;
                 justify-content: center;
-                flex: 1;
+                flex: 1 0 auto;
                 min-height: 0;
-                padding: 2.666667vw 0;
+                padding: 1vw 0;
             }
 
                 .title {
-                    display: -webkit-box;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 4;
-                    overflow: hidden;
+                    display: block;
+                    overflow: visible;
                     overflow-wrap: anywhere;
-                    margin: 0;
-                    font-size: 5.775vw;
+                    word-break: break-word;
+                    margin: 0 0 0.168em;
+                    font-size: calc(5.775vw * var(--og-title-scale, 1));
                     font-weight: 500;
                     line-height: 1.12;
+                    text-shadow:
+                        0 0.166667vw 0.666667vw rgba(0, 0, 0, 0.8),
+                        0 0.333333vw 2vw rgba(0, 0, 0, 0.55),
+                        0 1vw 4vw rgba(0, 0, 0, 0.65);
                 }
 
-                .title-medium {
-                    font-size: 5vw;
-                }
-
-                .title-long {
-                    -webkit-line-clamp: 5;
-                    font-size: 4vw;
+                .tags, .stats {
+                    filter: drop-shadow(0 0.166667vw 0.666667vw rgba(0, 0, 0, 0.8));
                 }
 
                 .tags {
@@ -172,21 +184,34 @@
                     white-space: nowrap;
                     color: #e2e8f0;
                 }
+
+        .og-measure { height: auto; }
+        .og-hide-rewards .stats { display: none; }
+        .og-hide-metadata .tags, .og-hide-metadata .rating { display: none; }
+        .og-fit-90 { --og-title-scale: 0.9; }
+        .og-fit-80 { --og-title-scale: 0.8; }
+        .og-fit-70 { --og-title-scale: 0.7; }
+        .og-fit-60 { --og-title-scale: 0.6; }
+        .og-fit-50 { --og-title-scale: 0.5; }
+        .og-fit-40 { --og-title-scale: 0.4; }
+        .og-fit-30 { --og-title-scale: 0.3; }
     </style>
 </head>
 <body>
-    <main class="card">
+    <main id="og-card" class="card">
         {% if background_url %}
             <img class="background" src="{{ background_url }}" alt="">
         {% endif %}
         <div class="overlay"></div>
         <header class="header">
-            <img class="avatar" src="{{ avatar_url }}" alt="">
-            <span class="author">{{ item.author.full_name|default:item.author.slug }}</span>
+            <a class="avatar-link" href="{% url 'user_profile' item.author.slug %}" aria-label="{{ item.author.full_name|default:item.author.slug }}">
+                <img class="avatar" src="{{ avatar_url }}" alt="">
+            </a>
+            <a class="author" href="{% url 'user_profile' item.author.slug %}">{{ item.author.full_name|default:item.author.slug }}</a>
             <span class="rating {% if item.rating > 0 %}rating-positive{% elif item.rating < 0 %}rating-negative{% endif %}" aria-label="Рейтинг">{{ item.rating|rating }}</span>
         </header>
         <section class="content">
-            <h1 class="title {% if item.title_with_prefix|length > 140 %}title-long{% elif item.title_with_prefix|length > 100 %}title-medium{% endif %}">{{ item.title_with_prefix }}</h1>
+            <h1 class="title"><a href="{{ item.get_absolute_url }}">{{ item.title_with_prefix|truncatechars:180 }}</a></h1>
             <div class="tags">
                 <span class="tag">{{ item.country.icon|striptags|default:"🌍" }} {{ item.country.name }}</span>
                 {% if item.city %}
@@ -198,10 +223,10 @@
             </div>
         </section>
         <footer class="footer">
-            <div class="brand">
+            <a class="brand" href="{% url 'index' %}">
                 <img class="logo" src="{% static 'images/logo@256.png' %}" alt="">
                 <span>Вастрик База</span>
-            </div>
+            </a>
             <div class="stats">
                 <span aria-label="Просмотры">👁 {{ item.view_count|cool_number }}</span>
                 <span aria-label="Комментарии">💬 {{ item.comment_count|cool_number }}</span>
