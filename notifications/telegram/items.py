@@ -1,4 +1,3 @@
-from django.conf import settings
 from django.template.defaultfilters import truncatechars_html
 
 from items.models import Item
@@ -20,7 +19,6 @@ def send_telegram_user_new_item(item_id, subscription_ids):
 
     subscriptions = subscribers_for_item(item, subscription_ids=subscription_ids)
 
-    url = settings.APP_HOST.rstrip("/") + item.get_absolute_url()
     images = item.images or []
     image = None
     if images and isinstance(images[0], dict):
@@ -41,14 +39,8 @@ def send_telegram_user_new_item(item_id, subscription_ids):
         body, footer = text.rsplit("\n\n", 1)
         text = truncatechars_html(body, TEXT_LIMIT - len(footer) - 2) + "\n\n" + footer
 
-        buttons = []
-        if url.startswith("https://"):
-            buttons.append({"text": "Открыть объявление", "url": url})
-        buttons.append({"text": "Отписаться от этой подписки", "callback_data": f"unsub:{subscription.id}"})
-        markup = {"inline_keyboard": [[button] for button in buttons]}
-
         chat_id = subscription.user.telegram_id
         if image:
-            if send_telegram_photo(chat_id, image, text, reply_markup=markup):
+            if send_telegram_photo(chat_id, image, text):
                 continue
-        send_telegram_message(chat_id, text, reply_markup=markup)
+        send_telegram_message(chat_id, text)

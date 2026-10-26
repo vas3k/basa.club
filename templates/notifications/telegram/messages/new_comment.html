@@ -1,5 +1,6 @@
-{% load telegram %}{% if is_reply %}↩️ <b>{% if is_parent_author %}Вам ответили под объявлением{% else %}Обсуждают ваше объявление{% endif %} «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% else %}💬 <b>Вам написали под объявлением «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% endif %}{% if not is_reply and vibe_label %}
-<i>{{ vibe_label }}</i>{% endif %}
+{% load telegram %}{% if is_reply %}↩️ <b>{% if is_parent_author %}Вам ответили под объявлением{% else %}Обсуждают ваше объявление{% endif %} «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% else %}💬 <b>Вам написали под объявлением «<a href="{{ settings.APP_HOST }}{{ comment.item.get_absolute_url }}">{{ comment.item.title_with_prefix }}</a>»</b>{% endif %}
+{% if not is_reply and vibe_label %}
+<b>{{ vibe_label }}</b>{% endif %}
 
 <b>{% if comment.author and not comment.author.deleted_at %}<a href="{{ settings.APP_HOST }}{{ comment.author.get_absolute_url }}">{{ comment.author.full_name|default:comment.author.slug }}</a>{% else %}Участник Базы{% endif %}:</b> {% render_tg comment.text text_limit %}{% if is_reply %}
 

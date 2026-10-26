@@ -1,9 +1,8 @@
 {% load telegram %}{% if subscription %}💎 {% endif %}<b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title_with_prefix }}</a></b>{% if subscription %} по вашей подписке на <a href="{{ settings.APP_HOST }}{{ subscription.listing_url }}">{{ subscription.label }}</a>{% endif %}
-📂 {{ item.category.name }}{% if item.subcategory %} · {{ item.subcategory.name }}{% endif %}
-📍 {% if item.city %}{{ item.city.name }}{% if item.country %}, {{ item.country.name }}{% endif %}{% elif item.country %}{{ item.country.name }}{% else %}Весь мир{% endif %}
-{% if item.author %}👤 <a href="{{ settings.APP_HOST }}{{ item.author.get_absolute_url }}">{{ item.author.full_name|default:item.author.slug }}</a>
-{% endif %}{% if item.description %}
-<b>Описание:</b> {% render_tg item.description 1000 %}
+
+{% if item.author %}от 👤 <a href="{{ settings.APP_HOST }}{{ item.author.get_absolute_url }}">{{ item.author.full_name|default:item.author.slug }}</a>, {% endif %}📍 {% if item.city %}{{ item.city.name }}{% if item.country %}, {{ item.country.name }}{% endif %}{% elif item.country %}{{ item.country.name }}{% else %}Весь мир{% endif %}, 📂 {{ item.category.name }}{% if item.subcategory %} · {{ item.subcategory.name }}{% endif %}
+{% if item.description %}
+{% render_tg item.description 1000 %}
 {% endif %}{% if item.location %}
 📍 Адрес: {{ item.location|truncatechars:200 }}
 {% endif %}{% if item.promo_code %}🎁 Промокод: <code>{{ item.promo_code }}</code>
