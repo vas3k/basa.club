@@ -25,3 +25,15 @@ def send_telegram_admin_new_flag(flag_id):
     if not flag:
         return
     send_telegram_message(chat_id, render_html_message("notifications/telegram/moderation/new_flag.html", flag=flag))
+
+
+def send_telegram_item_moderated(item_id, reason, chat_id):
+    item = Item.objects.select_related("author").filter(id=item_id).first()
+    if not item:
+        return
+    text = render_html_message(
+        "notifications/telegram/moderation/item_moderated.html",
+        item=item,
+        reason=reason,
+    )
+    send_telegram_message(chat_id, text)

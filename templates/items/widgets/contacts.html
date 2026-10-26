@@ -5,13 +5,13 @@
                 {% if contact.href %}
                     <a class="inline-block tone-contacts inline-block-small item-contact" href="{{ contact.href }}" data-nofavicon{% if contact.external %} target="_blank" rel="noopener noreferrer"{% endif %}>
                         <span class="inline-block-icon item-contact-icon" aria-hidden="true"><i class="{{ contact.icon_class }}"></i></span>
-                        <span>{{ contact.text }}</span>
+                        <span>{{ contact.text|truncatechars:80 }}</span>
                         {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
                     </a>
                 {% else %}
                     <span class="inline-block tone-contacts inline-block-small item-contact item-contact-static">
                         <span class="inline-block-icon item-contact-icon" aria-hidden="true"><i class="{{ contact.icon_class }}"></i></span>
-                        <span>{{ contact.text }}</span>
+                        <span>{{ contact.text|truncatechars:80 }}</span>
                         {% if contact.comment %}<span class="item-contact-comment">{{ contact.comment }}</span>{% endif %}
                     </span>
                 {% endif %}

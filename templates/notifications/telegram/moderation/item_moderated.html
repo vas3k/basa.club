@@ -1,0 +1,1 @@
+💎 <b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title_with_prefix }}</a></b> от <a href="{{ settings.APP_HOST }}{{ item.author.get_absolute_url }}">{{ item.author.full_name|default:item.author.slug }}</a> был скрыт модераторами по причине: {{ reason }}

@@ -9,7 +9,7 @@
 {% endif %}{% if item.promo_code %}🎁 Промокод: <code>{{ item.promo_code }}</code>
 {% endif %}{% if item.contact_links %}
 <b>Контакты:</b>
-{% for contact in item.contact_links %}{{ contact.icon }} {% if contact.href %}<a href="{{ contact.href }}">{{ contact.text|truncatechars:100 }}</a>{% else %}{{ contact.text|truncatechars:100 }}{% endif %}{% if contact.comment %} — {{ contact.comment|truncatechars:100 }}{% endif %}
+{% for contact in item.contact_links %}{{ contact.icon }} {% if contact.href %}<a href="{{ contact.href }}">{{ contact.text|truncatechars:80 }}</a>{% else %}{{ contact.text|truncatechars:80 }}{% endif %}{% if contact.comment %} — {{ contact.comment|truncatechars:100 }}{% endif %}
 {% endfor %}{% endif %}{% if item.expires_at %}
 ⏳ Действует до {{ item.expires_at|date:"d.m.Y H:i" }} UTC
 {% endif %}{% if item.images %}

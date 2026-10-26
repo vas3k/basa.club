@@ -1,10 +1,15 @@
+from django.conf import settings
 from django_q.tasks import async_task
 
 from notifications.subscriptions import subscribers_for_item
 from notifications.telegram.base import send_telegram_base_new_item
 from notifications.telegram.comments import send_telegram_user_new_comment
 from notifications.telegram.items import send_telegram_user_new_item
-from notifications.telegram.moderation import send_telegram_admin_new_flag, send_telegram_admin_new_item
+from notifications.telegram.moderation import (
+    send_telegram_admin_new_flag,
+    send_telegram_admin_new_item,
+    send_telegram_item_moderated,
+)
 from notifications.telegram.users import send_telegram_user_banned, send_telegram_user_logged_in
 
 
@@ -12,6 +17,16 @@ def item_created(item):
     async_task(send_telegram_admin_new_item, item.id)
     async_task(send_telegram_base_new_item, item.id)
     async_task(send_telegram_user_new_item, item.id, [s.id for s in subscribers_for_item(item)])
+
+
+def item_moderated(item, *, reason):
+    chat_ids = (
+        item.author.telegram_id,
+        settings.TELEGRAM_ADMIN_CHAT_ID,
+        settings.TELEGRAM_BASE_CHAT_ID,
+    )
+    for chat_id in dict.fromkeys(str(chat_id) for chat_id in chat_ids if chat_id):
+        async_task(send_telegram_item_moderated, item.id, reason, chat_id)
 
 
 def comment_created(comment):

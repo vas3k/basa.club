@@ -1,9 +1,11 @@
 from django import forms
 from django.conf import settings
+from django.db import transaction
 from django.shortcuts import render
 
 from counters import counters
 from items.models import Item
+from notifications import notification
 from search import search
 
 
@@ -51,6 +53,8 @@ def post_moderate_action(request, obj: Item, **context):
     search.update_item_index(obj)
     if was_listed:
         counters.item_hidden(obj)
+
+    transaction.on_commit(lambda: notification.item_moderated(obj, reason=selected["title"]))
 
     return render(request, "godmode/message.html", {
         **context,
