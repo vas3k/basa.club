@@ -2,7 +2,7 @@ import asyncio
 import json
 import logging
 import secrets
-from html import unescape
+from html import escape, unescape
 from urllib.parse import urlencode
 from uuid import uuid4
 
@@ -245,6 +245,14 @@ async def answer_listing(message, source, content, comment=""):
     ])
     keyboard = InlineKeyboardMarkup(rows)
     html = preview["html"]
+    if preview["missing"] or preview["errors"]:
+        guidance = []
+        if preview["missing"]:
+            guidance.append(preview["missing"])
+        guidance.extend(f"• {error}" for error in preview["errors"])
+        html += "\n\n<b>Перед публикацией:</b> " + escape("\n".join(guidance))
+        html += "\n\nНажмите «Отредактировать руками»."
+
     try:
         if len(html.encode("utf-16-le")) // 2 <= 4096:
             await message.reply_text(html, parse_mode="HTML", reply_markup=keyboard, link_preview_options=NO_PREVIEW)
@@ -257,15 +265,6 @@ async def answer_listing(message, source, content, comment=""):
                     reply_markup=keyboard if index == len(chunks) - 1 else None,
                     link_preview_options=NO_PREVIEW,
                 )
-        if preview["missing"] or preview["errors"]:
-            guidance = []
-            if preview["missing"]:
-                guidance.append(preview["missing"])
-            guidance.extend(f"• {error}" for error in preview["errors"])
-            await message.reply_text(
-                "Перед публикацией:\n" + "\n".join(guidance) + "\n\nНажмите «Отредактировать руками».",
-                link_preview_options=NO_PREVIEW,
-            )
     except TelegramError:
         log.exception("item preview delivery failed")
         await message.reply_text("Не получилось отправить предпросмотр. Попробуйте ещё раз.")
