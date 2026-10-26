@@ -21,7 +21,7 @@
             aria-pressed="{% if listing_subscribed %}true{% else %}false{% endif %}"
         >
             <i class="{% if listing_subscribed %}fas{% else %}far{% endif %} fa-bell"></i>
-            {% if listing_subscribed %}Отписаться от:{% else %}Подписаться на:{% endif %}
+            {% if listing_subscribed %}Вы подписаны на:{% else %}Подписаться на:{% endif %}
             {% if current_subcategory %}
                 {{ current_subcategory.name }} ⋅
             {% elif current_category %}

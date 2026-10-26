@@ -1,8 +1,10 @@
 from django.conf import settings
+from django.template.defaultfilters import truncatechars_html
 
 from items.models import Item
 from notifications.subscriptions import subscribers_for_item
 from notifications.telegram.common import (
+    TEXT_LIMIT,
     render_html_message,
     send_telegram_message,
     send_telegram_photo,
@@ -34,7 +36,11 @@ def send_telegram_user_new_item(item_id, subscription_ids):
             "notifications/telegram/messages/new_item.html",
             item=item,
             subscription=subscription,
+            show_unsibscribe_footer=True,
         )
+        body, footer = text.rsplit("\n\n", 1)
+        text = truncatechars_html(body, TEXT_LIMIT - len(footer) - 2) + "\n\n" + footer
+
         buttons = []
         if url.startswith("https://"):
             buttons.append({"text": "Открыть объявление", "url": url})

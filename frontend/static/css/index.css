@@ -415,6 +415,25 @@
     margin: 0;
 }
 
+.feed-subscribe-button.button-toggle {
+    background-color: var(--block-bg-color);
+    color: var(--telegram-color);
+    border-color: var(--telegram-color);
+}
+
+.feed-subscribe-button.button-toggle:hover,
+.feed-subscribe-button.button-toggle-active {
+    background-color: var(--telegram-color);
+    color: var(--button-color);
+    border-color: var(--telegram-color);
+}
+
+.feed-subscribe-button.button-toggle-active:hover {
+    background-color: var(--block-bg-color);
+    color: var(--telegram-color);
+    border-color: var(--telegram-color);
+}
+
 .feed-empty-actions {
     display: flex;
     flex-wrap: wrap;
