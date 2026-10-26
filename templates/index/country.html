@@ -14,7 +14,12 @@
 
     {% if country_items %}
         <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}{% append_query_param page=1 %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
+            <div class="index-section-header">
+                <h2 class="index-section-title"><a href="{% url "listing" current_country.id "everywhere" %}{% append_query_param page=1 %}">Новое {% if current_country.icon %}{{ current_country.icon|safe }} {% endif %}{{ current_country.name }}</a></h2>
+                {% if show_listing_subscribe %}
+                    {% include "notifications/widgets/subscribe_button.html" %}
+                {% endif %}
+            </div>
             <div class="index-cards">
                 {% for item in country_items %}
                     {% include "items/list/card.html" %}

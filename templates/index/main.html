@@ -14,7 +14,12 @@
 
     {% if all_items %}
         <section class="index-section">
-            <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}{% append_query_param sort="date" page=1 %}">Новое 🌎 Весь мир</a></h2>
+            <div class="index-section-header">
+                <h2 class="index-section-title"><a href="{% url "listing" "everywhere" "everywhere" %}{% append_query_param sort="date" page=1 %}">Новое 🌎 Весь мир</a></h2>
+                {% if show_listing_subscribe %}
+                    {% include "notifications/widgets/subscribe_button.html" %}
+                {% endif %}
+            </div>
             <div class="index-cards">
                 {% for item in all_items %}
                     {% include "items/list/card.html" %}

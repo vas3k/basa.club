@@ -217,6 +217,19 @@
     margin-top: 66px;
 }
 
+.index-section-header {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: space-between;
+    align-items: center;
+    gap: 12px 20px;
+    margin: 20px 0 18px;
+}
+
+.index-section-header .index-section-title {
+    margin: 0;
+}
+
 .index-section-title {
     margin: 20px 0 18px;
     font-size: 172.5%;
