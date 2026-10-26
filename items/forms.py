@@ -84,13 +84,13 @@ class ItemForm(forms.ModelForm):
     description = forms.CharField(
         label="Описание",
         required=True,
-        min_length=100,
+        min_length=70,
         max_length=5000,
         strip=True,
         widget=forms.Textarea(),
         error_messages={
-            "required": "Добавьте описание не короче 100 символов",
-            "min_length": "Описание должно содержать не менее 100 символов",
+            "required": "Добавьте описание не короче 70 символов",
+            "min_length": "Описание должно содержать не менее 70 символов",
             "max_length": "Слишком длинное описание",
         },
     )
