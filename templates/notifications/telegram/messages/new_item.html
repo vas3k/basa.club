@@ -17,4 +17,4 @@
 {% endif %}
 ↗ <a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">Открыть объявление</a>
 
-{% if show_unsibscribe_footer and subscription %}<i>Вас пинганули потому что вы подписались на: <a href="{{ settings.APP_HOST }}{{ subscription.listing_url }}">{{ subscription.label }}</a>. Вы всегда можете отписаться.</i>{% endif %}
+{% if show_unsibscribe_footer and subscription %}<i>Вас пинганули потому что вы подписались на: <a href="{{ settings.APP_HOST }}{{ subscription.listing_url }}">{{ subscription.label }}</a>. Ваши <a href="{{ settings.APP_HOST }}{% url "bookmarks" %}">подписки здесь</a>.</i>{% endif %}
