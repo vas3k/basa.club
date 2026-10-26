@@ -304,12 +304,15 @@ def compose_item(request, item_id=None):
     old = copy(item)
 
     initial = {}
+    ai_recommendation = request.POST.get("ai_recommendation", "")
     if not item_id:
         country = GeoCountry.objects.filter(name=request.user.country).first() if request.user.country else None
         city = GeoCity.objects.filter(country=country, name=request.user.city).first() if country and request.user.city else None
         initial = {"country": country.id if country else "", "city": city.id if city else None}
         if request.method == "GET" and request.GET.get("prefill_from_session") == "1":
-            initial.update(request.session.pop("item_ai_initial", {}))
+            parsed_initial = request.session.pop("item_ai_initial", {})
+            ai_recommendation = parsed_initial.pop("missing", "")
+            initial.update(parsed_initial)
         initial = ItemForm.initial_from_query(request.GET, initial)
     form = ItemForm(request.POST if request.method == "POST" else None, instance=item, initial=initial)
 
@@ -371,6 +374,7 @@ def compose_item(request, item_id=None):
         "countries_options": countries,
         "categories_options": categories,
         "contact_fields": CONTACT_EDITOR_FIELDS,
+        "ai_recommendation": ai_recommendation,
     })
 
 

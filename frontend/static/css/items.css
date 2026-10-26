@@ -643,6 +643,10 @@
     padding: 20px 25px;
 }
 
+.item-ai-recommendation {
+    font-size: 120%;
+}
+
 .item-ai-loader {
     font-size: 130%;
     margin-top: 40px;

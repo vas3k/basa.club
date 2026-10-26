@@ -45,12 +45,23 @@ def prepare_listing(author, text):
 
         close_old_connections()
 
+        missing = fields.pop("missing", "")
+        data = {
+            name.removesuffix("_id"): value if value is not None else ""
+            for name, value in fields.items()
+        }
+        form = ItemForm(data, instance=Item(author=author))
+        errors = []
+        if not form.is_valid():
+            errors = [str(error) for messages in form.errors.values() for error in messages]
+
         token = secrets.token_hex(8)
         cache.set(f"bot-item-draft:{token}", {
             "telegram_id": str(author.telegram_id),
             "user_id": str(author.id),
             "item_id": str(uuid4()),
             "fields": fields,
+            "missing": missing,
         }, DRAFT_TIMEOUT)
         item = Item(author=author, **fields)
         params = {}
@@ -63,7 +74,13 @@ def prepare_listing(author, text):
             "notifications/telegram/messages/item_full.html",
             item=item,
         )
-        return {"html": html, "token": token, "edit_url": edit_url}, ""
+        return {
+            "html": html,
+            "token": token,
+            "edit_url": edit_url,
+            "missing": missing,
+            "errors": errors,
+        }, ""
     finally:
         close_old_connections()
 
@@ -103,7 +120,10 @@ def publish_draft(token):
                         text += f" ({requirement} {limit} символов)"
                     errors.append(f"• {text}")
             reason = "\n".join(errors)
-            return None, f"Исправьте карточку перед публикацией:\n{reason}\n\nНажмите «Отредактировать руками».", "edit"
+            return None, f"Для публикации карточки не хватает данных:\n{reason}\n\nНажмите «Отредактировать руками».", "edit"
+
+        if stored.get("missing"):
+            return None, f"Перед публикацией: {stored['missing']}\n\nНажмите «Отредактировать руками».", "edit"
 
         draft = form.save(commit=False)
 
@@ -216,11 +236,14 @@ async def answer_listing(message, source, content, comment=""):
         return
 
     token = preview["token"]
-    keyboard = InlineKeyboardMarkup([
-        [InlineKeyboardButton("✅ Постим", callback_data=f"add:post:{token}")],
+    rows = []
+    if not preview["missing"] and not preview["errors"]:
+        rows.append([InlineKeyboardButton("✅ Постим", callback_data=f"add:post:{token}")])
+    rows.extend([
         [InlineKeyboardButton("✏️ Отредактировать руками", url=preview["edit_url"])],
         [InlineKeyboardButton("❌ Отменить", callback_data=f"add:cancel:{token}")],
     ])
+    keyboard = InlineKeyboardMarkup(rows)
     html = preview["html"]
     try:
         if len(html.encode("utf-16-le")) // 2 <= 4096:
@@ -234,6 +257,15 @@ async def answer_listing(message, source, content, comment=""):
                     reply_markup=keyboard if index == len(chunks) - 1 else None,
                     link_preview_options=NO_PREVIEW,
                 )
+        if preview["missing"] or preview["errors"]:
+            guidance = []
+            if preview["missing"]:
+                guidance.append(preview["missing"])
+            guidance.extend(f"• {error}" for error in preview["errors"])
+            await message.reply_text(
+                "Перед публикацией:\n" + "\n".join(guidance) + "\n\nНажмите «Отредактировать руками».",
+                link_preview_options=NO_PREVIEW,
+            )
     except TelegramError:
         log.exception("item preview delivery failed")
         await message.reply_text("Не получилось отправить предпросмотр. Попробуйте ещё раз.")

@@ -9,8 +9,15 @@
     <div class="block">
         <div class="block-header">{{ form_title }}</div>
 
+        {% if ai_recommendation %}
+            <div class="block block-note item-ai-recommendation">{{ ai_recommendation }}</div>
+        {% endif %}
+
         <form method="post" action="{{ form_url }}" class="item-form" {% block form_attributes %}data-behavior="no-enter-submit"{% endblock %}>
             {% csrf_token %}
+            {% if ai_recommendation %}
+                <input type="hidden" name="ai_recommendation" value="{{ ai_recommendation }}">
+            {% endif %}
 
             {% block fields %}{% endblock %}
 
