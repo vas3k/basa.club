@@ -19,9 +19,11 @@
     </div>
 
     {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" max_length=form.description.field.max_length %}
+    <div class="form-help">Обязательное поле, не менее {{ form.description.field.min_length }} символов.</div>
     {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
 
     <div class="stack stack-spaced form-optionals">
+        <div class="form-help">Заполните хотя бы одно из полей: {% for field in form %}{% if field.name in form.ONE_OF_REQUIRED_EXTRA_FIELDS %}{{ field.label }}{% if field.name != form.ONE_OF_REQUIRED_EXTRA_FIELDS|last %}, {% endif %}{% endif %}{% endfor %}.</div>
         <div class="form-optional tone-photos">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-images" {% if form.images.errors or form.images.value and form.images.value != "[]" and form.images.value != "null" %}hidden{% endif %}>+ Добавить картинки</button>
             <div class="block form-section" id="item-images" {% if not form.images.errors and not form.images.value or not form.images.errors and form.images.value == "[]" or not form.images.errors and form.images.value == "null" %}hidden{% endif %}>

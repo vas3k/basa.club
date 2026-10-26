@@ -30,7 +30,7 @@ class AIItemForm(forms.Form):
                 "Адрес: Ника Вуйчича 8, https://google.maps.com/... Запись через телефон и WhatsApp: +0000... "
                 "либо через онлайн форму на сайте: https://... "
         }),
-        error_messages={"required": "Напишите что-нибудь!"},
+        error_messages={"required": "Ну напишите хоть что-нибудь!"},
     )
 
 
@@ -68,9 +68,13 @@ class ItemForm(forms.ModelForm):
     )
     title = forms.CharField(
         label="Заголовок",
+        min_length=10,
         max_length=Item._meta.get_field("title").max_length,
         strip=True,
-        widget=forms.TextInput(attrs={"placeholder": "Заголовок, краткое описание", "minlength": 8}),
+        widget=forms.TextInput(attrs={
+            "placeholder": "Заголовок, краткое описание",
+            "minlength": 10,
+        }),
         error_messages={
             "required": "Нужен заголовок",
             "min_length": "Слишком короткий заголовок",
@@ -79,11 +83,16 @@ class ItemForm(forms.ModelForm):
     )
     description = forms.CharField(
         label="Описание",
-        required=False,
+        required=True,
+        min_length=100,
         max_length=5000,
         strip=True,
         widget=forms.Textarea(),
-        error_messages={"max_length": "Слишком длинное описание"},
+        error_messages={
+            "required": "Добавьте описание не короче 100 символов",
+            "min_length": "Описание должно содержать не менее 100 символов",
+            "max_length": "Слишком длинное описание",
+        },
     )
     location = forms.CharField(
         label="Место",
@@ -92,11 +101,12 @@ class ItemForm(forms.ModelForm):
         max_length=512,
         widget=forms.TextInput(attrs={"placeholder": "Адрес или ссылка на карту", "minlength": 5}),
         error_messages={
-            "min_length": "Слишком короткое место",
-            "max_length": "Слишком длинное место",
+            "min_length": "Слишком короткий адрес",
+            "max_length": "Слишком длинный адрес",
         },
     )
     contacts = forms.JSONField(
+        label="Контакты и ссылки",
         required=False,
         error_messages={"invalid": "Неверный список контактов"},
     )
@@ -133,6 +143,8 @@ class ItemForm(forms.ModelForm):
             "country", "city", "category", "subcategory",
             "prefix", "title", "description", "images", "location", "contacts", "promo_code",
         )
+
+    ONE_OF_REQUIRED_EXTRA_FIELDS = ("location", "contacts", "promo_code")
 
     QUERY_FIELDS = (
         "country", "city", "category", "subcategory",
@@ -279,6 +291,10 @@ class ItemForm(forms.ModelForm):
         subcategory = cleaned_data.get("subcategory")
         if category and subcategory and subcategory.root_id != category.id:
             self.add_error("subcategory", "Эта подкатегория не из выбранной категории")
+
+        if not any(cleaned_data.get(name) for name in self.ONE_OF_REQUIRED_EXTRA_FIELDS):
+            labels = ", ".join(self.fields[name].label for name in self.ONE_OF_REQUIRED_EXTRA_FIELDS)
+            self.add_error(None, f"Одно из этих полей обязательно при создании: {labels}")
 
         return cleaned_data
 

@@ -8,7 +8,7 @@ from uuid import uuid4
 
 from django.conf import settings
 from django.core.cache import cache
-from django.db import close_old_connections, transaction
+from django.db import DatabaseError, close_old_connections, transaction
 from django.urls import reverse
 from django.utils import timezone
 from django.utils.html import strip_tags
@@ -16,10 +16,9 @@ from telegram import InlineKeyboardButton, InlineKeyboardMarkup, LinkPreviewOpti
 from telegram.error import BadRequest, TelegramError
 
 from bot.config import BOT_PAGE_URL
-from categories.models import Category
 from common.ai.item_parser import ItemParsingError, parse_item
 from counters import counters
-from geo.models import GeoCity, GeoCountry
+from items.forms import ItemForm
 from items.models import Item
 from notifications import notification
 from notifications.telegram.common import render_html_message
@@ -75,24 +74,38 @@ def publish_draft(token):
     stored = cache.get(key)
     if not stored:
         close_old_connections()
-        return None, "Это предложение уже не действует.", False
+        return None, "Это предложение уже не действует.", "remove"
 
     try:
         author = User.objects.filter(id=stored["user_id"]).first()
-        fields = stored["fields"]
-        category = Category.objects.filter(id=fields["category_id"], parent__isnull=True).first()
-        subcategory = Category.objects.filter(id=fields["subcategory_id"], parent__isnull=False).first()
-        country = GeoCountry.objects.filter(id=fields["country_id"]).first() if fields["country_id"] else None
-        city = None
+        if author is None:
+            return None, "Аккаунт автора больше не существует. Привяжите бота к действующему аккаунту Базы.", "remove"
+        if author.is_banned:
+            return None, "Ваш аккаунт заблокирован и не может публиковать посты.", "remove"
+        if str(author.telegram_id) != stored["telegram_id"]:
+            return None, "Привязка Telegram к аккаунту изменилась. Привяжите бота заново и отправьте сообщение ещё раз.", "remove"
 
-        if fields["city_id"] and country is not None:
-            city = GeoCity.objects.filter(id=fields["city_id"], country=country).first()
-        if author is None or author.is_banned or category is None or subcategory is None:
-            return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
-        if fields["country_id"] and country is None:
-            return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
-        if str(author.telegram_id) != stored["telegram_id"] or subcategory.root_id != category.id:
-            return None, "Не получилось опубликовать. Отправьте сообщение ещё раз.", False
+        data = {
+            name.removesuffix("_id"): value if value is not None else ""
+            for name, value in stored["fields"].items()
+        }
+        form = ItemForm(data, instance=Item(author=author))
+        if not form.is_valid():
+            errors = []
+            for name, messages in form.errors.as_data().items():
+                for error in messages:
+                    text = "; ".join(error.messages)
+                    if name in form.fields:
+                        text = f"{form.fields[name].label or name}: {text}"
+                    if error.code in {"min_length", "max_length"} and error.params and "limit_value" in error.params:
+                        limit = error.params["limit_value"]
+                        requirement = "минимум" if error.code == "min_length" else "максимум"
+                        text += f" ({requirement} {limit} символов)"
+                    errors.append(f"• {text}")
+            reason = "\n".join(errors)
+            return None, f"Исправьте карточку перед публикацией:\n{reason}\n\nНажмите «Отредактировать руками».", "edit"
+
+        draft = form.save(commit=False)
 
         # Keep this handler serialized with cancel; parsing handlers run independently.
         # A stable ID makes retries safe after an ambiguous database failure.
@@ -100,10 +113,8 @@ def publish_draft(token):
             item, created = Item.objects.get_or_create(
                 id=stored["item_id"],
                 defaults={
-                    **fields,
-                    "prefix": fields["prefix"] or None,
-                    "country_id": country.id if country else None,
-                    "city_id": city.id if city else None,
+                    **{name: getattr(draft, name) for name in form.Meta.fields},
+                    "expires_at": draft.expires_at,
                     "author": author,
                     "visibility": Item.VISIBILITY_VISIBLE,
                     "published_at": timezone.now(),
@@ -118,11 +129,15 @@ def publish_draft(token):
             except Exception:
                 log.exception("item %s published, but notifications failed", item.id)
         cache.delete(key)
-        return item, "", False
-    except Exception:
+        return item, "", "remove"
+    except Exception as error:
         log.exception("item publish failed")
         cache.set(key, stored, DRAFT_TIMEOUT)
-        return None, "Не получилось опубликовать. Попробуйте ещё раз.", True
+        if isinstance(error, DatabaseError):
+            reason = "Ошибка базы данных при публикации карточки"
+        else:
+            reason = f"Внутренняя ошибка при публикации карточки ({type(error).__name__})"
+        return None, f"{reason}. Это технический сбой, а не ошибка заполнения формы. Попробуйте нажать «Постим» ещё раз.", "keep"
     finally:
         close_old_connections()
 
@@ -239,18 +254,27 @@ async def draft_callback(update, context):
     if action == "cancel":
         cache.delete(f"bot-item-draft:{token}")
         text = "Отменил. Ничего не публикую."
-        keep_buttons = False
+        buttons = "remove"
     else:
-        item, error, keep_buttons = await asyncio.to_thread(publish_draft, token)
+        item, error, buttons = await asyncio.to_thread(publish_draft, token)
         if error:
             text = error
         else:
             url = settings.APP_HOST.rstrip("/") + item.get_absolute_url()
             text = f"Добавил в Базу: {item.title}\n{url}"
 
-    if not keep_buttons:
+    if buttons != "keep":
+        markup = None
+        if buttons == "edit" and query.message and query.message.reply_markup:
+            rows = []
+            for row in query.message.reply_markup.inline_keyboard:
+                kept = [button for button in row if not (button.callback_data or "").startswith("add:post:")]
+                if kept:
+                    rows.append(kept)
+            markup = InlineKeyboardMarkup(rows)
+
         try:
-            await query.edit_message_reply_markup(reply_markup=None)
+            await query.edit_message_reply_markup(reply_markup=markup)
         except BadRequest as error:
             if "message is not modified" not in str(error).lower():
                 log.warning("Could not remove draft buttons: %s", error)
