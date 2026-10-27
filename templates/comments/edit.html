@@ -18,6 +18,18 @@
                 {{ form.reply_to }}
             {% endif %}
 
+            {% if form.vibe %}
+                <div class="stack comment-form-vibes">
+                    {% for radio in form.vibe %}
+                        <label class="comment-form-vibe comment-vibe-{{ radio.data.value }}">
+                            {{ radio.tag }}
+                            <span>{{ radio.choice_label }}</span>
+                        </label>
+                    {% endfor %}
+                </div>
+                {% if form.vibe.errors %}<div class="form-error">{{ form.vibe.errors }}</div>{% endif %}
+            {% endif %}
+
             <div class="form-group">
                 {{ form.text }}
                 {% if form.text.errors %}<div class="form-error">{{ form.text.errors }}</div>{% endif %}

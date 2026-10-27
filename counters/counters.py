@@ -90,6 +90,33 @@ def comment_created(comment):
 
 
 @transaction.atomic
+def comment_updated(comment, old_vibe):
+    if comment.vibe == old_vibe or comment.is_on_own_item or comment.reply_to_id:
+        return
+
+    weights = {Comment.VIBE_GOOD: VIBE_GOOD, Comment.VIBE_BAD: -VIBE_BAD}
+    change = weights.get(comment.vibe, 0) - weights.get(old_vibe, 0)
+    if comment.item.author_id and change:
+        User.objects.filter(id=comment.item.author_id).update(rating=F("rating") + change)
+        title = (comment.item.title or "пост").strip()
+        Rating.objects.create(
+            user_id=comment.item.author_id,
+            change=change,
+            reason=f"Изменили оценку отзыва к «{title}»",
+        )
+
+    votes = CommentVote.objects.filter(comment_id=comment.id)
+    if comment.author_id:
+        votes = votes.exclude(user_id=comment.author_id)
+    if comment.item.author_id:
+        votes = votes.exclude(user_id=comment.item.author_id)
+    directions = {Comment.VIBE_GOOD: 1, Comment.VIBE_BAD: -1}
+    change += votes.count() * COMMENT_UPVOTE * (directions.get(comment.vibe, 0) - directions.get(old_vibe, 0))
+    if change:
+        Item.objects.filter(id=comment.item_id).update(rating=F("rating") + change)
+
+
+@transaction.atomic
 def comment_deleted(comment):
     if not comment.reply_to_id:
         Item.objects.filter(id=comment.item_id).update(comment_count=F("comment_count") - 1)

@@ -3,6 +3,7 @@ from copy import deepcopy
 from django.conf import settings
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 from django.views.decorators.http import require_http_methods, require_POST
@@ -43,6 +44,7 @@ def create_comment(request, item_id):
 
 @login_required
 @require_http_methods(["GET", "POST"])
+@transaction.atomic
 def edit_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author", "reply_to"),
@@ -61,13 +63,16 @@ def edit_comment(request, comment_id):
     is_reply = bool(comment.reply_to_id)
     form_class = ReplyForm if is_reply else CommentForm
     form = form_class(request.POST or None, item=comment.item, instance=comment)
-    form.fields.pop("vibe", None)
+    if not request.user.is_moderator:
+        form.fields.pop("vibe", None)
     if is_reply:
         form.fields["text"].widget = deepcopy(CommentForm.base_fields["text"].widget)
 
+    old_vibe = comment.vibe
     if request.method == "POST" and form.is_valid():
         comment = form.save(author=comment.author, request=request, commit=False)
         comment.save()
+        counters.comment_updated(comment, old_vibe)
         return redirect(f"{comment.item.get_absolute_url()}#comment-{comment.id}")
 
     return render(request, "comments/edit.html", {
