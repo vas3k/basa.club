@@ -49,9 +49,9 @@ def edit_comment(request, comment_id):
         id=comment_id,
         item__in=Item.objects_for_user(request.user),
     )
-    if comment.author_id != request.user.id:
+    if comment.author_id != request.user.id and not request.user.is_moderator:
         raise Http404()
-    if not comment.is_editable():
+    if not request.user.is_moderator and not comment.is_editable():
         messages.error(
             request,
             f"Комментарий можно редактировать только первые {settings.COMMENT_EDIT_PERIOD.days} дней",
@@ -66,7 +66,7 @@ def edit_comment(request, comment_id):
         form.fields["text"].widget = deepcopy(CommentForm.base_fields["text"].widget)
 
     if request.method == "POST" and form.is_valid():
-        comment = form.save(author=request.user, request=request, commit=False)
+        comment = form.save(author=comment.author, request=request, commit=False)
         comment.save()
         return redirect(f"{comment.item.get_absolute_url()}#comment-{comment.id}")
 
@@ -87,9 +87,9 @@ def delete_comment(request, comment_id):
         id=comment_id,
         item__in=Item.objects_for_user(request.user),
     )
-    if comment.author_id != request.user.id:
+    if comment.author_id != request.user.id and not request.user.is_moderator:
         raise Http404()
-    if not comment.is_deletable():
+    if not request.user.is_moderator and not comment.is_deletable():
         messages.error(
             request,
             f"Комментарий можно удалить только первые {settings.COMMENT_DELETE_PERIOD.days} дней",

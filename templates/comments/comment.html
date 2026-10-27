@@ -20,7 +20,7 @@
     <div class="row comment-footer">
         <div class="row comment-actions">
             <a class="comment-date" href="{{ item.get_absolute_url }}#comment-{{ comment.id }}">{{ comment.created_at|date:"j E Y" }}</a>
-            {% if request.user.is_authenticated and request.user.id == comment.author_id %}
+            {% if request.user.is_moderator or request.user.is_authenticated and request.user.id == comment.author_id %}
                 {% include "comments/widgets/edit.html" %}
                 {% include "comments/widgets/delete.html" %}
             {% endif %}
