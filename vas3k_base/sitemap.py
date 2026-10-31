@@ -53,7 +53,12 @@ class CategorySitemap(Sitemap):
 
 class ItemSitemap(Sitemap):
     def items(self):
-        return Item.visible_objects().order_by("id")
+        return (
+            Item.visible_objects()
+            .select_related(None)
+            .only("id", "country_id", "city_id", "category_id", "subcategory_id", "updated_at")
+            .order_by("id")
+        )
 
     def location(self, item):
         return item.get_absolute_url()

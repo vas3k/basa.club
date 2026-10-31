@@ -140,16 +140,18 @@ CACHES = {
 }
 
 if os.getenv("POSTGRES_USE_POOLING", "").lower() in {"1", "true"}:
+    DATABASES["default"]["CONN_MAX_AGE"] = 0
+    DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
     DATABASES["default"]["OPTIONS"] = {
         "pool": {
-            "min_size": 3,
-            "max_size": 10,
+            "min_size": 0,
+            "max_size": 2,
             "timeout": 10, # fail in 10 sec under load
             "max_idle": 300, # close idle after 5 min
         }
     }
 else:
-    DATABASES["default"]["CONN_MAX_AGE"] = 0
+    DATABASES["default"]["CONN_MAX_AGE"] = 0 if DEBUG else 60
     DATABASES["default"]["CONN_HEALTH_CHECKS"] = True
 
 
@@ -158,6 +160,7 @@ else:
 Q_CLUSTER = {
     "name": "vas3k_base",
     "workers": 2,
+    "recycle": 100,
     "timeout": 60,
     "retry": 90,
     "max_attempts": 3,
