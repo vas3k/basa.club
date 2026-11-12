@@ -55,7 +55,7 @@
                         {{ reply_form.text }}
                         {% if reply_form.text.errors %}<div class="form-error">{{ reply_form.text.errors }}</div>{% endif %}
                         {% if reply_form.reply_to.errors %}<div class="form-error">{{ reply_form.reply_to.errors }}</div>{% endif %}
-                        {% if reply_form.non_field_errors %}<div class="form-error">{{ reply_form.non_field_errors }}</div>{% endif %}
+                        {% if reply_form.non_field_errors %}<div class="form-error form-error-block" role="alert">{{ reply_form.non_field_errors }}</div>{% endif %}
                     {% else %}
                         <input type="text" name="{{ reply_form.text.html_name }}" placeholder="{{ reply_form.fields.text.widget.attrs.placeholder }}" maxlength="{{ reply_form.fields.text.max_length }}" required>
                     {% endif %}

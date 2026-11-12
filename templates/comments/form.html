@@ -2,7 +2,7 @@
     {% csrf_token %}
 
     {% if comment_form.non_field_errors %}
-        <div class="form-error">{{ comment_form.non_field_errors }}</div>
+        <div class="form-error form-error-block" role="alert">{{ comment_form.non_field_errors }}</div>
     {% endif %}
 
     <div class="stack comment-form-vibes">

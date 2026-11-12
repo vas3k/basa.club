@@ -11,7 +11,7 @@
             {% csrf_token %}
 
             {% if form.non_field_errors %}
-                <div class="form-error">{{ form.non_field_errors }}</div>
+                <div class="form-error form-error-block" role="alert">{{ form.non_field_errors }}</div>
             {% endif %}
 
             {% if is_reply %}

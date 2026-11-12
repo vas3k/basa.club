@@ -216,7 +216,7 @@ def render_item_page(request, item, *, comment_form=None, reply_form=None, statu
 
     return render(request, "items/show/default.html", {
         "item": item,
-        "show_owner_actions": is_owner and not is_admin,
+        "show_owner_actions": is_owner,
         "show_admin_actions": is_admin,
         "moderation": moderation,
         "comments_tree": comments_tree,
