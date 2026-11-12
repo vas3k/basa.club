@@ -1,7 +1,7 @@
 from django import forms
 from django.conf import settings
 from django.db import transaction
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404, render
 
 from counters import counters
 from items.models import Item
@@ -33,7 +33,9 @@ def get_moderate_action(request, obj: Item, **context):
     })
 
 
+@transaction.atomic
 def post_moderate_action(request, obj: Item, **context):
+    obj = get_object_or_404(Item.objects, id=obj.id)
     form = ItemModerateForm(request.POST)
     if not form.is_valid():
         return render(request, "godmode/actions/item_moderate.html", {

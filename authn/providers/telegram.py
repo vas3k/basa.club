@@ -104,7 +104,7 @@ def finish(request):
         return render(request, "authn/signup.html", {"code": code, "form": form})
 
     with transaction.atomic():
-        auth_code = Code.objects.select_for_update(of=("self",)).filter(id=auth_code.id).first()
+        auth_code = Code.objects.filter(id=auth_code.id).first()
         if not auth_code or auth_code.user_id or str((auth_code.telegram_data or {}).get("id") or "") != telegram_id:
             return render(request, "error.html", {
                 "title": "Ссылка не сработала",

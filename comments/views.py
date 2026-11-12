@@ -86,6 +86,7 @@ def edit_comment(request, comment_id):
 
 @login_required
 @require_POST
+@transaction.atomic
 def delete_comment(request, comment_id):
     comment = get_object_or_404(
         Comment.objects.select_related("item", "author"),

@@ -1,9 +1,13 @@
 from datetime import datetime, timedelta
 
 from django import forms
+from django.db import transaction
 from django.shortcuts import render
 from django.utils import timezone
+from django_q.tasks import async_task
 
+from comments.models import Comment
+from counters import counters
 from items.models import Item
 from notifications import notification
 from search import search
@@ -29,6 +33,17 @@ class UserBanForm(forms.Form):
         widget=forms.Textarea(attrs={"rows": 4}),
     )
     is_permanent = forms.BooleanField(label="Забанить навечно", required=False)
+    hide_items = forms.BooleanField(
+        label="Переместить все посты в черновики",
+        initial=False,
+        required=False,
+    )
+    delete_comments = forms.BooleanField(
+        label="Удалить все комментарии и ответы автора",
+        help_text="Ответы других пользователей к удаляемым комментариям тоже будут скрыты.",
+        initial=False,
+        required=False,
+    )
     is_unbanned = forms.BooleanField(required=False)
 
     def clean(self):
@@ -47,7 +62,9 @@ def target_user(obj):
     return None
 
 
-def ban_user(user, *, until, reason, comment, permanent):
+@transaction.atomic
+def ban_user(user, *, until, reason, comment, permanent, hide_items=False, delete_comments=False, by=None):
+    user = User.all_objects.get(id=user.id)
     if user.is_superuser:
         return False
     metadata = dict(user.metadata or {})
@@ -59,19 +76,55 @@ def ban_user(user, *, until, reason, comment, permanent):
     user.metadata = metadata
     user.is_banned_until = until
     user.save(update_fields=["metadata", "is_banned_until"])
-    notification.user_banned(
+
+    if hide_items or delete_comments:
+        moderator_id = by.id if by else None
+        transaction.on_commit(lambda: async_task(
+            cleanup_banned_user_content, user.id, hide_items, delete_comments, moderator_id,
+        ))
+
+    transaction.on_commit(lambda: notification.user_banned(
         user,
         reason=metadata["last_ban"]["reason"],
         comment=comment,
         until=until,
         is_permanent=permanent,
-    )
+    ))
     return True
 
 
+@transaction.atomic
+def cleanup_banned_user_content(user_id, hide_items, delete_comments, moderator_id):
+    user = User.all_objects.filter(id=user_id).first()
+    if not user or not user.is_banned:
+        return
+
+    if hide_items:
+        for item in Item.objects.filter(author=user).exclude(visibility=Item.VISIBILITY_DRAFT):
+            was_listed = item.is_listed
+            item.visibility = Item.VISIBILITY_DRAFT
+            item.save(update_fields=["visibility"])
+            if was_listed:
+                counters.item_hidden(item)
+        search.delete_author_index(user)
+
+    if delete_comments:
+        moderator = User.all_objects.filter(id=moderator_id).first() if moderator_id else None
+        comment_ids = list(Comment.objects.filter(author=user).order_by("created_at", "id").values_list("id", flat=True))
+        for comment_id in comment_ids:
+            authored_comment = Comment.objects.select_related("item").filter(id=comment_id).first()
+            if authored_comment:
+                authored_comment.delete(by=moderator)
+                counters.comment_deleted(authored_comment)
+
+
+@transaction.atomic
 def unban_user(user):
+    user = User.all_objects.get(id=user.id)
     user.is_banned_until = None
     user.save(update_fields=["is_banned_until"])
+    for item in Item.objects.filter(author=user):
+        search.update_item_index(item)
 
 
 def get_ban_action(request, obj, **context):
@@ -119,8 +172,6 @@ def post_ban_action(request, obj, **context):
 
     if data["is_unbanned"]:
         unban_user(user)
-        for item in Item.objects.filter(author=user):
-            search.update_item_index(item)
         return render(request, "godmode/message.html", {
             **context,
             "title": f"{name} разбанен",
@@ -130,8 +181,16 @@ def post_ban_action(request, obj, **context):
     now = timezone.now()
     permanent = bool(data["is_permanent"])
     until = datetime(9999, 12, 31, 23, 59, tzinfo=now.tzinfo) if permanent else now + timedelta(days=data["days"])
-    if ban_user(user, until=until, reason=data["reason"], comment=data["comment"], permanent=permanent):
-        search.delete_author_index(user)
+    ban_user(
+        user,
+        until=until,
+        reason=data["reason"],
+        comment=data["comment"],
+        permanent=permanent,
+        hide_items=data["hide_items"],
+        delete_comments=data["delete_comments"],
+        by=request.user,
+    )
     return render(request, "godmode/message.html", {
         **context,
         "title": f"{name} забанен",

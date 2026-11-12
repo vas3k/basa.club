@@ -298,7 +298,7 @@ def compose_item_ai(request):
 def compose_item(request, item_id=None):
     item = Item(author=request.user, visibility=Item.VISIBILITY_DRAFT)
     if item_id:
-        item = get_object_or_404(Item.objects.select_for_update(), id=item_id)
+        item = get_object_or_404(Item.objects, id=item_id)
         if item.author_id != request.user.id and not request.user.is_moderator:
             raise Http404()
     old = copy(item)
@@ -320,7 +320,9 @@ def compose_item(request, item_id=None):
     publishing = old.visibility == Item.VISIBILITY_DRAFT and action == "publish"
     first_publication = publishing and not old.published_at
     if request.method == "POST" and form.is_valid():
-        if first_publication and not Item.check_rate_limits(item.author):
+        if publishing and item.author.is_banned:
+            form.add_error(None, "Нельзя опубликовать пост заблокированного автора")
+        elif first_publication and not Item.check_rate_limits(item.author):
             form.add_error(None, f"Можно опубликовать не больше {settings.ITEM_RATE_LIMIT} постов за сутки")
         else:
             item = form.save(commit=False)
@@ -380,6 +382,7 @@ def compose_item(request, item_id=None):
 
 @login_required
 @require_POST
+@transaction.atomic
 def hide_item(request, item_id):
     item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
     if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):
@@ -395,6 +398,7 @@ def hide_item(request, item_id):
 
 @login_required
 @require_POST
+@transaction.atomic
 def delete_item(request, item_id):
     item = get_object_or_404(Item.objects.select_related("author"), id=item_id)
     if item.author_id != request.user.id and not (request.user.is_authenticated and request.user.is_moderator):

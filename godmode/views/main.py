@@ -1,10 +1,14 @@
+from copy import copy
+
 from django.contrib.auth.decorators import login_required
 from django.core.paginator import Paginator
+from django.db import transaction
 from django.http import Http404
 from django.shortcuts import get_object_or_404, redirect, render
 
 from comments.models import Comment
 from counters import counters
+from godmode.actions.user_ban import ban_user, unban_user
 from godmode.config import ADMIN, ITEMS_PER_PAGE
 from godmode.filters import FILTER_OPERATORS, apply_filters, get_filterable_fields
 from items.models import Item
@@ -96,6 +100,7 @@ def godmode_list_model(request, model_name):
 
 
 @login_required
+@transaction.atomic
 def godmode_edit_model(request, model_name, item_id):
     ensure_access(request)
 
@@ -123,11 +128,32 @@ def godmode_edit_model(request, model_name, item_id):
                 "title": "Вам сюда нельзя",
                 "message": f"Редактировать «{admin_model.title}» могут только администраторы.",
             })
+        old = copy(item)
         form = edit_form_class(request.POST, instance=item)
         if form.is_valid():
             saved = form.save()
-            if admin_model.model is Item:
+            if isinstance(saved, Item):
                 search.update_item_index(saved)
+                was_listed = old.is_listed and not old.deleted_at
+                is_listed = saved.is_listed and not saved.deleted_at
+                if was_listed and is_listed:
+                    counters.item_updated(saved, old)
+                elif was_listed:
+                    counters.item_hidden(old)
+                elif is_listed:
+                    counters.item_created(saved)
+            elif isinstance(saved, User) and "is_banned_until" in form.changed_data:
+                if saved.is_banned:
+                    last_ban = (saved.metadata or {}).get("last_ban") or {}
+                    ban_user(
+                        saved,
+                        until=saved.is_banned_until,
+                        reason=last_ban.get("reason") or "other",
+                        comment=last_ban.get("comment") or "",
+                        permanent=saved.is_permanently_banned,
+                    )
+                else:
+                    unban_user(saved)
             return redirect("godmode_list_model", model_name=model_name)
     else:
         form = edit_form_class(instance=item)
@@ -145,6 +171,7 @@ def godmode_edit_model(request, model_name, item_id):
 
 
 @login_required
+@transaction.atomic
 def godmode_delete_model(request, model_name, item_id):
     ensure_access(request)
 
@@ -170,16 +197,23 @@ def godmode_delete_model(request, model_name, item_id):
             "button": "Да, удаляем",
         })
 
-    already_deleted = isinstance(item, Comment) and item.deleted_at
-    item.delete()
-    if admin_model.model is Item:
+    already_deleted = bool(getattr(item, "deleted_at", None))
+    was_listed = isinstance(item, Item) and not already_deleted and item.is_listed
+    if isinstance(item, (Item, Comment)):
+        item.delete(by=request.user)
+    else:
+        item.delete()
+    if isinstance(item, Item):
         search.delete_item_index(item)
+        if was_listed:
+            counters.item_hidden(item)
     elif isinstance(item, Comment) and not already_deleted:
         counters.comment_deleted(item)
     return redirect("godmode_list_model", model_name=model_name)
 
 
 @login_required
+@transaction.atomic
 def godmode_create_model(request, model_name):
     ensure_access(request)
 
@@ -199,8 +233,10 @@ def godmode_create_model(request, model_name):
         form = create_form_class(request.POST)
         if form.is_valid():
             saved = form.save()
-            if admin_model.model is Item:
+            if isinstance(saved, Item):
                 search.update_item_index(saved)
+                if saved.is_listed and not saved.deleted_at:
+                    counters.item_created(saved)
             return redirect("godmode_list_model", model_name=model_name)
     else:
         form = create_form_class()

@@ -9,6 +9,7 @@ from django.template.loader import render_to_string
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
 
+from items.models import Item
 from users.models import User
 
 
@@ -158,6 +159,15 @@ class ClubAdminModel:
                         form_field.required = True
                     else:
                         form_field.required = False
+
+            def clean(self):
+                data = super().clean()
+                if admin_model.model is Item:
+                    author = data.get("author")
+                    visibility = data.get("visibility")
+                    if author and author.is_banned and visibility != Item.VISIBILITY_DRAFT:
+                        self.add_error("visibility", "Посты заблокированного автора должны оставаться в черновиках")
+                return data
 
         return DynamicModelForm
 
