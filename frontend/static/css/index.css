@@ -1,8 +1,12 @@
 .welcome {
+    --note-bg: #f3f5fc;
+    --note-gradient: linear-gradient(180deg, rgba(212, 220, 244, 0.65), transparent 140px);
+    --note-border: 1px solid rgba(140, 153, 195, 0.24);
+
     position: relative;
     width: fit-content;
     max-width: 100%;
-    font-family: var(--serif-font);
+    font-family: var(--sans-font);
     font-weight: 400;
 }
 
