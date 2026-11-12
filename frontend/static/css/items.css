@@ -636,6 +636,10 @@
     flex-shrink: 0;
 }
 
+.item-form .EasyMDEContainer .CodeMirror {
+    font-size: 120%;
+}
+
 .item-ai-text {
     width: 100%;
     height: 250px;
