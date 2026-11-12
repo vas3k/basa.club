@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 ('deleted_at', models.DateTimeField(blank=True, null=True)),
                 ('id', models.UUIDField(default=uuid.uuid4, editable=False, primary_key=True, serialize=False)),
                 ('text', models.TextField()),
-                ('vibe', models.CharField(blank=True, choices=[('good', '👍 Пробовал, доволен'), ('bad', '👎 Пробовал, не доволен'), ('neutral', '💬 Нейтрально')], max_length=16, null=True)),
+                ('vibe', models.CharField(blank=True, choices=[('good', '👍 Пробовал, доволен'), ('bad', '👎 Пробовал, недоволен'), ('neutral', '💬 Нейтрально')], max_length=16, null=True)),
                 ('ipaddress', models.GenericIPAddressField(null=True)),
                 ('useragent', models.CharField(blank=True, max_length=512, null=True)),
                 ('created_at', models.DateTimeField(auto_now_add=True, db_index=True)),

@@ -1,19 +1,3 @@
-{% load telegram %}{% if subscription %}💎 {% endif %}<b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title_with_prefix }}</a></b>{% if subscription %} по вашей подписке на <a href="{{ settings.APP_HOST }}{{ subscription.listing_url }}">{{ subscription.label }}</a>{% endif %}
-
-{% if item.author %}от 👤 <a href="{{ settings.APP_HOST }}{{ item.author.get_absolute_url }}">{{ item.author.full_name|default:item.author.slug }}</a>, {% endif %}📍 {% if item.city %}{{ item.city.name }}{% if item.country %}, {{ item.country.name }}{% endif %}{% elif item.country %}{{ item.country.name }}{% else %}Весь мир{% endif %}, 📂 {{ item.category.name }}{% if item.subcategory %} · {{ item.subcategory.name }}{% endif %}
-{% if item.description %}
-{% render_tg item.description 1000 %}
-{% endif %}{% if item.location %}
-📍 Адрес: {{ item.location|truncatechars:200 }}
-{% endif %}{% if item.promo_code %}🎁 Промокод: <code>{{ item.promo_code }}</code>
-{% endif %}{% if item.contact_links %}
-<b>Контакты:</b>
-{% for contact in item.contact_links %}{{ contact.icon }} {% if contact.href %}<a href="{{ contact.href }}">{{ contact.text|truncatechars:80 }}</a>{% else %}{{ contact.text|truncatechars:80 }}{% endif %}{% if contact.comment %} — {{ contact.comment|truncatechars:100 }}{% endif %}
-{% endfor %}{% endif %}{% if item.expires_at %}
-⏳ Действует до {{ item.expires_at|date:"d.m.Y H:i" }} UTC
-{% endif %}{% if item.images %}
-📷 Фото: {{ item.images|length }}
-{% endif %}
-↗ <a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">Открыть объявление</a>
+💎 <b><a href="{{ settings.APP_HOST }}{{ item.get_absolute_url }}">{{ item.title_with_prefix|truncatewords:200 }}</a></b> · {{ item.category.name|truncatewords:200 }}{% if item.subcategory %} / {{ item.subcategory.name|truncatewords:200 }}{% endif %} · {% if item.country %}{{ item.country.name|truncatewords:200 }}{% else %}Весь мир{% endif %}{% if item.city %}, {{ item.city.name|truncatewords:200 }}{% endif %}{% if item.author %} · <a href="{{ settings.APP_HOST }}{{ item.author.get_absolute_url }}">{{ item.author.full_name|default:item.author.slug|truncatewords:200 }}</a> {{ item.author.rating|rating }}{% endif %}
 
 {% if show_unsibscribe_footer and subscription %}<i>Вас пинганули потому что вы подписались на: <a href="{{ settings.APP_HOST }}{{ subscription.listing_url }}">{{ subscription.label }}</a>. Ваши <a href="{{ settings.APP_HOST }}{% url "bookmarks" %}">подписки здесь</a>.</i>{% endif %}

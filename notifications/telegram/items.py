@@ -6,7 +6,6 @@ from notifications.telegram.common import (
     TEXT_LIMIT,
     render_html_message,
     send_telegram_message,
-    send_telegram_photo,
 )
 
 
@@ -18,13 +17,6 @@ def send_telegram_user_new_item(item_id, subscription_ids):
         return
 
     subscriptions = subscribers_for_item(item, subscription_ids=subscription_ids)
-
-    images = item.images or []
-    image = None
-    if images and isinstance(images[0], dict):
-        candidate = images[0].get("image") or ""
-        if isinstance(candidate, str) and candidate.startswith(("http://", "https://")):
-            image = candidate
 
     for subscription in subscriptions:
         if not subscription.user.telegram_id:
@@ -40,7 +32,4 @@ def send_telegram_user_new_item(item_id, subscription_ids):
         text = truncatechars_html(body, TEXT_LIMIT - len(footer) - 2) + "\n\n" + footer
 
         chat_id = subscription.user.telegram_id
-        if image:
-            if send_telegram_photo(chat_id, image, text):
-                continue
         send_telegram_message(chat_id, text)

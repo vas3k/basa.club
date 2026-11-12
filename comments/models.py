@@ -34,7 +34,7 @@ class Comment(SoftDeleteMixin, models.Model):
     VIBE_NEUTRAL = "neutral"
     VIBES = (
         (VIBE_GOOD, "👍 Пробовал, доволен"),
-        (VIBE_BAD, "👎 Пробовал, не доволен"),
+        (VIBE_BAD, "👎 Пробовал, недоволен"),
         (VIBE_NEUTRAL, "💬 Нейтрально"),
     )
 
