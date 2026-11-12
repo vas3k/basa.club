@@ -40,7 +40,7 @@
                         {% include "items/list/card.html" %}
                     {% endfor %}
                 </div>
-                {% if subscription.index_items|length >= 10 %}
+                {% if subscription.index_items|length >= 50 %}
                     <a class="button button-inverted index-card-more" href="{{ subscription.listing_url }}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
                 {% endif %}
             </section>

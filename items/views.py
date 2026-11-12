@@ -78,7 +78,7 @@ def main_index_page(request):
                 items = items.filter(category_id=subscription.category_id)
             if subscription.query:
                 items = search.filter_items(items, subscription.query)
-            subscription.index_items = list(items[:10])
+            subscription.index_items = list(items[:50])
             shown_ids.extend(item.id for item in subscription.index_items)
 
     return render(request, "index/main.html", {
@@ -109,7 +109,7 @@ def country_index_page(request, country):
         .values_list("city_id", "total")
     )
     for city in GeoCity.objects.filter(country=country, id__in=city_counts):
-        city_items = list(feed.filter(city=city).exclude(id__in=shown_ids)[:10])
+        city_items = list(feed.filter(city=city).exclude(id__in=shown_ids)[:20])
         city_blocks.append({
             "city": city,
             "count": city_counts[city.id],
@@ -157,7 +157,7 @@ def listing_page(request, country, city, category=None, subcategory=None):
         here = Q(country_id=country)
         if city != "everywhere":
             get_object_or_404(GeoCity, id=city, country_id=country)
-            here &= Q(city_id=city)
+            here &= Q(city_id=city) | Q(city_id__isnull=True)
         if include_online:
             here |= Q(country_id=settings.ONLINE_COUNTRY_ID)
         items = items.filter(here)

@@ -18,12 +18,19 @@
         {% if form.title.errors %}<div class="form-error">{{ form.title.errors }}</div>{% endif %}
     </div>
 
-    {% island "MarkdownEditor" name="description" label=form.description.label value=form.description.value|default:"" placeholder="Расскажите подробнее. Можно использовать Markdown" max_length=form.description.field.max_length %}
-    <div class="form-help">Обязательное поле, не менее {{ form.description.field.min_length }} символов.</div>
+    {% island "MarkdownEditor" name="description" value=form.description.value|default:"" placeholder=form.description.field.widget.attrs.placeholder max_length=form.description.field.max_length %}
     {% if form.description.errors %}<div class="form-error">{{ form.description.errors }}</div>{% endif %}
 
+    <div class="form-group">
+        <div class="item-form-expires">
+            <label for="{{ form.expires_in.id_for_label }}">{{ form.expires_in.label }}</label>
+            {{ form.expires_in }}
+            <span class="item-form-expires-hint">{{ form.expires_in.help_text }}</span>
+        </div>
+        {% if form.expires_in.errors %}<div class="form-error">{{ form.expires_in.errors }}</div>{% endif %}
+    </div>
+
     <div class="stack stack-spaced form-optionals">
-        <div class="form-help">Заполните хотя бы одно из полей: {% for field in form %}{% if field.name in form.ONE_OF_REQUIRED_EXTRA_FIELDS %}{{ field.label }}{% if field.name != form.ONE_OF_REQUIRED_EXTRA_FIELDS|last %}, {% endif %}{% endif %}{% endfor %}.</div>
         <div class="form-optional tone-photos">
             <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-images" {% if form.images.errors or form.images.value and form.images.value != "[]" and form.images.value != "null" %}hidden{% endif %}>+ Добавить картинки</button>
             <div class="block form-section" id="item-images" {% if not form.images.errors and not form.images.value or not form.images.errors and form.images.value == "[]" or not form.images.errors and form.images.value == "null" %}hidden{% endif %}>
@@ -53,17 +60,12 @@
         </div>
 
         <div class="form-optional tone-promo">
-            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-promo" {% if form.promo_code.errors or form.promo_code.value or form.expires_in.errors %}hidden{% endif %}>+ Добавить скидку или промокод</button>
-            <div class="block form-section" id="item-promo" {% if not form.promo_code.errors and not form.promo_code.value and not form.expires_in.errors %}hidden{% endif %}>
+            <button type="button" class="block form-reveal" data-behavior="toggle" data-mode="show" data-hide-self data-target="#item-promo" {% if form.promo_code.errors or form.promo_code.value %}hidden{% endif %}>+ Добавить скидку или промокод</button>
+            <div class="block form-section" id="item-promo" {% if not form.promo_code.errors and not form.promo_code.value %}hidden{% endif %}>
                 <div class="form-section-title">🎁 Промокод</div>
                 <div class="form-group">
                     {{ form.promo_code }}
                     {% if form.promo_code.errors %}<div class="form-error">{{ form.promo_code.errors }}</div>{% endif %}
-                </div>
-                <div class="form-group item-form-expires">
-                    <label for="{{ form.expires_in.id_for_label }}">{{ form.expires_in.label }}</label>
-                    {{ form.expires_in }}
-                    {% if form.expires_in.errors %}<div class="form-error">{{ form.expires_in.errors }}</div>{% endif %}
                 </div>
             </div>
         </div>

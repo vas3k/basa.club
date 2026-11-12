@@ -82,4 +82,10 @@
             </div>
         {% endif %}
     </div>
+
+    {% if show_listing_subscribe %}
+        <div class="item-subscribe">
+            {% include "notifications/widgets/subscribe_button.html" %}
+        </div>
+    {% endif %}
 {% endblock %}

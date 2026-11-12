@@ -10,13 +10,15 @@ from common.contacts import CONTACT_TYPES
 from geo.models import GeoCity, GeoCountry
 from items.models import Item
 
-EXPIRES_CHOICES = (
-    ("never", "Никогда"),
-    ("day", "1 день"),
-    ("week", "1 неделю"),
-    ("month", "1 месяц"),
-    ("quarter", "3 месяца"),
-    ("year", "1 год"),
+POST_VISIBLE_FOR_CHOICES = (
+    ("never", "Вечность"),
+    ("week", "Неделя"),
+    ("two_weeks", "Пара недель"),
+    ("month", "Месяц"),
+    ("quarter", "Три месяца"),
+    ("half_year", "Полгода"),
+    ("year", "Год"),
+    ("3year", "Три года"),
 )
 
 
@@ -87,7 +89,9 @@ class ItemForm(forms.ModelForm):
         min_length=70,
         max_length=5000,
         strip=True,
-        widget=forms.Textarea(),
+        widget=forms.Textarea(attrs={
+            "placeholder": "Расскажите поподробнее, поделитесь личным опытом и почему вы рекомендуете. Минимум 70 символов. Можно использовать Markdown",
+        }),
         error_messages={
             "required": "Добавьте описание не короче 70 символов",
             "min_length": "Описание должно содержать не менее 70 символов",
@@ -131,8 +135,9 @@ class ItemForm(forms.ModelForm):
         },
     )
     expires_in = forms.ChoiceField(
-        label="Истекает через:",
-        choices=EXPIRES_CHOICES,
+        label="Время жизни поста:",
+        help_text="(важно для временных объявлений или скидок — по истечению пост будет скрыт из фидов)",
+        choices=POST_VISIBLE_FOR_CHOICES,
         initial="never",
         required=False,
     )
@@ -185,8 +190,8 @@ class ItemForm(forms.ModelForm):
             return
         shown = formats.date_format(self.instance.expires_at, "j E Y")
         self.fields["expires_in"].choices = (
-            ("keep", shown),
-            *EXPIRES_CHOICES,
+            ("keep", f"До {shown}"),
+            *POST_VISIBLE_FOR_CHOICES,
         )
         if not self.is_bound:
             self.initial["expires_in"] = "keep"
@@ -303,12 +308,11 @@ class ItemForm(forms.ModelForm):
 
         choice = self.cleaned_data.get("expires_in") or "never"
         now = timezone.now()
-        if choice == "day":
-            item.expires_at = now + timedelta(days=1)
-        elif choice == "week":
-            item.expires_at = now + timedelta(days=7)
-        elif choice in {"month", "quarter", "year"}:
-            months = {"month": 1, "quarter": 3, "year": 12}[choice]
+        if choice in {"week", "two_weeks"}:
+            weeks = {"week": 1, "two_weeks": 2}[choice]
+            item.expires_at = now + timedelta(weeks=weeks)
+        elif choice in {"month", "quarter", "half_year", "year"}:
+            months = {"month": 1, "quarter": 3, "half_year": 6, "year": 12}[choice]
             month_index = now.month - 1 + months
             year = now.year + month_index // 12
             month = month_index % 12 + 1

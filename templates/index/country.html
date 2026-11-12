@@ -40,7 +40,7 @@
                         {% include "items/list/card.html" %}
                     {% endfor %}
                 </div>
-                {% if block.items|length >= 10 %}
+                {% if block.items|length >= 20 %}
                     <a class="button button-inverted index-card-more" href="{% url "listing" current_country.id block.city.id %}{% append_query_param page=1 %}"><span>Ещё</span><i class="fas fa-chevron-down" aria-hidden="true"></i></a>
                 {% endif %}
             </section>
