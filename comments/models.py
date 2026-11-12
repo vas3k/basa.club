@@ -35,7 +35,7 @@ class Comment(SoftDeleteMixin, models.Model):
     VIBES = (
         (VIBE_GOOD, "👍 Пробовал, доволен"),
         (VIBE_BAD, "👎 Пробовал, недоволен"),
-        (VIBE_NEUTRAL, "💬 Нейтрально"),
+        (VIBE_NEUTRAL, "💬 Просто коммент"),
     )
 
     id = models.UUIDField(primary_key=True, default=uuid4, editable=False)
