@@ -7,6 +7,8 @@ CONTACTS = [
     {"type": "phone", "label": "Телефон", "icon": "📞", "icon_class": "fas fa-phone"},
     {"type": "telegram", "label": "Телеграм", "icon": "✈️", "icon_class": "fab fa-telegram"},
     {"type": "whatsapp", "label": "WhatsApp", "icon": "💬", "icon_class": "fab fa-whatsapp"},
+    {"type": "instagram", "label": "Instagram", "icon": "📸", "icon_class": "fab fa-instagram"},
+    {"type": "facebook", "label": "Facebook", "icon": "👥", "icon_class": "fab fa-facebook"},
     {"type": "website", "label": "Сайт", "icon": "🌐", "icon_class": "fas fa-globe"},
     {"type": "custom", "label": "Другое", "icon": "🔗", "icon_class": "fas fa-link"},
 ]
