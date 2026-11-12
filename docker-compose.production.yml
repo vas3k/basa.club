@@ -11,6 +11,8 @@ x-app: &app
     POSTGRES_DB: vas3k_base
     POSTGRES_USER: vas3k
     POSTGRES_HOST: host.docker.internal
+    POSTGRES_PORT: "6432"
+    POSTGRES_DISABLE_SERVER_SIDE_CURSORS: "1"
     POSTGRES_USE_POOLING: "0"
     REDIS_HOST: redis
     TELEGRAM_BOT_WEBHOOK_PORT: "8001"
@@ -32,30 +34,53 @@ services:
     <<: *app
     user: root
     command: make docker-run-production
+    healthcheck:
+      test: ["CMD", "python", "-c", 'import socket; socket.create_connection(("127.0.0.1", 8000), 3).close()']
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
     volumes:
       - ./frontend/static:/tmp/static
     ports:
       - "127.0.0.1:8824:8000"
-    depends_on: [redis]
+    depends_on:
+      redis:
+        condition: service_healthy
 
   queue:
     <<: *app
     command: python manage.py qcluster
-    depends_on: [redis]
+    depends_on:
+      redis:
+        condition: service_healthy
 
   bot:
     <<: *app
     command: python bot/main.py
+    healthcheck:
+      test: ["CMD", "python", "-c", 'import socket; socket.create_connection(("127.0.0.1", 8001), 3).close()']
+      interval: 30s
+      timeout: 5s
+      start_period: 60s
+      retries: 3
     ports:
       - "127.0.0.1:8826:8001"
 
   cron:
     <<: *app
     command: supercronic -json -split-logs /app/etc/crontab
-    depends_on: [redis]
+    depends_on:
+      redis:
+        condition: service_healthy
 
   redis:
     image: redis:7.4-alpine
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 30s
+      timeout: 5s
+      retries: 3
     command: redis-server --appendonly yes --appendfsync everysec
     restart: unless-stopped
     volumes:
