@@ -163,7 +163,7 @@ def publish_draft(token):
 
 
 async def command_add(update, context):
-    message = update.effective_message
+    message = update.message
     if not message or not update.effective_user or update.effective_user.is_bot:
         return
 
@@ -181,7 +181,7 @@ async def command_add(update, context):
 
 
 async def private_message(update, context):
-    message = update.effective_message
+    message = update.message
     if not message or not update.effective_user or update.effective_user.is_bot:
         return
     await answer_listing(message, message, (message.text or message.caption or "").strip())

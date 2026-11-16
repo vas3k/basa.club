@@ -26,9 +26,9 @@ def main() -> None:
     application = Application.builder().token(settings.TELEGRAM_TOKEN).build()
     application.add_handler(CommandHandler("start", auth.command_start, filters.ChatType.PRIVATE))
     application.add_handler(CommandHandler("help", help.command_help, filters.ChatType.PRIVATE))
-    application.add_handler(CommandHandler("add", items.command_add, block=False))
+    application.add_handler(CommandHandler("add", items.command_add, filters.UpdateType.MESSAGE, block=False))
     application.add_handler(MessageHandler(
-        filters.ChatType.PRIVATE & (filters.TEXT | filters.CAPTION) & ~filters.COMMAND,
+        filters.UpdateType.MESSAGE & filters.ChatType.PRIVATE & (filters.TEXT | filters.CAPTION) & ~filters.COMMAND,
         items.private_message,
         block=False,
     ))
