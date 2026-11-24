@@ -150,9 +150,41 @@
     }
 }
 
+.login-block {
+    text-align: center;
+}
+
+.login-block .block-header {
+    font-size: 216%;
+}
+
+.login-options .button {
+    font-size: 120%;
+}
+
 .login-options {
+    justify-content: center;
+    flex-wrap: wrap;
     gap: 12px;
     padding: 10px 0 30px;
+}
+
+@media only screen and (max-width: 600px) {
+    .login-options {
+        flex-direction: column;
+        max-width: 320px;
+        margin: 0 auto;
+    }
+
+    .login-options > a,
+    .login-options > form,
+    .login-options button {
+        width: 100%;
+    }
+
+    .login-options .button {
+        min-height: 48px;
+    }
 }
 
     .login-option-icon {

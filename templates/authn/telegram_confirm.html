@@ -1,0 +1,14 @@
+{% extends "layout.html" %}
+
+{% block title %}Вход через Telegram — {{ block.super }}{% endblock %}
+
+{% block content %}
+    <div class="block block-narrow login-block">
+        <div class="block-header">{% if linking %}Привязать Telegram{% else %}Войти через Telegram{% endif %}</div>
+        <p>{{ account.full_name }} (@{{ account.slug }})</p>
+        <form method="post">
+            {% csrf_token %}
+            <button type="submit" class="button button-blue">{% if linking %}Привязать к этому профилю{% else %}Войти в этот профиль{% endif %}</button>
+        </form>
+    </div>
+{% endblock %}

@@ -23,7 +23,7 @@ def api_login_required(view):
 
 
 def start_session(request, user, *, new_user=False):
-    if user.is_banned:
+    if user.deleted_at or user.is_banned:
         return render(request, "error.html", {
             "title": "Вам сюда нельзя", "message": "Аккаунт заблокирован",
         }, status=403)

@@ -2,6 +2,7 @@ from django import forms
 
 from geo.models import GeoCity, GeoCountry
 from users.models import User
+from users.validators import validate_bio, validate_full_name
 
 EVERYWHERE = "everywhere"
 
@@ -51,6 +52,18 @@ class ProfileForm(forms.ModelForm):
         model = User
         fields = ("full_name", "avatar", "bio", "country", "city")
 
+    def clean_full_name(self):
+        name = " ".join((self.cleaned_data.get("full_name") or "").split())
+        if not self.instance.club_slug:
+            validate_full_name(name)
+        return name
+
+    def clean_bio(self):
+        bio = self.cleaned_data.get("bio") or ""
+        if not self.instance.club_slug:
+            validate_bio(bio)
+        return bio
+
     def clean_avatar(self):
         avatar = (self.cleaned_data.get("avatar") or "").strip()
         return avatar or None
@@ -82,6 +95,16 @@ class ProfileForm(forms.ModelForm):
 
 
 class WelcomeForm(ProfileForm):
+    avatar = forms.URLField(
+        label="Аватар",
+        required=True,
+        max_length=200,
+        assume_scheme="https",
+        error_messages={
+            "required": "Загрузите свой аватар",
+            "max_length": "Слишком длинное значение",
+        },
+    )
     full_name = forms.CharField(
         label="Как вас зовут?",
         min_length=5,

@@ -6,14 +6,24 @@
 {% block og_title %}Вход — {{ block.super }}{% endblock %}
 
 {% block content %}
-    <div class="block">
-        <div class="block-header profile-header">Войти</div>
+    <div class="block block-narrow login-block">
+        <div class="block-header">Войти</div>
 
-        <div class="stack login-options">
-            <a href="{% url "login_club" %}" class="button button-black button-wide button-wrap">
+        <div class="row login-options">
+            <a href="{% url "login_club" %}" class="button button-black button-wrap">
                 <span class="login-option-icon">✖︎</span>
-                Войти через Вастрик Клуб
+                Через Вастрик Клуб
             </a>
+            <form method="post" action="{% url "login_telegram" %}">
+                {% csrf_token %}
+                <button type="submit" class="button button-blue button-wrap">
+                    <i class="fab fa-telegram login-option-icon"></i>
+                    Через Телеграм-бота
+                </button>
+            </form>
         </div>
+        {% if settings.DEBUG %}
+            <p class="form-help">В режиме разработки Telegram откроет тестовую анкету без бота.</p>
+        {% endif %}
     </div>
 {% endblock %}

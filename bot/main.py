@@ -11,6 +11,7 @@ os.environ.setdefault("DJANGO_ALLOW_ASYNC_UNSAFE", "true")
 django.setup()
 
 from django.conf import settings
+from django.utils.crypto import salted_hmac
 from telegram.ext import Application, CallbackQueryHandler, CommandHandler, MessageHandler, filters
 
 from bot.handlers import auth, help, items, notifications
@@ -41,6 +42,7 @@ def main() -> None:
         application.run_webhook(
             listen=settings.TELEGRAM_BOT_WEBHOOK_HOST,
             port=settings.TELEGRAM_BOT_WEBHOOK_PORT,
+            secret_token=salted_hmac("telegram-webhook", settings.TELEGRAM_TOKEN).hexdigest(),
             url_path=settings.TELEGRAM_TOKEN,
             webhook_url=settings.TELEGRAM_BOT_WEBHOOK_URL + settings.TELEGRAM_TOKEN,
         )

@@ -149,8 +149,10 @@ a {
     transition: color linear .1s;
 }
 
-a:hover {
-    color: var(--link-hover-color);
+@media (hover: hover) and (pointer: fine) {
+    a:hover {
+        color: var(--link-hover-color);
+    }
 }
 
 button {

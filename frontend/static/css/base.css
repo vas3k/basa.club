@@ -175,10 +175,12 @@
     }
 }
 
-.button:hover {
-    color: var(--button-hover-color);
-    background-color: var(--button-hover-bg-color);
-    border: var(--button-hover-border);
+@media (hover: hover) and (pointer: fine) {
+    .button:hover {
+        color: var(--button-hover-color);
+        background-color: var(--button-hover-bg-color);
+        border: var(--button-hover-border);
+    }
 }
 
 .button:disabled {
@@ -186,10 +188,12 @@
     border-color: var(--button-disabled-bg-color);
 }
 
-.button:disabled:hover {
-    color: var(--button-color);
-    background-color: var(--button-disabled-bg-color);
-    border-color: var(--button-disabled-bg-color);
+@media (hover: hover) and (pointer: fine) {
+    .button:disabled:hover {
+        color: var(--button-color);
+        background-color: var(--button-disabled-bg-color);
+        border-color: var(--button-disabled-bg-color);
+    }
 }
 
 .button-inverted {
@@ -197,10 +201,12 @@
     color: var(--button-bg-color);
 }
 
-.button-inverted:hover {
-    background-color: var(--button-bg-color);
-    color: var(--button-color);
-    border: solid 2px var(--button-color);
+@media (hover: hover) and (pointer: fine) {
+    .button-inverted:hover {
+        background-color: var(--button-bg-color);
+        color: var(--button-color);
+        border: solid 2px var(--button-color);
+    }
 }
 
 .button-wide {
@@ -234,13 +240,20 @@
     text-align: left;
 }
 
-.button-toggle:hover,
 .button-toggle:has(:checked),
-.button-toggle-active,
-.button-toggle-active:hover {
+.button-toggle-active {
     background-color: var(--brighter-text-color);
     color: var(--block-bg-color);
     border-color: var(--brighter-text-color);
+}
+
+@media (hover: hover) and (pointer: fine) {
+    .button-toggle:hover,
+    .button-toggle-active:hover {
+        background-color: var(--brighter-text-color);
+        color: var(--block-bg-color);
+        border-color: var(--brighter-text-color);
+    }
 }
 
 .button-toggle input[type="checkbox"] {
@@ -274,10 +287,12 @@
     color: var(--button-color);
 }
 
-.button-blue:hover {
-    color: var(--telegram-color);
-    background-color: var(--button-hover-bg-color);
-    border: solid 2px var(--telegram-color);
+@media (hover: hover) and (pointer: fine) {
+    .button-blue:hover {
+        color: var(--telegram-color);
+        background-color: var(--button-hover-bg-color);
+        border: solid 2px var(--telegram-color);
+    }
 }
 
 .button-black {
@@ -286,10 +301,12 @@
     color: var(--button-color);
 }
 
-.button-black:hover {
-    background-color: var(--button-emphasis-hover-bg);
-    border-color: var(--button-emphasis-hover-bg);
-    color: var(--button-color);
+@media (hover: hover) and (pointer: fine) {
+    .button-black:hover {
+        background-color: var(--button-hover-bg-color);
+        border-color: var(--button-emphasis-bg);
+        color: var(--button-emphasis-bg);
+    }
 }
 
 .border {

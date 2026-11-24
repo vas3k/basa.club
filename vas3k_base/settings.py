@@ -240,6 +240,8 @@ LOGGING = {
         },
     },
     "loggers": {
+        "httpx": {"level": "WARNING"},
+        "httpcore": {"level": "WARNING"},
         "": {  # "catch all" loggers by referencing it with the empty string
             "handlers": ["console"],
             "level": "DEBUG" if DEBUG else "INFO",

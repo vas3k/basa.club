@@ -19,6 +19,9 @@ export async function uploadImage(file: File): Promise<string> {
     if (!isSupportedImage(file)) {
         throw new Error(imageTypeError);
     }
+    if (file.size > 10 * 1024 * 1024) {
+        throw new Error("Картинка должна быть не больше 10 МБ");
+    }
     const body = new FormData();
     body.append("media", file);
     const response = await fetch("/api/images/", {

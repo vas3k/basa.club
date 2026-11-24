@@ -23,5 +23,6 @@
 <div class="form-group profile-form-bio">
     <label for="{{ form.bio.id_for_label }}">{{ form.bio.label }}</label>
     {{ form.bio }}
+    {% if form.bio.help_text %}<div class="form-help">{{ form.bio.help_text }}</div>{% endif %}
     {% if form.bio.errors %}<div class="form-error">{{ form.bio.errors }}</div>{% endif %}
 </div>

@@ -116,6 +116,7 @@ def welcome(request):
     city_id = city.id if city else ""
 
     form = WelcomeForm(request.POST or None, instance=user, initial={
+        "avatar": "",
         "country": country_id,
         "city": city_id,
     })
