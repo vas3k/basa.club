@@ -6,7 +6,7 @@ from counters.categories import invalidate as invalidate_category
 from counters.defaults import COMMENT_UPVOTE, ITEM_UPVOTE, VIBE_BAD, VIBE_GOOD
 from counters.models import Rating
 from geo.models import GeoCity, GeoCountry
-from items.models import Item
+from items.models import Item, ItemVote
 from users.models import User
 
 
@@ -39,6 +39,43 @@ def item_hidden(item):
         User.objects.filter(id=item.author_id).update(items_count=F("items_count") - 1)
 
     invalidate_category(item.category_id)
+
+
+@transaction.atomic
+def item_deleted(item, by):
+    if not by or not by.is_moderator or by.id == item.author_id:
+        return
+
+    upvotes = ItemVote.objects.filter(item=item).exclude(user_id=item.author_id).count()
+    author_change = -upvotes * ITEM_UPVOTE
+    title = (item.title or "пост").strip()
+    weights = {Comment.VIBE_GOOD: VIBE_GOOD, Comment.VIBE_BAD: -VIBE_BAD}
+    for comment in Comment.rating_objects().filter(item=item).exclude(author_id=item.author_id):
+        author_change -= weights.get(comment.vibe, 0)
+        if comment.author_id and comment.rating:
+            User.objects.filter(id=comment.author_id).update(
+                rating=F("rating") - comment.rating,
+                upvotes=F("upvotes") - comment.rating // COMMENT_UPVOTE,
+            )
+            Rating.objects.create(
+                user_id=comment.author_id,
+                change=-comment.rating,
+                reason=f"Модератор удалил пост с комментарием: «{title}»",
+            )
+
+    if item.author_id:
+        User.objects.filter(id=item.author_id).update(
+            rating=F("rating") + author_change,
+            upvotes=F("upvotes") - upvotes,
+        )
+        if author_change:
+            Rating.objects.create(
+                user_id=item.author_id,
+                change=author_change,
+                reason=f"Модератор удалил пост: «{title}»",
+            )
+    Item.all_objects.filter(id=item.id).update(rating=0)
+    Comment.all_objects.filter(item=item).update(rating=0)
 
 
 @transaction.atomic
@@ -118,6 +155,7 @@ def comment_updated(comment, old_vibe):
 
 @transaction.atomic
 def comment_deleted(comment):
+    moderator_deleted = bool(comment.deleted_by_id and comment.deleted_by_id != comment.author_id)
     if not comment.reply_to_id:
         Item.objects.filter(id=comment.item_id).update(comment_count=F("comment_count") - 1)
         replies = Comment.all_objects.filter(
@@ -127,14 +165,19 @@ def comment_deleted(comment):
         for reply in replies:
             if reply.author_id:
                 User.objects.filter(id=reply.author_id).update(comments_count=F("comments_count") - 1)
-            decline_comment_rating(reply)
+            if moderator_deleted:
+                decline_comment_rating(reply)
 
     if comment.author_id:
         User.objects.filter(id=comment.author_id).update(comments_count=F("comments_count") - 1)
-    decline_comment_rating(comment)
+    if moderator_deleted:
+        decline_comment_rating(comment)
 
 
 def decline_comment_rating(comment):
+    if comment.item.deleted_at and comment.item.deleted_by_id != comment.item.author_id:
+        return
+
     title = (comment.item.title or "пост").strip()
     own_item = bool(comment.author_id and comment.author_id == comment.item.author_id)
     if own_item:
@@ -159,24 +202,18 @@ def decline_comment_rating(comment):
             )
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") + VIBE_BAD)
 
-    counted = CommentVote.objects.filter(comment_id=comment.id).exclude(user_id__isnull=True)
-    if comment.author_id:
-        counted = counted.exclude(user_id=comment.author_id)
-    if comment.item.author_id:
-        counted = counted.exclude(user_id=comment.item.author_id)
-    upvotes = counted.count()
-    if not upvotes:
+    lost = comment.rating
+    if not lost:
         return
 
-    lost = upvotes * COMMENT_UPVOTE
-    Comment.all_objects.filter(id=comment.id).update(rating=F("rating") - lost)
+    Comment.all_objects.filter(id=comment.id).update(rating=0)
     if comment.vibe == Comment.VIBE_GOOD:
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") - lost)
     elif comment.vibe == Comment.VIBE_BAD:
         Item.objects.filter(id=comment.item_id).update(rating=F("rating") + lost)
     if comment.author_id:
         User.objects.filter(id=comment.author_id).update(
-            upvotes=F("upvotes") - upvotes,
+            upvotes=F("upvotes") - lost // COMMENT_UPVOTE,
             rating=F("rating") - lost,
         )
         Rating.objects.create(

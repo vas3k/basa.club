@@ -133,6 +133,10 @@ def godmode_edit_model(request, model_name, item_id):
         if form.is_valid():
             saved = form.save()
             if isinstance(saved, Item):
+                if saved.deleted_at and not old.deleted_at:
+                    saved.deleted_by = request.user
+                    saved.save(update_fields=["deleted_by"])
+                    counters.item_deleted(saved, by=request.user)
                 search.update_item_index(saved)
                 was_listed = old.is_listed and not old.deleted_at
                 is_listed = saved.is_listed and not saved.deleted_at
@@ -142,6 +146,9 @@ def godmode_edit_model(request, model_name, item_id):
                     counters.item_hidden(old)
                 elif is_listed:
                     counters.item_created(saved)
+            elif isinstance(saved, Comment) and saved.deleted_at and not old.deleted_at:
+                saved.delete(by=request.user)
+                counters.comment_deleted(saved)
             elif isinstance(saved, User) and "is_banned_until" in form.changed_data:
                 if saved.is_banned:
                     last_ban = (saved.metadata or {}).get("last_ban") or {}
@@ -200,10 +207,13 @@ def godmode_delete_model(request, model_name, item_id):
     already_deleted = bool(getattr(item, "deleted_at", None))
     was_listed = isinstance(item, Item) and not already_deleted and item.is_listed
     if isinstance(item, (Item, Comment)):
-        item.delete(by=request.user)
+        if not already_deleted:
+            item.delete(by=request.user)
     else:
         item.delete()
     if isinstance(item, Item):
+        if not already_deleted:
+            counters.item_deleted(item, by=request.user)
         search.delete_item_index(item)
         if was_listed:
             counters.item_hidden(item)

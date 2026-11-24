@@ -2,7 +2,7 @@ from collections import Counter
 
 from django.core.management.base import BaseCommand
 from django.db import transaction
-from django.db.models import Count, F
+from django.db.models import Count, F, Q
 
 from bookmarks.models import Bookmark
 from comments.models import Comment, CommentVote
@@ -27,7 +27,9 @@ class Command(BaseCommand):
         user_ids = set(User.objects.values_list("id", flat=True))
         history = []
 
-        for row in ItemVote.objects.filter(item__deleted_at__isnull=True).exclude(
+        for row in ItemVote.objects.filter(
+            Q(item__deleted_at__isnull=True) | Q(item__deleted_by_id=F("item__author_id")),
+        ).exclude(
             user_id__isnull=False,
             user_id=F("item__author_id"),
         ).values("item_id", "item__author_id", "item__title", "created_at").iterator():
@@ -44,9 +46,9 @@ class Command(BaseCommand):
                     created_at=row["created_at"],
                 ))
 
-        for row in Comment.objects.filter(
+        for row in Comment.rating_objects().filter(
+            Q(item__deleted_at__isnull=True) | Q(item__deleted_by_id=F("item__author_id")),
             vibe__in=[Comment.VIBE_GOOD, Comment.VIBE_BAD],
-            item__deleted_at__isnull=True,
         ).exclude(
             author_id=F("item__author_id"),
         ).values("item__author_id", "item_id", "vibe", "item__title", "created_at").iterator():
@@ -67,8 +69,8 @@ class Command(BaseCommand):
                 ))
 
         for row in CommentVote.objects.filter(
-            comment__deleted_at__isnull=True,
-            comment__item__deleted_at__isnull=True,
+            Q(comment__item__deleted_at__isnull=True) | Q(comment__item__deleted_by_id=F("comment__item__author_id")),
+            comment__in=Comment.rating_objects(),
         ).exclude(
             comment__author_id=F("comment__item__author_id"),
         ).exclude(
@@ -100,10 +102,10 @@ class Command(BaseCommand):
                 ))
 
         for model, values in ((User, users), (Item, items), (Comment, comments)):
-            model.objects.exclude(rating=0).update(rating=0)
+            model.all_objects.exclude(rating=0).update(rating=0)
             objects = [model(id=pk, rating=rating) for pk, rating in values.items() if pk and rating]
             if objects:
-                model.objects.bulk_update(objects, ["rating"], batch_size=500)
+                model.all_objects.bulk_update(objects, ["rating"], batch_size=500)
 
         Rating.objects.filter(user_id__in=user_ids).delete()
         if history:

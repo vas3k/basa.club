@@ -3,7 +3,7 @@ from uuid import uuid4
 from django.conf import settings
 from django.core.exceptions import ValidationError
 from django.db import models
-from django.db.models import BigIntegerField, OuterRef, Q, Subquery
+from django.db.models import BigIntegerField, F, OuterRef, Q, Subquery
 from django.db.models.functions import Extract, Round
 from django.utils import timezone
 
@@ -92,6 +92,17 @@ class Comment(SoftDeleteMixin, models.Model):
         since = timezone.now() - settings.RATE_LIMIT_PERIOD
         recent = cls.all_objects.filter(author=user, created_at__gte=since).count()
         return recent < settings.COMMENT_RATE_LIMIT
+
+    @classmethod
+    def rating_objects(cls):
+        return cls.all_objects.filter(
+            Q(deleted_at__isnull=True)
+            | Q(deleted_by_id=F("author_id"))
+            | Q(
+                reply_to__deleted_by_id=F("reply_to__author_id"),
+                deleted_at=F("reply_to__deleted_at"),
+            ),
+        )
 
     @classmethod
     def visible_objects(cls):

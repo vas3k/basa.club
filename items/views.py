@@ -406,6 +406,7 @@ def delete_item(request, item_id):
     was_listed = item.is_listed
     is_owner = item.author_id == request.user.id
     item.delete(by=request.user)
+    counters.item_deleted(item, by=request.user)
     search.delete_item_index(item)
     if was_listed:
         counters.item_hidden(item)
