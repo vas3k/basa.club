@@ -31,17 +31,22 @@ async def command_start(update: Update, context: CallbackContext) -> None:
             "language_code": tg.language_code,
         }
         try:
-            text, url = confirm(code, data)
+            text, url, auth_code = confirm(code, data)
         except TelegramAuthError as ex:
             await update.effective_chat.send_message(ex.message)
             return
 
-        await update.effective_chat.send_message(
+        message = await update.effective_chat.send_message(
             text,
             reply_markup=InlineKeyboardMarkup([[
                 InlineKeyboardButton("Войти в Базу", url=url),
             ]]),
         )
+        auth_code.telegram_data["login_message"] = {
+            "chat_id": message.chat_id,
+            "message_id": message.message_id,
+        }
+        auth_code.save(update_fields=["telegram_data"])
     finally:
         close_old_connections()
 
@@ -61,7 +66,7 @@ async def confirm_callback(update: Update, context: CallbackContext) -> None:
             "language_code": tg.language_code,
         }
         try:
-            text, url = confirm(code, data)
+            text, url, auth_code = confirm(code, data)
         except TelegramAuthError as ex:
             await query.edit_message_text(ex.message)
             return
@@ -72,5 +77,10 @@ async def confirm_callback(update: Update, context: CallbackContext) -> None:
                 InlineKeyboardButton("Войти в Базу", url=url),
             ]]),
         )
+        auth_code.telegram_data["login_message"] = {
+            "chat_id": query.message.chat_id,
+            "message_id": query.message.message_id,
+        }
+        auth_code.save(update_fields=["telegram_data"])
     finally:
         close_old_connections()

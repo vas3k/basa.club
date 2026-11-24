@@ -222,7 +222,7 @@ async def answer_listing(message, source, content, comment=""):
     text = "\n\n".join(blocks)
 
     await message.reply_chat_action("typing")
-    await message.reply_text("🤔 Посмотрим, парсю сообщение...")
+    progress = await message.reply_text("🤔 Посмотрим, парсю сообщение...")
 
     try:
         async with PARSING_SLOTS:
@@ -231,6 +231,11 @@ async def answer_listing(message, source, content, comment=""):
         log.exception("item preview failed")
         await message.reply_text("Не получилось подготовить карточку. Попробуйте ещё раз.")
         return
+    finally:
+        try:
+            await progress.delete()
+        except TelegramError:
+            log.warning("Could not delete parsing message")
     if error:
         await message.reply_text(error[:2000])
         return
@@ -253,20 +258,33 @@ async def answer_listing(message, source, content, comment=""):
         html += "\n\n<b>Перед публикацией:</b> " + escape("\n".join(guidance))
         html += "\n\nНажмите «Отредактировать руками»."
 
+    preview_messages = []
     try:
         if len(html.encode("utf-16-le")) // 2 <= 4096:
-            await message.reply_text(html, parse_mode="HTML", reply_markup=keyboard, link_preview_options=NO_PREVIEW)
+            sent = await message.reply_text(html, parse_mode="HTML", reply_markup=keyboard, link_preview_options=NO_PREVIEW)
+            preview_messages.append(sent.message_id)
         else:
             # Long previews retain every field without cutting HTML tags or entities.
             text = unescape(strip_tags(html))
             chunks = [text[index:index + 2000] for index in range(0, len(text), 2000)]
             for index, chunk in enumerate(chunks):
-                await message.reply_text(chunk,
+                sent = await message.reply_text(chunk,
                     reply_markup=keyboard if index == len(chunks) - 1 else None,
                     link_preview_options=NO_PREVIEW,
                 )
+                preview_messages.append(sent.message_id)
+        stored = cache.get(f"bot-item-draft:{token}")
+        if stored:
+            stored["preview_messages"] = preview_messages
+            cache.set(f"bot-item-draft:{token}", stored, DRAFT_TIMEOUT)
     except TelegramError:
         log.exception("item preview delivery failed")
+        for message_id in preview_messages:
+            try:
+                await message.get_bot().delete_message(chat_id=message.chat_id, message_id=message_id)
+            except TelegramError:
+                log.warning("Could not delete partial preview message=%s", message_id)
+        cache.delete(f"bot-item-draft:{token}")
         await message.reply_text("Не получилось отправить предпросмотр. Попробуйте ещё раз.")
 
 
@@ -276,6 +294,11 @@ async def draft_callback(update, context):
     stored = cache.get(f"bot-item-draft:{token}")
     if not stored:
         await query.answer("Это предложение уже не действует", show_alert=True)
+        if query.message:
+            try:
+                await query.message.delete()
+            except TelegramError:
+                log.warning("Could not delete expired draft prompt")
         return
     if not query.from_user or str(query.from_user.id) != str(stored["telegram_id"]):
         await query.answer("Это не ваша карточка", show_alert=True)
@@ -284,8 +307,12 @@ async def draft_callback(update, context):
     await query.answer()
     if action == "cancel":
         cache.delete(f"bot-item-draft:{token}")
-        text = "Отменил. Ничего не публикую."
-        buttons = "remove"
+        for message_id in stored.get("preview_messages", [query.message.message_id]):
+            try:
+                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
+            except TelegramError:
+                log.warning("Could not delete draft preview message=%s", message_id)
+        return
     else:
         item, error, buttons = await asyncio.to_thread(publish_draft, token)
         if error:
@@ -293,6 +320,15 @@ async def draft_callback(update, context):
         else:
             url = settings.APP_HOST.rstrip("/") + item.get_absolute_url()
             text = f"Добавил в Базу: {item.title}\n{url}"
+
+    if buttons == "remove":
+        await context.bot.send_message(chat_id=query.message.chat_id, text=text)
+        for message_id in stored.get("preview_messages", [query.message.message_id]):
+            try:
+                await context.bot.delete_message(chat_id=query.message.chat_id, message_id=message_id)
+            except TelegramError:
+                log.warning("Could not delete draft preview message=%s", message_id)
+        return
 
     if buttons != "keep":
         markup = None

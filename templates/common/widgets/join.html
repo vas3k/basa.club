@@ -2,7 +2,7 @@
     <div class="block join-block">
         <div class="block-description block-description-center">
             <p>Контакты, комментарии и промокоды доступны только участникам Базы.</p>
-            <a href="{% url "login" %}" class="button">Войти</a>
+            <a href="{% url "login" %}{% if item %}?next_item_id={{ item.id }}{% endif %}" class="button">Войти</a>
         </div>
     </div>
 {% endif %}

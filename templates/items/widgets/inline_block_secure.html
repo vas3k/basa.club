@@ -1,4 +1,4 @@
-<a class="inline-block inline-block-secure {{ css_class }}" href="{% url "login" %}" aria-label="Войти, чтобы посмотреть">
+<a class="inline-block inline-block-secure {{ css_class }}" href="{% url "login" %}{% if item %}?next_item_id={{ item.id }}{% endif %}" aria-label="Войти, чтобы посмотреть">
     <span class="inline-block-icon {{ icon_class }}" aria-hidden="true">{% if icon_fa %}<i class="{{ icon_fa }}"></i>{% else %}{{ icon }}{% endif %}</span>
     <span class="inline-block-secure-source" aria-hidden="true">{{ teaser }}</span>
     <span class="inline-block-secure-canvas">

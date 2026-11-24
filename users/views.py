@@ -128,6 +128,11 @@ def welcome(request):
 
         subscribe_to_geo(user, form.cleaned_data["country_id"], form.cleaned_data["city_id"])
 
+        next_item_id = request.session.pop("next_item_id", None)
+        if next_item_id:
+            item = Item.objects.filter(id=next_item_id).first()
+            if item:
+                return redirect(item.get_absolute_url())
         return redirect("user_profile", slug=user.slug)
 
     country_id = form["country"].value() or ""

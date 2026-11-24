@@ -1,4 +1,5 @@
 import logging
+from uuid import UUID
 
 import requests
 from authlib.integrations.base_client import OAuthError
@@ -18,13 +19,28 @@ from authn.providers import club, telegram
 from notifications import notification
 from authn.providers.club import oauth
 from users.models import User
+from items.models import Item
 from vas3k_base.exceptions import RateLimitException
 
 log = logging.getLogger(__name__)
 
 
 def log_in(request):
+    try:
+        next_item_id = str(UUID(request.GET.get("next_item_id", "")))
+    except ValueError:
+        next_item_id = None
+    if next_item_id:
+        request.session["next_item_id"] = next_item_id
+    else:
+        request.session.pop("next_item_id", None)
+
     if request.user.is_authenticated:
+        request.session.pop("next_item_id", None)
+        if next_item_id:
+            item = Item.objects.filter(id=next_item_id).first()
+            if item:
+                return redirect(item.get_absolute_url())
         return redirect("user_profile", slug=request.user.slug)
 
     return render(request, "users/login.html")
@@ -178,6 +194,7 @@ def login_telegram(request):
             if account and not (account.telegram_data or {}).get("debug"):
                 return render(request, "error.html", {"message": "Тестовый Telegram ID уже занят другим аккаунтом."})
             auth_code = Code.create_for_user(user=None, recipient="local-telegram-development")
+            payload["next_item_id"] = request.session.get("next_item_id")
             auth_code.telegram_data = payload
             auth_code.save(update_fields=["telegram_data"])
             return redirect(f"{reverse('telegram_continue')}?code={auth_code.code}")

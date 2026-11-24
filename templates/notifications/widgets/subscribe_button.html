@@ -40,7 +40,7 @@
         </button>
     </form>
 {% else %}
-    <a href="{% url "login" %}" class="button button-small button-toggle feed-subscribe feed-subscribe-button">
+    <a href="{% url "login" %}{% if item %}?next_item_id={{ item.id }}{% endif %}" class="button button-small button-toggle feed-subscribe feed-subscribe-button">
         <i class="far fa-bell"></i>
         Подписаться на:
         {% if current_subcategory %}

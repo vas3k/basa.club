@@ -91,8 +91,8 @@
                                 <span class="avatar" style="background-image: url('{{ request.user.default_avatar }}');"></span>
                             </a>
                         {% else %}
-                            <a href="{% url "login" %}" class="button header-action header-create header-create-guest" aria-label="Добавить"><i class="fas fa-plus"></i><span class="header-create-label">Добавить</span></a>
-                            <a href="{% url "login" %}" class="button header-action header-user-button header-login">
+                            <a href="{% url "login" %}{% if item %}?next_item_id={{ item.id }}{% endif %}" class="button header-action header-create header-create-guest" aria-label="Добавить"><i class="fas fa-plus"></i><span class="header-create-label">Добавить</span></a>
+                            <a href="{% url "login" %}{% if item %}?next_item_id={{ item.id }}{% endif %}" class="button header-action header-user-button header-login">
                                 Войти
                                 <span class="avatar header-anon"><i class="fas fa-sign-in-alt"></i></span>
                             </a>

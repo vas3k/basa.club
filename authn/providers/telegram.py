@@ -31,6 +31,8 @@ def bot_url(request, user=None):
         ipaddress=address,
         useragent=parse_useragent(request),
     )
+    auth_code.telegram_data = {"next_item_id": request.session.get("next_item_id")}
+    auth_code.save(update_fields=["telegram_data"])
     return f"{settings.TELEGRAM_BOT_URL}?start={auth_code.code}"
 
 
@@ -70,17 +72,18 @@ def confirm(code, data):
     else:
         text = "Telegram подтверждён. На сайте останется короткая анкета."
 
+    payload["next_item_id"] = (auth_code.telegram_data or {}).get("next_item_id")
     auth_code.code = random_code(settings.AUTH_CODE_LENGTH)
     auth_code.telegram_data = payload
     auth_code.save()
     url = f"{settings.APP_HOST}{reverse('telegram_continue')}?code={auth_code.code}"
-    return text, url
+    return text, url, auth_code
 
 
 def finish(request):
     code = (request.GET.get("code") or "").strip().upper()
     auth_code = Code.objects.filter(code=code).select_related("user").first()
-    payload = (auth_code.telegram_data or {}) if auth_code else {}
+    payload = dict(auth_code.telegram_data or {}) if auth_code else {}
     telegram_id = str(payload.get("id") or "")
     if payload.get("debug") and not settings.DEBUG:
         return render(request, "error.html", {"message": "Тестовый вход отключён."}, status=403)
@@ -89,6 +92,13 @@ def finish(request):
             "title": "Ссылка не сработала",
             "message": "Сначала нажмите кнопку в боте, потом откройте ссылку, которую он пришлёт.",
         })
+
+    login_message = payload.pop("login_message", None)
+    if login_message:
+        request.session["telegram_login_message"] = login_message
+    next_item_id = payload.pop("next_item_id", None)
+    if next_item_id:
+        request.session["next_item_id"] = next_item_id
 
     account = User.all_objects.filter(telegram_id=telegram_id).first()
     if account and (account.deleted_at or account.is_banned):
@@ -190,7 +200,7 @@ def finish(request):
         full_name=form.cleaned_data["full_name"],
         bio=form.cleaned_data["bio"],
         telegram_id=telegram_id,
-        telegram_data=auth_code.telegram_data,
+        telegram_data=payload,
         city=form.cleaned_data["city"],
         country=form.cleaned_data["country"],
         avatar=form.cleaned_data["avatar"] or None,
