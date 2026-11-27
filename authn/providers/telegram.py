@@ -104,6 +104,23 @@ def finish(request):
     if account and (account.deleted_at or account.is_banned):
         return render(request, "error.html", {"message": "Этот аккаунт недоступен."}, status=403)
 
+    if auth_code.user_id and not auth_code.user.telegram_id:
+        if not request.user.is_authenticated or request.user.id != auth_code.user_id:
+            return render(request, "error.html", {
+                "message": "Откройте ссылку в браузере, где вы вошли в свой профиль Базы.",
+            }, status=403)
+        if auth_code.user.deleted_at or auth_code.user.is_banned or account:
+            return render(request, "error.html", {"message": "Не удалось привязать Telegram к этому профилю."}, status=403)
+        if request.method == "GET":
+            return render(request, "authn/telegram_confirm.html", {"account": auth_code.user, "linking": True})
+        account = auth_code.user
+        account.telegram_id = telegram_id
+        account.telegram_data = payload
+        account.save(update_fields=["telegram_id", "telegram_data"])
+        log.info("Telegram linked to user=%s", account.id)
+        auth_code.delete()
+        return account
+
     if not payload.get("debug"):
         if not settings.CLUB_SERVICE_TOKEN:
             log.error("Telegram login Club lookup is unavailable: CLUB_SERVICE_TOKEN is missing")
@@ -131,21 +148,6 @@ def finish(request):
     if account and account.club_slug and not payload.get("debug"):
         auth_code.delete()
         return redirect("login_club")
-
-    if auth_code.user_id and not auth_code.user.telegram_id:
-        if not request.user.is_authenticated or request.user.id != auth_code.user_id:
-            return render(request, "error.html", {
-                "message": "Откройте ссылку в браузере, где вы вошли в свой профиль Базы.",
-            }, status=403)
-        if auth_code.user.deleted_at or auth_code.user.is_banned or account:
-            return render(request, "error.html", {"message": "Не удалось привязать Telegram к этому профилю."}, status=403)
-        if request.method == "GET":
-            return render(request, "authn/telegram_confirm.html", {"account": auth_code.user, "linking": True})
-        account = auth_code.user
-        account.telegram_id = telegram_id
-        account.telegram_data = payload
-        account.save(update_fields=["telegram_id", "telegram_data"])
-        log.info("Telegram linked to user=%s", account.id)
 
     if auth_code.user_id and (not account or account.id != auth_code.user_id):
         return render(request, "error.html", {

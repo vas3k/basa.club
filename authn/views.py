@@ -1,5 +1,5 @@
 import logging
-from uuid import UUID
+from uuid import UUID, uuid4
 
 import requests
 from authlib.integrations.base_client import OAuthError
@@ -131,7 +131,13 @@ def club_callback(request):
         })
 
     telegram_data = member.get("telegram") or {}
-    telegram_id = str(telegram_data["id"]) if telegram_data.get("id") else None
+    telegram_id = member.get("telegram_id") or telegram_data.get("id")
+    telegram_id = str(telegram_id) if telegram_id else None
+    if not telegram_id:
+        log.warning(
+            "Club profile has no Telegram ID: club_slug=%s telegram_field_present=%s scope=%s",
+            user_slug, "telegram" in member, token.get("scope"),
+        )
 
     club_user = User.all_objects.filter(club_slug=user_slug).first()
     telegram_user = User.all_objects.filter(telegram_id=telegram_id).first() if telegram_id else None
@@ -153,11 +159,6 @@ def club_callback(request):
             "message": "В профиле привязан другой Клуб или Telegram. Обратитесь к модераторам.",
         })
 
-    if not telegram_id and not user:
-        return render(request, "error.html", {
-            "message": "Сначала привяжите Telegram в профиле Клуба, затем повторите вход в Базу.",
-        })
-
     created = user is None
     email = userinfo.get("email") or member.get("email")
     if not email or User.all_objects.filter(email__iexact=email).exclude(id=user.id if user else None).exists():
@@ -167,7 +168,7 @@ def club_callback(request):
     if created:
         slug = user_slug[:32]
         if User.all_objects.filter(slug=slug).exists() or slug == "me":
-            slug = f"tg-{telegram_id}"
+            slug = f"tg-{telegram_id}" if telegram_id else f"club-{uuid4().hex[:24]}"
         user = User.objects.create_user(username=slug, email=email, telegram_id=telegram_id)
     fill_bio = not user.bio
     user.email = email
