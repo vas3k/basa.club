@@ -14,6 +14,7 @@
                 <span class="login-option-icon">✖︎</span>
                 Через Вастрик Клуб
             </a>
+            {% comment %}
             <form method="post" action="{% url "login_telegram" %}">
                 {% csrf_token %}
                 <button type="submit" class="button button-blue button-wrap">
@@ -21,6 +22,7 @@
                     Через Телеграм-бота
                 </button>
             </form>
+            {% endcomment %}
         </div>
         {% if settings.DEBUG %}
             <p class="form-help">В режиме разработки Telegram откроет тестовую анкету без бота.</p>

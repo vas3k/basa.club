@@ -141,8 +141,10 @@ def club_callback(request):
             "message": "Клуб и Telegram уже связаны с разными профилями. Обратитесь к модераторам для объединения.",
         })
     user = telegram_user or club_user
+
     if user and (user.deleted_at or user.is_banned):
         return render(request, "error.html", {"message": "Аккаунт заблокирован."}, status=403)
+
     if user and (
         (user.club_slug and user.club_slug != user_slug)
         or (user.telegram_id and telegram_id and user.telegram_id != telegram_id)
@@ -150,6 +152,7 @@ def club_callback(request):
         return render(request, "error.html", {
             "message": "В профиле привязан другой Клуб или Telegram. Обратитесь к модераторам.",
         })
+
     if not telegram_id and not user:
         return render(request, "error.html", {
             "message": "Сначала привяжите Telegram в профиле Клуба, затем повторите вход в Базу.",
